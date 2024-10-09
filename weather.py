@@ -11,10 +11,13 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-version = "0.02"     # 24/10/08 v0.02 1時間ごとの天気を取得、表示
+# 24/10/09 v0.03 結果をファイルに出力
+version = "0.03"     
+
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
+outfile = appdir + "/data/we.txt" 
 conffile = appdir + "/weather.conf"
 res = ""
 
@@ -22,6 +25,7 @@ def main_proc() :
     read_config()
     access_site()
     analize()
+    output_datafile()
     output_result()
 
 def access_site() :
@@ -32,6 +36,19 @@ def access_site() :
 
     res = requests.get(target_url,verify=False)
     res.encoding = res.apparent_encoding
+
+def output_datafile() :
+    today_date = date.today()
+    cur_mm =  today_date.month    #  今月
+    cur_yy =  today_date.year    #  今月
+    start_date = datetime.date(cur_yy, cur_mm , start_dd)
+    out = open(outfile , 'w', encoding='utf-8')
+    s = str(start_date) + " " + str(start_hh) + "\n"
+    out.write(s)
+    s = ",".join(map(str, we_list))
+    out.write(s)
+    out.write("\n")
+    out.close()
 
 def output_result() :
     today_date = date.today()
@@ -56,11 +73,9 @@ def analize() :
     div_date = div_1hour.find('div', class_ ='date')    # 最初に出てくる  日
     start_dd = div_date.text.strip()
     start_dd = int(re.sub(r"\D", "", start_dd))     # 数字部分を抜き出す
-    #print(start_dd)
     
     time_data = div_1hour.find('li', class_ ='time')    # 最初に出てくる  時
     start_hh = int(time_data.text)
-    #print(start_hh)
 
     weather_items = div_1hour.find_all('li', class_ ='weather')
     we_list = []
@@ -70,8 +85,6 @@ def analize() :
         icon = icon.replace("https://weathernews.jp/onebox/img/wxicon/","")
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
-
-    #print(we_list)
 
 def read_config() : 
     global target_url,proxy,debug
