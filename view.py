@@ -6,13 +6,14 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/10 v0.00 htmlファイル出力
-version = "0.00"     
+# 24/10/11 v0.01 複数ファイルに対応中
+version = "0.01"     
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
 datafile = appdir + "/data/we.txt" 
+datadir = appdir + "/data/" 
 outfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
 res = ""
@@ -22,11 +23,19 @@ def main_proc() :
     #output_datafile()
     #output_result()
 
-    read_data()
+    dir_path = datadir
+
+    datafile_list = [
+        f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
+    ]
+    read_data(datafile_list[0])
+    #for fname in datafile_list :
+    #    read_data(fname)
     output_html()
 
-def read_data() : 
+def read_data(fname) : 
     global start_date,start_hh,we_list
+    datafile = datadir + fname
     f = open(datafile , 'r')
     header  = f.readline().strip()
     hh = header.split()
