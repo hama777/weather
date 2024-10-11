@@ -11,13 +11,14 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/10/09 v0.03 結果をファイルに出力
-version = "0.03"     
+# 24/10/11 v0.04 ファイル名の形式変更
+version = "0.04"     
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
-outfile = appdir + "/data/we.txt" 
+#  出力ファイル名の形式    we.yymmdd_hh.txt   (データ開始の日時)
+outfile_prefix = appdir + "/data/we" 
 conffile = appdir + "/weather.conf"
 res = ""
 
@@ -40,8 +41,9 @@ def access_site() :
 def output_datafile() :
     today_date = date.today()
     cur_mm =  today_date.month    #  今月
-    cur_yy =  today_date.year    #  今月
+    cur_yy =  today_date.year    #  今年
     start_date = datetime.date(cur_yy, cur_mm , start_dd)
+    outfile = outfile_prefix + f'{cur_yy-2000}{cur_mm:02}{start_dd:02}_{start_hh:02}.txt' 
     out = open(outfile , 'w', encoding='utf-8')
     s = str(start_date) + " " + str(start_hh) + "\n"
     out.write(s)
