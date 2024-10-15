@@ -11,8 +11,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/10/11 v0.04 ファイル名の形式変更
-version = "0.04"     
+# 24/10/15 v0.05 過去のデータは出力しないようにした
+version = "0.05"     
 
 out =  ""
 logf = ""
@@ -27,7 +27,7 @@ def main_proc() :
     access_site()
     analize()
     output_datafile()
-    output_result()
+    #output_result()
 
 def access_site() :
     global res
@@ -40,14 +40,40 @@ def access_site() :
 
 def output_datafile() :
     today_date = date.today()
-    cur_mm =  today_date.month    #  今月
-    cur_yy =  today_date.year    #  今年
-    start_date = datetime.date(cur_yy, cur_mm , start_dd)
-    outfile = outfile_prefix + f'{cur_yy-2000}{cur_mm:02}{start_dd:02}_{start_hh:02}.txt' 
+    today_mm =  today_date.month    #  今月
+    today_yy =  today_date.year    #  今年
+    today_dd =  today_date.day    #  今年
+    today_datetime = datetime.datetime.today()
+    today_hh = today_datetime.hour
+
+    #  TODO:  月を考慮する必要あり
+    start_date = datetime.date(today_yy, today_mm , start_dd)
+
+    cur_date = start_date
+    dd = cur_date.day
+    hh = start_hh
+    data_list = []
+    rec_hh = ""      # ファイルに記録する最初の 時
+    for we in we_list :
+        if hh == 24 :
+            hh = 0
+            cur_date +=  datetime.timedelta(days=1)
+        if cur_date < today_date :
+            hh += 1
+            continue
+        if hh <  today_hh :
+            hh += 1
+            continue
+        if rec_hh == "" :
+            rec_hh = hh
+        data_list.append(we)
+
+
+    outfile = outfile_prefix + f'{today_yy-2000}{today_mm:02}{today_dd:02}_{rec_hh:02}.txt' 
     out = open(outfile , 'w', encoding='utf-8')
-    s = str(start_date) + " " + str(start_hh) + "\n"
+    s = str(today_date) + " " + str(rec_hh) + "\n"
     out.write(s)
-    s = ",".join(map(str, we_list))
+    s = ",".join(map(str, data_list))
     out.write(s)
     out.write("\n")
     out.close()
