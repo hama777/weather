@@ -6,8 +6,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/11 v0.01 複数ファイルに対応中
-version = "0.01"     
+# 24/10/15 v0.02 複数ファイルに対応中
+version = "0.02"     
 
 out =  ""
 logf = ""
@@ -17,6 +17,22 @@ datadir = appdir + "/data/"
 outfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
 res = ""
+
+#    データ形式
+#    辞書   {発表日時 :  {予報日時 : 予報天気 , 予報日時 : 予報天気 , ....}}
+#      発表日時 はその予報が発表された日時    mmddhh をintとして持つ    発表日時はデータ最初の日時から 2日4時間後？
+#      予報日時 予報天気の日時  mmddhh をintとして持つ
+#      予報天気 int
+#    例  
+#    発表日時      予報日時     予報天気   予報日時     予報天気
+#    10/01 01:00  10/01 12:00  100       10/01 13:00     200   ... この1行が 1ファイル
+#    10/01 02:00  10/01 12:00  100       10/01 13:00     100 
+#    10/01 03:00  10/01 12:00  100       10/01 13:00     300
+#    以下のデータになる
+#    100112  {100101:100 , 100102 : 100, 100103 : 200, ....}
+#    100113  {100101:200 , 100102 : 100, 100103 : 300, ....}
+we_data = {}
+
 
 def main_proc() :
     #read_config()
@@ -28,7 +44,9 @@ def main_proc() :
     datafile_list = [
         f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
     ]
+    #print(datafile_list)
     read_data(datafile_list[0])
+
     #for fname in datafile_list :
     #    read_data(fname)
     output_html()
@@ -42,12 +60,21 @@ def read_data(fname) :
     date_str = hh[0]
     dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
     start_date = datetime.date(dt.year, dt.month, dt.day)
+    start_date_int = conv_date_int(start_date)
 
     start_hh = int(hh[1])
+    cur_hh = start_hh
     body  = f.readline().strip()
     we_list = body.split(",")
     #print(we_list)
     f.close()
+    for we in we_list :
+        k = start_date_int + cur_hh
+
+
+def conv_date_int(d) :
+    i = d.month * 10000 + d.day * 100 
+    return i
 
 def output_html() :
     
