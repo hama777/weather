@@ -6,8 +6,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/15 v0.02 複数ファイルに対応中
-version = "0.02"     
+# 24/10/16 v0.03 複数ファイルに対応中
+version = "0.03"     
 
 out =  ""
 logf = ""
@@ -18,10 +18,13 @@ outfile = appdir + "/weather.htm"
 conffile = appdir + "/weather.conf"
 res = ""
 
-#    データ形式
-#    辞書   {発表日時 :  {予報日時 : 予報天気 , 予報日時 : 予報天気 , ....}}
-#      発表日時 はその予報が発表された日時    mmddhh をintとして持つ    発表日時はデータ最初の日時から 2日4時間後？
+#    we_data  データ形式
+#    we_data = {
+#        予報日時 : {発表日時 : 天気, 発表日時 : 天気, ... },
+#        予報日時 : {発表日時 : 天気, 発表日時 : 天気, ... }
+#    }
 #      予報日時 予報天気の日時  mmddhh をintとして持つ
+#      発表日時 はその予報が発表された日時  mmddhh をintとして持つ  ファイルの先頭に記録されている  
 #      予報天気 int
 #    例  
 #    発表日時      予報日時     予報天気   予報日時     予報天気
@@ -32,7 +35,6 @@ res = ""
 #    100112  {100101:100 , 100102 : 100, 100103 : 200, ....}
 #    100113  {100101:200 , 100102 : 100, 100103 : 300, ....}
 we_data = {}
-
 
 def main_proc() :
     #read_config()
@@ -45,7 +47,9 @@ def main_proc() :
         f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
     ]
     #print(datafile_list)
-    read_data(datafile_list[0])
+    for fname in datafile_list :
+        read_data(fname)
+    print(we_data)
 
     #for fname in datafile_list :
     #    read_data(fname)
@@ -53,24 +57,42 @@ def main_proc() :
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
+
     datafile = datadir + fname
     f = open(datafile , 'r')
     header  = f.readline().strip()
     hh = header.split()
     date_str = hh[0]
     dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    start_date = datetime.date(dt.year, dt.month, dt.day)
-    start_date_int = conv_date_int(start_date)
+    start_date = datetime.date(dt.year, dt.month, dt.day) # データの開始日付 date型
+    start_date_int = conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
+    start_hh = int(hh[1])            # データの開始時刻
 
-    start_hh = int(hh[1])
-    cur_hh = start_hh
     body  = f.readline().strip()
-    we_list = body.split(",")
-    #print(we_list)
+    we_list = body.split(",")        #  we_list は1時間ごとの天気
     f.close()
-    for we in we_list :
-        k = start_date_int + cur_hh
 
+    pub_date = start_date_int + cur_hh   #  発表日時 int  yymmddhh  we_data のvalの辞書のキー として使用
+    cur_hh = start_hh                # 以下のループで現在の時刻として使用  int 型
+    cur_date = start_date            # 以下のループで現在の日付として使用  date 型
+
+    for we in we_list :
+        k = conv_date_int(cur_date) + cur_hh    #  we_data の key
+        
+        if k in we_data :       # すでにキーがある場合はそのキーに対応する辞書に追加する
+            val = we_data[k]    # そのキーに対応する辞書
+            val[pub_date] = we  # そのキーに対応する辞書 に天気を追加
+            we_data[k] = val    # we_data にどの辞書を再格納
+        else :
+            timeline_dic = {}   # キーがない場合は辞書を作成し、we_data の値として格納する
+            timeline_dic[pub_date] = we
+            we_data[k] = timeline_dic
+        cur_hh += 1
+        if cur_hh == 24 :
+            cur_hh = 0
+            cur_date +=  datetime.timedelta(days=1)
+
+    #print(we_data)
 
 def conv_date_int(d) :
     i = d.month * 10000 + d.day * 100 
