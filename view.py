@@ -6,8 +6,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/16 v0.03 複数ファイルに対応中
-version = "0.03"     
+# 24/10/17 v0.04 出力部分対応
+version = "0.04"     
 
 out =  ""
 logf = ""
@@ -37,8 +37,8 @@ res = ""
 we_data = {}
 
 def main_proc() :
+    date_settings()
     #read_config()
-    #output_datafile()
     #output_result()
 
     dir_path = datadir
@@ -49,7 +49,7 @@ def main_proc() :
     #print(datafile_list)
     for fname in datafile_list :
         read_data(fname)
-    print(we_data)
+    #print(we_data)
 
     #for fname in datafile_list :
     #    read_data(fname)
@@ -72,7 +72,7 @@ def read_data(fname) :
     we_list = body.split(",")        #  we_list は1時間ごとの天気
     f.close()
 
-    pub_date = start_date_int + cur_hh   #  発表日時 int  yymmddhh  we_data のvalの辞書のキー として使用
+    pub_date = start_date_int + start_hh   #  発表日時 int  yymmddhh  we_data のvalの辞書のキー として使用
     cur_hh = start_hh                # 以下のループで現在の時刻として使用  int 型
     cur_date = start_date            # 以下のループで現在の日付として使用  date 型
 
@@ -94,11 +94,47 @@ def read_data(fname) :
 
     #print(we_data)
 
+def output_html() :
+    
+    #out = open(outfile , 'w', encoding='utf-8')
+
+    #out.write("<table><tr><th>日付</th><th>時間</th><th>天気</th></tr>\n")
+    for forecast_date in  we_data.keys() :
+        #out.write(f'<tr><td>{cur_date}</td><td>{cur_hh}</td><td>')
+        print(f'{forecast_date} の天気')
+        timeline_dic = we_data[forecast_date]
+        cur_date = start_date - datetime.timedelta(days=3)    # 予報は3日前から
+        cur_hh = start_hh
+        while True :
+            k = conv_date_int(cur_date) + cur_hh 
+            if k in  timeline_dic :
+                we = timeline_dic[k]
+                print(f'発表日時 {k} 天気 {we}')
+            cur_hh += 1
+            if cur_hh == 24 :
+                cur_hh = 0
+                cur_date +=  datetime.timedelta(days=1)
+            if cur_date > start_date + datetime.timedelta(days=3) : # 先 3日間まで
+                break
+        print("---")
+
+    #out.write("</table>\n")
+    #out.close()
+
+def date_settings():
+    global  today_date,today_mm,today_dd,today_yy,today_datetime
+
+    today_datetime = datetime.datetime.today()   # datetime 型
+    today_date = datetime.date.today()           # date 型
+    today_mm = today_date.month
+    today_dd = today_date.day
+    today_yy = today_date.year
+
 def conv_date_int(d) :
     i = d.month * 10000 + d.day * 100 
     return i
 
-def output_html() :
+def output_html_old() :
     
     out = open(outfile , 'w', encoding='utf-8')
 
@@ -114,19 +150,6 @@ def output_html() :
             cur_date +=  datetime.timedelta(days=1)
 
     out.write("</table>\n")
-    out.close()
-
-def output_datafile() :
-    today_date = date.today()
-    cur_mm =  today_date.month    #  今月
-    cur_yy =  today_date.year    #  今月
-    start_date = datetime.date(cur_yy, cur_mm , start_dd)
-    out = open(outfile , 'w', encoding='utf-8')
-    s = str(start_date) + " " + str(start_hh) + "\n"
-    out.write(s)
-    s = ",".join(map(str, we_list))
-    out.write(s)
-    out.write("\n")
     out.close()
 
 def output_result() :
