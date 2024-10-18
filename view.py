@@ -6,8 +6,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/17 v0.04 出力部分対応
-version = "0.04"     
+# 24/10/18 v0.05 html出力対応
+version = "0.05"     
 
 out =  ""
 logf = ""
@@ -95,31 +95,52 @@ def read_data(fname) :
     #print(we_data)
 
 def output_html() :
-    
-    #out = open(outfile , 'w', encoding='utf-8')
+    icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 
-    #out.write("<table><tr><th>日付</th><th>時間</th><th>天気</th></tr>\n")
+    out = open(outfile , 'w', encoding='utf-8')
+
+    out.write("<table><tr><td>予報日時</td>\n")
+    cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
+    cur_hh = start_hh
+    while True :
+        out.write(f'<th>{cur_date.day}<br>{cur_hh}</th>')
+        cur_hh += 1
+        if cur_hh == 24 :
+            cur_hh = 0
+            cur_date +=  datetime.timedelta(days=1)
+        if cur_date > start_date  : # 
+            break
+    out.write("</tr>\n")
+
     for forecast_date in  we_data.keys() :
-        #out.write(f'<tr><td>{cur_date}</td><td>{cur_hh}</td><td>')
+        mmdd = int(forecast_date / 100)
+        if mmdd < today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
+            continue 
+
         print(f'{forecast_date} の天気')
+        out.write(f'<tr><td>{forecast_date}<td>\n')
         timeline_dic = we_data[forecast_date]
-        cur_date = start_date - datetime.timedelta(days=3)    # 予報は3日前から
+        cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
         while True :
             k = conv_date_int(cur_date) + cur_hh 
             if k in  timeline_dic :
                 we = timeline_dic[k]
+                out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
                 print(f'発表日時 {k} 天気 {we}')
+            else :
+                out.write("<td>--</td>")
             cur_hh += 1
             if cur_hh == 24 :
                 cur_hh = 0
                 cur_date +=  datetime.timedelta(days=1)
-            if cur_date > start_date + datetime.timedelta(days=3) : # 先 3日間まで
+            if cur_date > start_date  : # 
                 break
+        out.write("</tr>\n")
         print("---")
 
-    #out.write("</table>\n")
-    #out.close()
+    out.write("</table>\n")
+    out.close()
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
