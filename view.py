@@ -6,8 +6,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/18 v0.05 html出力対応
-version = "0.05"     
+# 24/10/21 v0.06 テーブルヘッダ修正
+version = "0.06"     
 
 out =  ""
 logf = ""
@@ -101,7 +101,8 @@ def output_html() :
 
     out.write("<table><tr><td>予報日時</td>\n")
     cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
-    cur_hh = start_hh
+    cur_hh = start_hh        
+    #  テーブルヘッダ出力
     while True :
         out.write(f'<th>{cur_date.day}<br>{cur_hh}</th>')
         cur_hh += 1
@@ -118,7 +119,7 @@ def output_html() :
             continue 
 
         print(f'{forecast_date} の天気')
-        out.write(f'<tr><td>{forecast_date}<td>\n')
+        out.write(f'<tr><td>{forecast_date}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
@@ -155,24 +156,6 @@ def conv_date_int(d) :
     i = d.month * 10000 + d.day * 100 
     return i
 
-def output_html_old() :
-    
-    out = open(outfile , 'w', encoding='utf-8')
-
-    out.write("<table><tr><th>日付</th><th>時間</th><th>天気</th></tr>\n")
-    cur_date = start_date
-    cur_hh = start_hh
-    for we in  we_list :
-        out.write(f'<tr><td>{cur_date}</td><td>{cur_hh}</td><td>'
-        f'<img src="https://weathernews.jp/onebox/img/wxicon/{we}.png" width="40" height="30"></td></tr>\n')
-        cur_hh += 1
-        if cur_hh == 24 :
-            cur_hh = 0
-            cur_date +=  datetime.timedelta(days=1)
-
-    out.write("</table>\n")
-    out.close()
-
 def output_result() :
     today_date = date.today()
     cur_mm =  today_date.month    #  今月
@@ -187,7 +170,6 @@ def output_result() :
         if cur_hh == 24 :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
-
 
 def read_config() : 
     global target_url,proxy,debug
