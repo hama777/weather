@@ -7,12 +7,11 @@ import codecs
 import re
 import datetime
 from datetime import date,timedelta
-#from datetime import datetime
 
 from bs4 import BeautifulSoup
 
-# 24/10/15 v0.05 過去のデータは出力しないようにした
-version = "0.05"     
+# 24/10/21 v1.00 完成版
+version = "1.00"     
 
 out =  ""
 logf = ""
@@ -24,10 +23,10 @@ res = ""
 
 def main_proc() :
     read_config()
+    date_settings()
     access_site()
     analize()
     output_datafile()
-    #output_result()
 
 def access_site() :
     global res
@@ -39,14 +38,22 @@ def access_site() :
     res.encoding = res.apparent_encoding
 
 def output_datafile() :
-    today_date = date.today()
-    today_mm =  today_date.month    #  今月
-    today_yy =  today_date.year    #  今年
-    today_dd =  today_date.day    #  今年
-    today_datetime = datetime.datetime.today()
-    today_hh = today_datetime.hour
+    
+    # today_date = date.today()
+    # today_mm =  today_date.month    #  今月
+    # today_yy =  today_date.year    #  今年
+    # today_dd =  today_date.day    #  今年
+    # today_datetime = datetime.datetime.today()
+    today_hh = today_datetime.hour     #  現在の 時
 
-    #  TODO:  月を考慮する必要あり
+    # 開始日 start_dd には月の情報がないため今日の日付から 開始日付 を作成する
+    start_mm = today_mm
+    start_yy = today_yy
+    if start_dd > today_dd :    # 月をまたいでいる
+        start_mm = today_mm - 1 
+        if start_mm == 0 :
+            start_mm = 12
+            start_yy = today_yy - 1 
     start_date = datetime.date(today_yy, today_mm , start_dd)
 
     cur_date = start_date
@@ -54,6 +61,7 @@ def output_datafile() :
     hh = start_hh
     data_list = []
     rec_hh = ""      # ファイルに記録する最初の 時
+    #  ファイルには現在の 日付 時  以降のものだけ出力する
     for we in we_list :
         if hh == 24 :
             hh = 0
@@ -68,7 +76,6 @@ def output_datafile() :
             rec_hh = hh
         data_list.append(we)
 
-
     outfile = outfile_prefix + f'{today_yy-2000}{today_mm:02}{today_dd:02}_{rec_hh:02}.txt' 
     out = open(outfile , 'w', encoding='utf-8')
     s = str(today_date) + " " + str(rec_hh) + "\n"
@@ -78,21 +85,10 @@ def output_datafile() :
     out.write("\n")
     out.close()
 
-def output_result() :
-    today_date = date.today()
-    cur_mm =  today_date.month    #  今月
-    cur_yy =  today_date.year    #  今月
-    start_date = datetime.date(cur_yy, cur_mm , start_dd)
-    cur_date = start_date
-    cur_hh = start_hh
-    print(start_date)
-    for we in  we_list :
-        print(cur_date,cur_hh,we)
-        cur_hh += 1
-        if cur_hh == 24 :
-            cur_hh = 0
-            cur_date +=  datetime.timedelta(days=1)
-
+#   1時間天気の情報を取得
+#      start_dd   記録されている最初の  日   (月の情報はない)
+#      start_hh   記録されている最初の  時
+#      we_list    1時間毎の天気  list 
 def analize() :
     global start_dd,start_hh,we_list
 
@@ -113,6 +109,15 @@ def analize() :
         icon = icon.replace("https://weathernews.jp/onebox/img/wxicon/","")
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
+
+def date_settings():
+    global  today_date,today_mm,today_dd,today_yy,today_datetime
+
+    today_datetime = datetime.datetime.today()   # datetime 型
+    today_date = datetime.date.today()           # date 型
+    today_mm = today_date.month
+    today_dd = today_date.day
+    today_yy = today_date.year
 
 def read_config() : 
     global target_url,proxy,debug
