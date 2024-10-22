@@ -6,16 +6,17 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/21 v0.06 テーブルヘッダ修正
-version = "0.06"     
+# 24/10/22 v0.07 テンプレートを使うように変更
+version = "0.07"     
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
 datafile = appdir + "/data/we.txt" 
 datadir = appdir + "/data/" 
-outfile = appdir + "/weather.htm" 
+resultfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
+templatefile = appdir + "/weather_templ.htm"
 res = ""
 
 #    we_data  データ形式
@@ -53,7 +54,8 @@ def main_proc() :
 
     #for fname in datafile_list :
     #    read_data(fname)
-    output_html()
+    parse_template()
+    #output_html()
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -97,14 +99,14 @@ def read_data(fname) :
 def output_html() :
     icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 
-    out = open(outfile , 'w', encoding='utf-8')
+    #out = open(outfile , 'w', encoding='utf-8')
 
-    out.write("<table><tr><td>予報日時</td>\n")
+    out.write('<tr><td class="fixed01">予報日時</td>\n')
     cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
     cur_hh = start_hh        
     #  テーブルヘッダ出力
     while True :
-        out.write(f'<th>{cur_date.day}<br>{cur_hh}</th>')
+        out.write(f'<th class="fixed02">{cur_date.day}<br>{cur_hh}</th>')
         cur_hh += 1
         if cur_hh == 24 :
             cur_hh = 0
@@ -119,7 +121,7 @@ def output_html() :
             continue 
 
         print(f'{forecast_date} の天気')
-        out.write(f'<tr><td>{forecast_date}</td>\n')
+        out.write(f'<tr><td class="fixed02">{forecast_date}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
@@ -140,8 +142,6 @@ def output_html() :
         out.write("</tr>\n")
         print("---")
 
-    out.write("</table>\n")
-    out.close()
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
@@ -170,6 +170,26 @@ def output_result() :
         if cur_hh == 24 :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
+
+def parse_template() :
+    global out 
+    f = open(templatefile , 'r', encoding='utf-8')
+    out = open(resultfile,'w' ,  encoding='utf-8')
+    for line in f :
+        if "%result_table%" in line :
+            output_html()
+            continue
+        if "%version%" in line :
+            s = line.replace("%version%",version)
+            out.write(s)
+            continue
+        if "%today%" in line :
+            #today(line)
+            continue
+        out.write(line)
+
+    f.close()
+    out.close()
 
 def read_config() : 
     global target_url,proxy,debug
