@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import locale
 import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/22 v0.07 テンプレートを使うように変更
-version = "0.07"     
+# 24/10/23 v0.08 予報日時に曜日を入れる
+version = "0.08"     
 
 out =  ""
 logf = ""
@@ -38,24 +39,19 @@ res = ""
 we_data = {}
 
 def main_proc() :
+    locale.setlocale(locale.LC_TIME, '')
     date_settings()
     #read_config()
-    #output_result()
 
     dir_path = datadir
 
     datafile_list = [
         f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
     ]
-    #print(datafile_list)
     for fname in datafile_list :
         read_data(fname)
-    #print(we_data)
 
-    #for fname in datafile_list :
-    #    read_data(fname)
     parse_template()
-    #output_html()
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -94,12 +90,8 @@ def read_data(fname) :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
 
-    #print(we_data)
-
 def output_html() :
     icon_url = "https://weathernews.jp/onebox/img/wxicon/"
-
-    #out = open(outfile , 'w', encoding='utf-8')
 
     out.write('<tr><td class="fixed01">予報日時</td>\n')
     cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
@@ -121,7 +113,8 @@ def output_html() :
             continue 
 
         print(f'{forecast_date} の天気')
-        out.write(f'<tr><td class="fixed02">{forecast_date}</td>\n')
+        forecast_str = conv_mmddhh_to_str(forecast_date)
+        out.write(f'<tr><td class="fixed02">{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
@@ -142,6 +135,15 @@ def output_html() :
         out.write("</tr>\n")
         print("---")
 
+#   int の mmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
+def conv_mmddhh_to_str(mmddhh) :
+    mm = int(mmddhh / 10000)
+    dd = int(mmddhh / 100 % 100)  
+    hh = int(mmddhh % 100)
+    dt = datetime.date(today_yy, mm, dd)
+    s = dt.strftime("%d(%a)")
+    s = f'{s}/{hh:02}'
+    return s 
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
@@ -155,21 +157,6 @@ def date_settings():
 def conv_date_int(d) :
     i = d.month * 10000 + d.day * 100 
     return i
-
-def output_result() :
-    today_date = date.today()
-    cur_mm =  today_date.month    #  今月
-    cur_yy =  today_date.year    #  今月
-    start_date = datetime.date(cur_yy, cur_mm , start_dd)
-    cur_date = start_date
-    cur_hh = start_hh
-    print(start_date)
-    for we in  we_list :
-        print(cur_date,cur_hh,we)
-        cur_hh += 1
-        if cur_hh == 24 :
-            cur_hh = 0
-            cur_date +=  datetime.timedelta(days=1)
 
 def parse_template() :
     global out 
