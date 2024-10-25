@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/23 v0.08 予報日時に曜日を入れる
-version = "0.08"     
+# 24/10/25 v0.09 的中率の計算処理
+version = "0.09"     
 
 out =  ""
 logf = ""
@@ -27,7 +27,7 @@ res = ""
 #    }
 #      予報日時 予報天気の日時  mmddhh をintとして持つ
 #      発表日時 はその予報が発表された日時  mmddhh をintとして持つ  ファイルの先頭に記録されている  
-#      予報天気 int
+#      予報天気 int   100 晴れ  200  曇り  300 以上  雨
 #    例  
 #    発表日時      予報日時     予報天気   予報日時     予報天気
 #    10/01 01:00  10/01 12:00  100       10/01 13:00     200   ... この1行が 1ファイル
@@ -52,6 +52,7 @@ def main_proc() :
         read_data(fname)
 
     parse_template()
+    calc_hit_rate()
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -107,23 +108,23 @@ def output_html() :
             break
     out.write("</tr>\n")
 
-    for forecast_date in  we_data.keys() :
+    for forecast_date in  we_data.keys() :     # 予報日時
         mmdd = int(forecast_date / 100)
         if mmdd < today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
             continue 
 
-        print(f'{forecast_date} の天気')
+        #print(f'{forecast_date} の天気')
         forecast_str = conv_mmddhh_to_str(forecast_date)
         out.write(f'<tr><td class="fixed02">{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
         while True :
-            k = conv_date_int(cur_date) + cur_hh 
+            k = conv_date_int(cur_date) + cur_hh    # k 発表日時
             if k in  timeline_dic :
                 we = timeline_dic[k]
                 out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
-                print(f'発表日時 {k} 天気 {we}')
+                #print(f'発表日時 {k} 天気 {we}')
             else :
                 out.write("<td>--</td>")
             cur_hh += 1
@@ -133,7 +134,7 @@ def output_html() :
             if cur_date > start_date  : # 
                 break
         out.write("</tr>\n")
-        print("---")
+        #print("---")
 
 #   int の mmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
 def conv_mmddhh_to_str(mmddhh) :
@@ -144,6 +145,22 @@ def conv_mmddhh_to_str(mmddhh) :
     s = dt.strftime("%d(%a)")
     s = f'{s}/{hh:02}'
     return s 
+
+#   的中率の計算
+def calc_hit_rate() : 
+    for forecast_date in  we_data.keys() :     # 予報日時
+        mmdd = int(forecast_date / 100)
+        print(f'{forecast_date} の天気')
+        timeline_dic = we_data[forecast_date]
+        if forecast_date in timeline_dic :
+            act = timeline_dic[forecast_date]   #  実際の天気
+            hit = 0 
+            cnt = 0 
+            for we in timeline_dic.values() :
+                cnt += 1
+                if we == act :
+                    hit += 1 
+        print(f'act = {act} cnt = {cnt} hit = {hit} rate = {hit/cnt*100} %')
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
