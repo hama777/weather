@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/25 v0.09 的中率の計算処理
-version = "0.09"     
+# 24/10/28 v0.10 的中率をテーブルにする
+version = "0.10"     
 
 out =  ""
 logf = ""
@@ -52,7 +52,7 @@ def main_proc() :
         read_data(fname)
 
     parse_template()
-    calc_hit_rate()
+    #calc_hit_rate()
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -161,6 +161,7 @@ def calc_hit_rate() :
                 if we == act :
                     hit += 1 
         print(f'act = {act} cnt = {cnt} hit = {hit} rate = {hit/cnt*100} %')
+        out.write(f'<tr><td>{forecast_date}</td><td>{act}</td><td>{cnt}</td><td>{hit}</td><td>{hit/cnt*100:5.2f}</td></tr>')
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
@@ -182,6 +183,9 @@ def parse_template() :
     for line in f :
         if "%result_table%" in line :
             output_html()
+            continue
+        if "%calc_hit_rate%" in line :
+            calc_hit_rate()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
