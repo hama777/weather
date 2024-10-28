@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/10/11 -->
+    <!-- 24/10/28 -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -7,14 +7,17 @@
         <link rel="stylesheet" href="weather.css">
     </head>
 
-
-<body>
+    <body>
         <h1>Weather Check</h1>
         <span style="font-size:12px;">Ver : %version%</span>
         <span style="font-size:12px;">実行日時   : %today%</span>
-	<table>
-	%result_table%
-	</table>
-
+	    <table>
+	    %result_table%
+	    </table>
+        <h1>的中率</h1>
+        <table>
+        <tr><th>日時</th><th>実天気</th><th>回数</th><th>的中</th><th>的中率</th></tr>
+        %calc_hit_rate%
+        </table>
     </body>
 </html>
