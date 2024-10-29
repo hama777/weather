@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/28 v0.10 的中率をテーブルにする
-version = "0.10"     
+# 24/10/29 v0.11 的中率の判定を雨か否かにする
+version = "0.11"     
 
 out =  ""
 logf = ""
@@ -37,6 +37,11 @@ res = ""
 #    100112  {100101:100 , 100102 : 100, 100103 : 200, ....}
 #    100113  {100101:200 , 100102 : 100, 100103 : 300, ....}
 we_data = {}
+
+#  天気コード
+#  天気アイコンのURL は  https://weathernews.jp/onebox/img/wxicon/{天気コード}.png
+#     100 500 550 600  晴れ  200  曇り  300  雨  650 小雨  400 450 雪   250  曇り 雪  800 曇り雷 850 大雨
+icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
@@ -92,7 +97,6 @@ def read_data(fname) :
             cur_date +=  datetime.timedelta(days=1)
 
 def output_html() :
-    icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 
     out.write('<tr><td class="fixed01">予報日時</td>\n')
     cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
@@ -149,8 +153,9 @@ def conv_mmddhh_to_str(mmddhh) :
 #   的中率の計算
 def calc_hit_rate() : 
     for forecast_date in  we_data.keys() :     # 予報日時
-        mmdd = int(forecast_date / 100)
-        print(f'{forecast_date} の天気')
+        date_str = conv_mmddhh_to_str(forecast_date)
+        #mmdd = int(forecast_date / 100)
+        #print(f'{forecast_date} の天気')
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
             act = timeline_dic[forecast_date]   #  実際の天気
@@ -158,10 +163,22 @@ def calc_hit_rate() :
             cnt = 0 
             for we in timeline_dic.values() :
                 cnt += 1
-                if we == act :
+                if is_rain(we) == is_rain(act) :
                     hit += 1 
-        print(f'act = {act} cnt = {cnt} hit = {hit} rate = {hit/cnt*100} %')
-        out.write(f'<tr><td>{forecast_date}</td><td>{act}</td><td>{cnt}</td><td>{hit}</td><td>{hit/cnt*100:5.2f}</td></tr>')
+        #print(f'act = {act} cnt = {cnt} hit = {hit} rate = {hit/cnt*100} %')
+        out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
+                  f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
+                  f'<td align="right">{hit/cnt*100:5.2f}</td></tr>')
+
+#  雨の時 true を返す
+def is_rain(we) :
+    we = int(we)
+    if we == 300 or we == 650 or  we == 400 or  we == 450 or  we == 800 or we == 850 :
+        return True
+    if we == 100 or we == 500 or  we == 550 or  we == 600 or we == 200:
+        return False
+    print(f'ERROR we code {we}')
+    return False
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
