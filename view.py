@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/29 v0.11 的中率の判定を雨か否かにする
-version = "0.11"     
+# 24/10/30 v0.12 的中率の表示は現在日時までにする
+version = "0.12"     
 
 out =  ""
 logf = ""
@@ -153,8 +153,9 @@ def conv_mmddhh_to_str(mmddhh) :
 #   的中率の計算
 def calc_hit_rate() : 
     for forecast_date in  we_data.keys() :     # 予報日時
+        if forecast_date > today_mm * 10000 + today_dd * 100 + today_hh :
+            break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
-        #mmdd = int(forecast_date / 100)
         #print(f'{forecast_date} の天気')
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
@@ -181,13 +182,14 @@ def is_rain(we) :
     return False
 
 def date_settings():
-    global  today_date,today_mm,today_dd,today_yy,today_datetime
+    global  today_date,today_mm,today_dd,today_yy,today_datetime,today_hh
 
     today_datetime = datetime.datetime.today()   # datetime 型
     today_date = datetime.date.today()           # date 型
     today_mm = today_date.month
     today_dd = today_date.day
     today_yy = today_date.year
+    today_hh = today_datetime.hour
 
 def conv_date_int(d) :
     i = d.month * 10000 + d.day * 100 
