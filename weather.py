@@ -10,8 +10,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/10/21 v1.00 完成版
-version = "1.00"     
+# 24/11/01 v1.01 月初で不正になるのを修正
+version = "1.01"     
 
 out =  ""
 logf = ""
@@ -39,11 +39,6 @@ def access_site() :
 
 def output_datafile() :
     
-    # today_date = date.today()
-    # today_mm =  today_date.month    #  今月
-    # today_yy =  today_date.year    #  今年
-    # today_dd =  today_date.day    #  今年
-    # today_datetime = datetime.datetime.today()
     today_hh = today_datetime.hour     #  現在の 時
 
     # 開始日 start_dd には月の情報がないため今日の日付から 開始日付 を作成する
@@ -54,7 +49,7 @@ def output_datafile() :
         if start_mm == 0 :
             start_mm = 12
             start_yy = today_yy - 1 
-    start_date = datetime.date(today_yy, today_mm , start_dd)
+    start_date = datetime.date(start_yy, start_mm , start_dd)
 
     cur_date = start_date
     dd = cur_date.day
@@ -100,7 +95,6 @@ def analize() :
     
     time_data = div_1hour.find('li', class_ ='time')    # 最初に出てくる  時
     start_hh = int(time_data.text)
-
     weather_items = div_1hour.find_all('li', class_ ='weather')
     we_list = []
     for w in weather_items :
@@ -109,6 +103,7 @@ def analize() :
         icon = icon.replace("https://weathernews.jp/onebox/img/wxicon/","")
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
+    
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
