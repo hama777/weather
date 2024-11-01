@@ -1,5 +1,46 @@
-/*  コメント */
-table, td, th { 
+/*  24/01/11  */
+
+table {
+    width: auto;
+    min-width: 600px;  /* 必要に応じて調整 */
+    border-collapse: collapse;
+}
+
+/* 固定する1行目（ヘッダー行） */
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #abf88d;
+    z-index: 2;
+}
+
+/* 固定する1列目 */
+tbody td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #abf88d;
+    z-index: 1;
+}
+
+/* 1行1列目の固定 */
+thead th:first-child {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 3;  /* 他のセルより高い z-index */
+    background-color: #829cf1;
+}
+
+/* ホバー効果の設定 */
+tbody tr:hover {
+    background-color: #e0f7fa;
+}
+
+tbody tr:hover td:first-child {
+    background-color: #e0f7fa;
+}
+
+td { 
     font-family: "Meiryo UI" ; 
     font-size: 14px; 
     border: 1px #dfe21c solid;  
@@ -7,6 +48,7 @@ table, td, th {
     padding: 3px; 
     margin-left: 0px;
 }
+
 table.rank {
     margin-top: 5px;
     margin-left: 10px;
@@ -32,9 +74,11 @@ h2{
 a { 
     text-decoration: none; 
 }
+/*
 th { 
     background-color :#fcfb8b;
 }
+*/
 tr { 
     background-color : #ffffff;
 }
@@ -44,6 +88,7 @@ td.all {
 tr:nth-child(2n+1) { 
     background-color : #cef7be;
 }
+
 td.red  { 
     color : #ff0000 ; 
     font-weight : bold ;
@@ -71,31 +116,5 @@ td.right{
 }
 span.red {
     color : red;
-}
-
-.fixed01,
-.fixed02{
-    position: sticky;
-    top: 0;
-    left: 0;
-    &:before{
-        content: "";
-        position: absolute;
-        top: -1px;
-        left: -1px;
-        width: 100%;
-        height: 100%;
-        border: 1px solid #ccc;
-    }
-}
-.fixed01{
-    background: #fcfb8b;
-    z-index: 2;
-}
-.fixed02{
-    z-index: 1;
-}
-tr:hover  { 
-    background-color : #b9dcf3;
 }
 
