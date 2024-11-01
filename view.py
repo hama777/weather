@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/10/30 v0.12 的中率の表示は現在日時までにする
-version = "0.12"     
+# 24/11/01 v0.13 テーブル行、列固定の方法を変更
+version = "0.13"     
 
 out =  ""
 logf = ""
@@ -98,20 +98,21 @@ def read_data(fname) :
 
 def output_html() :
 
-    out.write('<tr><td class="fixed01">予報日時</td>\n')
+    out.write('<thead><tr><th>予報日時</th>\n')
     cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
     cur_hh = start_hh        
     #  テーブルヘッダ出力
     while True :
-        out.write(f'<th class="fixed02">{cur_date.day}<br>{cur_hh}</th>')
+        out.write(f'<th>{cur_date.day}<br>{cur_hh:02}</th>')
         cur_hh += 1
         if cur_hh == 24 :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
         if cur_date > start_date  : # 
             break
-    out.write("</tr>\n")
+    out.write("</tr>\n</thead>\n")
 
+    out.write("<tbody>\n")
     for forecast_date in  we_data.keys() :     # 予報日時
         mmdd = int(forecast_date / 100)
         if mmdd < today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
@@ -119,7 +120,7 @@ def output_html() :
 
         #print(f'{forecast_date} の天気')
         forecast_str = conv_mmddhh_to_str(forecast_date)
-        out.write(f'<tr><td class="fixed02">{forecast_str}</td>\n')
+        out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
@@ -139,6 +140,7 @@ def output_html() :
                 break
         out.write("</tr>\n")
         #print("---")
+    out.write("</tbody>\n")
 
 #   int の mmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
 def conv_mmddhh_to_str(mmddhh) :
