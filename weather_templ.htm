@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/10/28 -->
+    <!-- 24/11/05  タブ化 -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -11,13 +11,27 @@
         <h1>Weather Check</h1>
         <span style="font-size:12px;">Ver : %version%</span>
         <span style="font-size:12px;">実行日時   : %today%</span>
-	    <table>
-	    %result_table%
-	    </table>
-        <h1>的中率</h1>
-        <table>
-        <tr><th>日時</th><th>実天気</th><th>回数</th><th>的中</th><th>的中率</th></tr>
-        %calc_hit_rate%
-        </table>
+        <div class="container">
+            <ul class="menu">
+              <li><a href="#" data-id="forecast" class="active menu_item">予報</a></li>
+              <li><a href="#" data-id="hitrate" class="menu_item">的中率</a></li>
+            </ul>
+            <div class="content active" id="forecast">
+                <div class="table-container">
+                    <table>
+                    %result_table%
+                    </table>
+                </div>
+            </div>
+            <div class="content" id="hitrate">
+                <h1>的中率</h1>
+                <table>
+                <tr><th>日時</th><th>実天気</th><th>回数</th><th>的中</th><th>的中率</th></tr>
+                %calc_hit_rate%
+                </table>
+            </div>
+        </div>
+        <script src="weather.js"></script>
+
     </body>
 </html>
