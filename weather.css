@@ -1,4 +1,4 @@
-/*  24/01/11  */
+/*  24/11/05  タブ化  */
 
 table {
     width: auto;
@@ -118,3 +118,57 @@ span.red {
     color : red;
 }
 
+  .container {
+    padding: 0;
+    background: #ffffff;
+    margin-left: 30px ;
+  }
+
+  ul.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0;
+  }
+  ul.menu li {
+    display: inline-block;
+  }
+  ul.menu li a {
+    font-size: 14px;
+    display: inline-block;
+    width: 80px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    text-decoration: none;
+    padding: 7px;
+    color: #333;
+
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-style: solid; border-color: #1cdd21;
+    border-width: 1px;
+    
+  }
+  ul.menu li a.active {
+    background: #1cdd21;  
+    color: #000;
+  }
+  ul.menu li a:not(.active):hover {
+    opacity: 0.5;
+    transition: .8s;
+    background:  #dadfdf;  
+  }
+  .content {
+    font-size: 14px;
+    padding: 7px 10px;
+    line-height: 1.4;
+    min-height: 150px;
+    display: none;
+    background: #fff;
+    color: #000;
+    
+  }
+  .content.active {
+    display: block;
+  }
