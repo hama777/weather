@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/11/01 v0.13 テーブル行、列固定の方法を変更
-version = "0.13"     
+# 24/11/06 v0.14 的中率の表示を7日間にした
+version = "0.14"     
 
 out =  ""
 logf = ""
@@ -152,9 +152,20 @@ def conv_mmddhh_to_str(mmddhh) :
     s = f'{s}/{hh:02}'
     return s 
 
+#   int の mmddhh 形式を入力し  date 型の値を返す
+def conv_mmddhh_to_date(mmddhh) :
+    mm = int(mmddhh / 10000)
+    dd = int(mmddhh / 100 % 100)  
+    hh = int(mmddhh % 100)
+    dt = datetime.date(today_yy, mm, dd)
+    return dt
+
 #   的中率の計算
 def calc_hit_rate() : 
     for forecast_date in  we_data.keys() :     # 予報日時
+        #  7日以前は表示しない
+        if conv_mmddhh_to_date(forecast_date) < today_date - datetime.timedelta(days=7) : 
+            continue 
         if forecast_date > today_mm * 10000 + today_dd * 100 + today_hh :
             break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
