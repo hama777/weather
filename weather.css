@@ -1,8 +1,8 @@
-/*  24/11/05  タブ化  */
+/*  24/11/06    */
 
 table {
-    width: auto;
-    min-width: 600px;  /* 必要に応じて調整 */
+    /*width: auto;*/
+    /* min-width: 600px;   */
     border-collapse: collapse;
 }
 
