@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/11/06 v0.14 的中率の表示を7日間にした
-version = "0.14"     
+# 24/11/07 v0.15 的中率の計算と表示を分けた
+version = "0.15"     
 
 out =  ""
 logf = ""
@@ -42,6 +42,11 @@ we_data = {}
 #  天気アイコンのURL は  https://weathernews.jp/onebox/img/wxicon/{天気コード}.png
 #     100 500 550 600  晴れ  200  曇り  300  雨  650 小雨  400 450 雪   250  曇り 雪  800 曇り雷 850 大雨
 icon_url = "https://weathernews.jp/onebox/img/wxicon/"
+
+#   hit_rate 的中率のデータ
+#   hit_rate 辞書  { yymmddhh : hitdata }
+#      hitdata 辞書 { act : 実際の天気(int) , cnt : 総件数 , hit : ヒット件数}
+hit_rate = {}
 
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
@@ -162,10 +167,13 @@ def conv_mmddhh_to_date(mmddhh) :
 
 #   的中率の計算
 def calc_hit_rate() : 
+    global  hit_rate
+
     for forecast_date in  we_data.keys() :     # 予報日時
         #  7日以前は表示しない
-        if conv_mmddhh_to_date(forecast_date) < today_date - datetime.timedelta(days=7) : 
-            continue 
+        # cur_date = conv_mmddhh_to_date(forecast_date)  # date型
+        # if cur_date < today_date - datetime.timedelta(days=7) : 
+        #     continue 
         if forecast_date > today_mm * 10000 + today_dd * 100 + today_hh :
             break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
@@ -179,10 +187,34 @@ def calc_hit_rate() :
                 cnt += 1
                 if is_rain(we) == is_rain(act) :
                     hit += 1 
+        hitdata = {}
+        hitdata['act'] = act
+        hitdata['cnt'] = cnt
+        hitdata['hit'] = hit
+        hit_rate[forecast_date] = hitdata
+
         #print(f'act = {act} cnt = {cnt} hit = {hit} rate = {hit/cnt*100} %')
+        #out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
+        #          f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
+        #          f'<td align="right">{hit/cnt*100:5.2f}</td></tr>')
+    #print(hit_rate)
+    output_hit_rate()
+
+#   的中率の表示
+def output_hit_rate() :
+    for forecast_date,hitdata in  hit_rate.items() :   
+        cur_date = conv_mmddhh_to_date(forecast_date)  # date型
+        #  7日以前は表示しない
+        if cur_date < today_date - datetime.timedelta(days=7) : 
+            continue 
+        date_str = conv_mmddhh_to_str(forecast_date)
+        act = hitdata['act']
+        cnt = hitdata['cnt']
+        hit = hitdata['hit']
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td></tr>')
+
 
 #  雨の時 true を返す
 def is_rain(we) :
