@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/11/07 v0.15 的中率の計算と表示を分けた
-version = "0.15"     
+# 24/11/08 v0.16 24時間的中率表示
+version = "0.16"     
 
 out =  ""
 logf = ""
@@ -62,7 +62,6 @@ def main_proc() :
         read_data(fname)
 
     parse_template()
-    #calc_hit_rate()
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -165,16 +164,19 @@ def conv_mmddhh_to_date(mmddhh) :
     dt = datetime.date(today_yy, mm, dd)
     return dt
 
+def calc_befor24h(mmddhh) :
+    hh = int(mmddhh % 100)
+    dt = conv_mmddhh_to_date(mmddhh)   # date型に変換
+    dt = dt - datetime.timedelta(days=1)  # 1日前
+    return dt.month * 10000 + dt.day * 100 + hh
+
 #   的中率の計算
 def calc_hit_rate() : 
     global  hit_rate
 
+    cur_mmddhh = today_mm * 10000 + today_dd * 100 + today_hh   #  現在の 日時  mmddhh 形式
     for forecast_date in  we_data.keys() :     # 予報日時
-        #  7日以前は表示しない
-        # cur_date = conv_mmddhh_to_date(forecast_date)  # date型
-        # if cur_date < today_date - datetime.timedelta(days=7) : 
-        #     continue 
-        if forecast_date > today_mm * 10000 + today_dd * 100 + today_hh :
+        if forecast_date > cur_mmddhh :
             break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
         #print(f'{forecast_date} の天気')
@@ -183,21 +185,30 @@ def calc_hit_rate() :
             act = timeline_dic[forecast_date]   #  実際の天気
             hit = 0 
             cnt = 0 
+            hit24 = 0
+            cnt24 = 0 
             for we in timeline_dic.values() :
                 cnt += 1
                 if is_rain(we) == is_rain(act) :
                     hit += 1 
+            #  24時間以内の的中率
+            befor24h  = calc_befor24h(forecast_date)
+            for dt,we in timeline_dic.items() :
+                if dt < befor24h :
+                    continue 
+                cnt24 += 1
+                if is_rain(we) == is_rain(act) :
+                    hit24 += 1 
+
         hitdata = {}
         hitdata['act'] = act
         hitdata['cnt'] = cnt
         hitdata['hit'] = hit
+        hitdata['cnt24'] = cnt24
+        hitdata['hit24'] = hit24
         hit_rate[forecast_date] = hitdata
+        #print(hitdata)
 
-        #print(f'act = {act} cnt = {cnt} hit = {hit} rate = {hit/cnt*100} %')
-        #out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
-        #          f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
-        #          f'<td align="right">{hit/cnt*100:5.2f}</td></tr>')
-    #print(hit_rate)
     output_hit_rate()
 
 #   的中率の表示
@@ -211,9 +222,13 @@ def output_hit_rate() :
         act = hitdata['act']
         cnt = hitdata['cnt']
         hit = hitdata['hit']
+        cnt24 = hitdata['cnt24']
+        hit24 = hitdata['hit24']
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
-                  f'<td align="right">{hit/cnt*100:5.2f}</td></tr>')
+                  f'<td align="right">{hit/cnt*100:5.2f}</td>'
+                  f'<td align="right">{cnt24}</td><td align="right">{hit24}</td>'
+                  f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
 
 
 #  雨の時 true を返す
