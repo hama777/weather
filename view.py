@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/11/08 v0.16 24時間的中率表示
-version = "0.16"     
+# 24/11/11 v0.17 1日ごとの的中率計算処理追加
+version = "0.17"     
 
 out =  ""
 logf = ""
@@ -47,6 +47,11 @@ icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 #   hit_rate 辞書  { yymmddhh : hitdata }
 #      hitdata 辞書 { act : 実際の天気(int) , cnt : 総件数 , hit : ヒット件数}
 hit_rate = {}
+
+#   1日ごとの的中率データ
+#   daily_rate  辞書   { yymmdd : hitdata }
+#      hitdata 辞書 {  cnt : 総件数 , hit : ヒット件数}
+daily_rate = {}
 
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
@@ -172,13 +177,17 @@ def calc_befor24h(mmddhh) :
 
 #   的中率の計算
 def calc_hit_rate() : 
-    global  hit_rate
+    global  hit_rate,daily_rate
 
     cur_mmddhh = today_mm * 10000 + today_dd * 100 + today_hh   #  現在の 日時  mmddhh 形式
+    cur_dd = 0 
+    daily_cnt = 0     # 1日ごとの集計に使う
+    daily_hit = 0
     for forecast_date in  we_data.keys() :     # 予報日時
         if forecast_date > cur_mmddhh :
             break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
+        dd = int(forecast_date / 100) % 100         # 日付部分
         #print(f'{forecast_date} の天気')
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
@@ -207,8 +216,19 @@ def calc_hit_rate() :
         hitdata['cnt24'] = cnt24
         hitdata['hit24'] = hit24
         hit_rate[forecast_date] = hitdata
-        #print(hitdata)
+        if dd != cur_dd : 
+            daily_hitdata = {}
+            daily_hitdata['cnt'] = daily_cnt
+            daily_hitdata['hit'] = daily_hit
+            daily_rate[int(forecast_date/100)] = daily_hitdata
+            daily_cnt = 0 
+            daily_hit = 0
+            cur_dd = dd
 
+        daily_cnt += cnt
+        daily_hit += hit
+
+    print(daily_rate)
     output_hit_rate()
 
 #   的中率の表示
