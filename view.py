@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/11/11 v0.17 1日ごとの的中率計算処理追加
-version = "0.17"     
+# 24/11/12 v0.18 1日ごとの的中率表示
+version = "0.18"     
 
 out =  ""
 logf = ""
@@ -44,12 +44,12 @@ we_data = {}
 icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 
 #   hit_rate 的中率のデータ
-#   hit_rate 辞書  { yymmddhh : hitdata }
+#   hit_rate 辞書  { mmddhh : hitdata }
 #      hitdata 辞書 { act : 実際の天気(int) , cnt : 総件数 , hit : ヒット件数}
 hit_rate = {}
 
 #   1日ごとの的中率データ
-#   daily_rate  辞書   { yymmdd : hitdata }
+#   daily_rate  辞書   { mmdd : hitdata }
 #      hitdata 辞書 {  cnt : 総件数 , hit : ヒット件数}
 daily_rate = {}
 
@@ -169,6 +169,13 @@ def conv_mmddhh_to_date(mmddhh) :
     dt = datetime.date(today_yy, mm, dd)
     return dt
 
+#   int の mmdd 形式を入力し  date 型の値を返す
+def conv_mmdd_to_date(mmdd) :
+    mm = int(mmdd / 100)
+    dd = int(mmdd % 100)  
+    dt = datetime.date(today_yy, mm, dd)
+    return dt
+
 def calc_befor24h(mmddhh) :
     hh = int(mmddhh % 100)
     dt = conv_mmddhh_to_date(mmddhh)   # date型に変換
@@ -216,6 +223,8 @@ def calc_hit_rate() :
         hitdata['cnt24'] = cnt24
         hitdata['hit24'] = hit24
         hit_rate[forecast_date] = hitdata
+
+        #  1日データの集計
         if dd != cur_dd : 
             daily_hitdata = {}
             daily_hitdata['cnt'] = daily_cnt
@@ -228,7 +237,7 @@ def calc_hit_rate() :
         daily_cnt += cnt
         daily_hit += hit
 
-    print(daily_rate)
+    #print(hit_rate)
     output_hit_rate()
 
 #   的中率の表示
@@ -249,6 +258,19 @@ def output_hit_rate() :
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
                   f'<td align="right">{cnt24}</td><td align="right">{hit24}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
+
+def daily_hit_rate() :
+    for forecast_date,hitdata in  daily_rate.items() :   
+        date_str = conv_mmdd_to_date(forecast_date)
+        cnt = hitdata['cnt']
+        hit = hitdata['hit']
+        if cnt != 0 :
+            r = hit/cnt*100 
+        else :
+            r = 0 
+        out.write(f'<tr><td>{date_str}</td>'
+                  f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
+                  f'<td align="right">{r:5.2f}</td></tr>')
 
 
 #  雨の時 true を返す
@@ -271,6 +293,7 @@ def date_settings():
     today_yy = today_date.year
     today_hh = today_datetime.hour
 
+#   date 型のデータを int型の mmdd00 にして返す
 def conv_date_int(d) :
     i = d.month * 10000 + d.day * 100 
     return i
@@ -285,6 +308,9 @@ def parse_template() :
             continue
         if "%calc_hit_rate%" in line :
             calc_hit_rate()
+            continue
+        if "%daily_hit_rate%" in line :
+            daily_hit_rate()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
