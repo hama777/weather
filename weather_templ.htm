@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/11/12 1日ごとの的中率表示 -->
+    <!-- 24/11/13  -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -19,21 +19,21 @@
             <div class="content active" id="forecast">
                 <div class="table-container">
                     <table>
-                    %result_table%
+                    %hour_forecast%
                     </table>
                 </div>
             </div>
             <div class="content" id="hitrate">
-                <h1>時間的中率</h1>
-                <table>
-                <tr><th>日時</th><th>実天気</th><th>回数</th><th>的中</th><th>的中率</th>
-                    <th>回数(24h)</th><th>的中(24h)</th><th>率(24h)</th></tr>
-                %calc_hit_rate%
-                </table>
                 <h1>日間的中率</h1>
                 <table>
                     <tr><th>日</th><th>回数</th><th>的中</th><th>的中率</th></tr>
                     %daily_hit_rate%
+                </table>
+                <h1>時間的中率</h1>
+                <table>
+                <tr><th>日時</th><th>実天気</th><th>回数</th><th>的中</th><th>的中率</th>
+                    <th>回数(24h)</th><th>的中(24h)</th><th>率(24h)</th></tr>
+                %output_hit_rate%
                 </table>
             </div>
         </div>
