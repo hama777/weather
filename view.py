@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 #from datetime import datetime
 
-# 24/11/13 v0.19 日付に年の情報を追加
-version = "0.19"     
+# 24/11/14 v1.00 ftp機能追加
+version = "1.00"     
 
 out =  ""
 logf = ""
@@ -56,7 +56,7 @@ daily_rate = {}
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
     date_settings()
-    #read_config()
+    read_config()
 
     dir_path = datadir
 
@@ -68,6 +68,7 @@ def main_proc() :
 
     calc_hit_rate()
     parse_template()
+    ftp_upload()
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -284,7 +285,6 @@ def calc_befor24h(mmddhh) :
 def get_dd_part(yymmddhh) :
     return int(yymmddhh / 100) % 10000  
 
-
 #  雨の時 true を返す
 def is_rain(we) :
     we = int(we)
@@ -339,7 +339,7 @@ def parse_template() :
     out.close()
 
 def read_config() : 
-    global target_url,proxy,debug
+    global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
     if not os.path.isfile(conffile) :
         debug = 1 
         return
@@ -347,8 +347,18 @@ def read_config() :
     conf = open(conffile,'r', encoding='utf-8')
     target_url = conf.readline().strip()
     proxy  = conf.readline().strip()
+    ftp_host = conf.readline().strip()
+    ftp_user = conf.readline().strip()
+    ftp_pass = conf.readline().strip()
+    ftp_url = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
+
+def ftp_upload() : 
+    if debug == 1 :
+        return 
+    with FTP_TLS(host=ftp_host, user=ftp_user, passwd=ftp_pass) as ftp:
+        ftp.storbinary('STOR {}'.format(ftp_url), open(resultfile, 'rb'))
 
 # -------------------------------------------------------------
 main_proc()
