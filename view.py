@@ -5,10 +5,12 @@ import re
 import locale
 import datetime
 from datetime import date,timedelta
+from ftplib import FTP_TLS
+
 #from datetime import datetime
 
-# 24/11/14 v1.00 ftp機能追加
-version = "1.00"     
+# 24/11/14 v1.01 FTP_TLSインポート
+version = "1.01"     
 
 out =  ""
 logf = ""
