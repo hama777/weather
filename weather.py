@@ -10,8 +10,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/11/01 v1.01 月初で不正になるのを修正
-version = "1.01"     
+# 24/11/14 v1.02 configデータ修正
+version = "1.02"     
 
 out =  ""
 logf = ""
@@ -115,7 +115,7 @@ def date_settings():
     today_yy = today_date.year
 
 def read_config() : 
-    global target_url,proxy,debug
+    global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
     if not os.path.isfile(conffile) :
         debug = 1 
         return
@@ -123,6 +123,10 @@ def read_config() :
     conf = open(conffile,'r', encoding='utf-8')
     target_url = conf.readline().strip()
     proxy  = conf.readline().strip()
+    ftp_host = conf.readline().strip()
+    ftp_user = conf.readline().strip()
+    ftp_pass = conf.readline().strip()
+    ftp_url = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
 
