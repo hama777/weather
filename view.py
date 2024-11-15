@@ -7,10 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-#from datetime import datetime
-
-# 24/11/14 v1.01 FTP_TLSインポート
-version = "1.01"     
+# 24/11/15 v1.02 日集計に天気を追加
+version = "1.02"    
 
 out =  ""
 logf = ""
@@ -160,21 +158,22 @@ def hour_forecast() :
 def calc_hit_rate() : 
     global  hit_rate,daily_rate
 
-    #cur_mmddhh = today_yy * 1000000 +  today_mm * 10000 + today_dd * 100 + today_hh   #  現在の 日時  yymmddhh 形式
     cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
     cur_dd = 0 
     daily_cnt = 0     # 1日ごとの集計に使う
     daily_hit = 0
+    daily_rain = 0 
     for forecast_date in  we_data.keys() :     # 予報日時
         if forecast_date > cur_mmddhh :
             break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
-        #dd = int(forecast_date / 100) % 10000         # 日付部分
         dd = get_dd_part(forecast_date)         # 日付部分
         #print(f'{forecast_date} の天気')
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
             act = timeline_dic[forecast_date]   #  実際の天気
+            if is_rain(act) :
+                daily_rain = 1    #  1日のうち 1回でも雨なら  daily_rain = 1 
             hit = 0 
             cnt = 0 
             hit24 = 0
@@ -201,17 +200,29 @@ def calc_hit_rate() :
         hit_rate[forecast_date] = hitdata
 
         #  1日データの集計
-        if dd != cur_dd : 
-            daily_hitdata = {}
-            daily_hitdata['cnt'] = daily_cnt
-            daily_hitdata['hit'] = daily_hit
-            daily_rate[int(forecast_date/100)] = daily_hitdata
+        if dd != cur_dd :    # 日が変わったら1日データを追加する
+            befor = calc_befor24h(forecast_date)   # forecast_date は新しい日になっているので1日前を取得
+            add_daily_data(daily_cnt,daily_hit,befor,daily_rain)
             daily_cnt = 0 
             daily_hit = 0
+            daily_rain = 0
             cur_dd = dd
 
         daily_cnt += cnt
         daily_hit += hit
+
+    #  最後に当日分のデータを追加する
+    add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
+
+#   1日データの追加
+def add_daily_data(cnt,hit,dd,act) :
+    global daily_rate
+
+    daily_hitdata = {}
+    daily_hitdata['cnt'] = cnt
+    daily_hitdata['hit'] = hit
+    daily_hitdata['act'] = act
+    daily_rate[int(dd/100)] = daily_hitdata
 
 #   時間的中率の表示
 def output_hit_rate() :
@@ -238,11 +249,16 @@ def daily_hit_rate() :
         date_str = conv_mmdd_to_date(forecast_date)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
+        act = hitdata['act']
         if cnt != 0 :
             r = hit/cnt*100 
         else :
             r = 0 
-        out.write(f'<tr><td>{date_str}</td>'
+        img = f'{icon_url}100.png'   #  晴れのアイコン 
+        if act == 1 :
+            img = f'{icon_url}300.png'   #  雨のアイコン
+
+        out.write(f'<tr><td>{date_str}</td><td><img src="{img}" width="20" height="15"></td>'
                   f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
 
@@ -314,6 +330,11 @@ def conv_date_int(d) :
     i = yy * 1000000 + d.month * 10000 + d.day * 100 
     return i
 
+def output_current_date(line) :
+    date_str = today_datetime.strftime("%m/%d(%a) %H:%M:%S ")
+    s = line.replace("%today%",date_str)
+    out.write(s)
+
 def parse_template() :
     global out 
     f = open(templatefile , 'r', encoding='utf-8')
@@ -333,7 +354,7 @@ def parse_template() :
             out.write(s)
             continue
         if "%today%" in line :
-            #today(line)
+            output_current_date(line)
             continue
         out.write(line)
 
