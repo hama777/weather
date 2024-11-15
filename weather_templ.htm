@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/11/13  -->
+    <!-- 24/11/15  -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -9,8 +9,8 @@
 
     <body>
         <h1>Weather Check</h1>
-        <span style="font-size:12px;">Ver : %version%</span>
-        <span style="font-size:12px;">実行日時   : %today%</span>
+        <span style="font-size:12px;">Ver : %version%</span>&nbsp;&nbsp;&nbsp;
+        <span style="font-size:12px;">実行日時   : %today%</span><br><br>
         <div class="container">
             <ul class="menu">
               <li><a href="#" data-id="forecast" class="active menu_item">予報</a></li>
@@ -26,12 +26,12 @@
             <div class="content" id="hitrate">
                 <h1>日間的中率</h1>
                 <table>
-                    <tr><th>日</th><th>回数</th><th>的中</th><th>的中率</th></tr>
+                    <tr><th>日</th><th>天気</th><th>回数</th><th>的中</th><th>的中率</th></tr>
                     %daily_hit_rate%
                 </table>
                 <h1>時間的中率</h1>
                 <table>
-                <tr><th>日時</th><th>実天気</th><th>回数</th><th>的中</th><th>的中率</th>
+                <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>的中率</th>
                     <th>回数(24h)</th><th>的中(24h)</th><th>率(24h)</th></tr>
                 %output_hit_rate%
                 </table>
