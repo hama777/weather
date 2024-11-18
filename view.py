@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/11/15 v1.02 日集計に天気を追加
-version = "1.02"    
+# 24/11/18 v1.03 日集計に雨時間を追加
+version = "1.03"    
 
 out =  ""
 logf = ""
@@ -173,7 +173,7 @@ def calc_hit_rate() :
         if forecast_date in timeline_dic :
             act = timeline_dic[forecast_date]   #  実際の天気
             if is_rain(act) :
-                daily_rain = 1    #  1日のうち 1回でも雨なら  daily_rain = 1 
+                daily_rain += 1    #  1日のうち 雨の回数をカウント 
             hit = 0 
             cnt = 0 
             hit24 = 0
@@ -255,11 +255,11 @@ def daily_hit_rate() :
         else :
             r = 0 
         img = f'{icon_url}100.png'   #  晴れのアイコン 
-        if act == 1 :
+        if act >= 1 :    # 1日で1回でも雨があれば 雨のアイコンにする
             img = f'{icon_url}300.png'   #  雨のアイコン
 
         out.write(f'<tr><td>{date_str}</td><td><img src="{img}" width="20" height="15"></td>'
-                  f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
+                  f'<td align="right">{act}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
 
 #   int の yymmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
