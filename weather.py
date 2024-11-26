@@ -10,8 +10,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/11/14 v1.02 configデータ修正
-version = "1.02"     
+# 24/11/26 v1.03 週間天気情報取得
+version = "1.03"     
 
 out =  ""
 logf = ""
@@ -26,6 +26,7 @@ def main_proc() :
     date_settings()
     access_site()
     analize()
+    #analize_week()
     output_datafile()
 
 def access_site() :
@@ -104,6 +105,21 @@ def analize() :
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
     
+def analize_week() :
+    top = BeautifulSoup(res.text, 'html.parser')
+    div_week = top.find('div', id ='flick_list_week')
+    weather_items = div_week.find_all('ul', class_ ='wxweek_content')
+    for w in weather_items :
+        div_date = w.find('li', class_ ='date') 
+        div_day = div_date.find('p', class_ ='day') 
+        dd = div_day.text
+        img = w.find('img', class_ = 'wx__icon' )
+        icon = img.get('src')
+        icon = icon.replace("//weathernews.jp/onebox/img/wxicon/","")
+        icon = int(icon.replace(".png",""))
+
+        #print(dd,icon)
+
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
