@@ -10,14 +10,15 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/11/26 v1.03 週間天気情報取得
-version = "1.03"     
+# 24/11/26 v1.04 週間天気情報出力
+version = "1.04"     
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
 #  出力ファイル名の形式    we.yymmdd_hh.txt   (データ開始の日時)
 outfile_prefix = appdir + "/data/we" 
+week_outfile_prefix = appdir + "/week/we" 
 conffile = appdir + "/weather.conf"
 res = ""
 
@@ -26,8 +27,9 @@ def main_proc() :
     date_settings()
     access_site()
     analize()
-    #analize_week()
+    analize_week()
     output_datafile()
+    output_week_datafile()
 
 def access_site() :
     global res
@@ -81,6 +83,39 @@ def output_datafile() :
     out.write("\n")
     out.close()
 
+def output_week_datafile() :
+    
+    today_hh = today_datetime.hour     #  現在の 時
+
+    # 開始日 start_dd には月の情報がないため今日の日付から 開始日付 を作成する
+    start_mm = today_mm
+    start_yy = today_yy
+    if week_start_dd > today_dd :    # 月をまたいでいる
+        start_mm = today_mm - 1 
+        if start_mm == 0 :
+            start_mm = 12
+            start_yy = today_yy - 1 
+    start_date = datetime.date(start_yy, start_mm , week_start_dd)
+
+    cur_date = start_date
+    data_list = []
+    #  ファイルには現在の 日付 以降のものだけ出力する
+    for we in week_list :
+        if cur_date < today_date :
+            cur_date +=  datetime.timedelta(days=1)
+            continue
+        data_list.append(we)
+        cur_date +=  datetime.timedelta(days=1)
+
+    outfile = week_outfile_prefix + f'{today_yy-2000}{today_mm:02}{today_dd:02}_{today_hh:02}.txt' 
+    out = open(outfile , 'w', encoding='utf-8')
+    s = str(today_date) + " " + str(today_hh) + "\n"
+    out.write(s)
+    s = ",".join(map(str, data_list))
+    out.write(s)
+    out.write("\n")
+    out.close()
+
 #   1時間天気の情報を取得
 #      start_dd   記録されている最初の  日   (月の情報はない)
 #      start_hh   記録されている最初の  時
@@ -106,20 +141,26 @@ def analize() :
         we_list.append(icon)
     
 def analize_week() :
+    global week_start_dd , week_list 
     top = BeautifulSoup(res.text, 'html.parser')
     div_week = top.find('div', id ='flick_list_week')
     weather_items = div_week.find_all('ul', class_ ='wxweek_content')
+    week_start_dd = 0
+    week_list = []
     for w in weather_items :
         div_date = w.find('li', class_ ='date') 
         div_day = div_date.find('p', class_ ='day') 
-        dd = div_day.text
+        dd = int(div_day.text)
+        if week_start_dd == 0 :    #  最初の日付
+            week_start_dd = dd
         img = w.find('img', class_ = 'wx__icon' )
         icon = img.get('src')
         icon = icon.replace("//weathernews.jp/onebox/img/wxicon/","")
         icon = int(icon.replace(".png",""))
+        week_list.append(icon)
 
         #print(dd,icon)
-
+    #print(type(week_start_dd))
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime
