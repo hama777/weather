@@ -7,14 +7,15 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/11/18 v1.03 日集計に雨時間を追加
-version = "1.03"    
+# 24/11/28 v1.04 週間天気の情報を表示
+version = "1.04"    
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
-datafile = appdir + "/data/we.txt" 
+#datafile = appdir + "/data/we.txt" 
 datadir = appdir + "/data/" 
+datadir_week = appdir + "/week/" 
 resultfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
@@ -38,6 +39,14 @@ res = ""
 #    24100113  {24100101:200 , 24100102 : 100, 24100103 : 300, ....}
 we_data = {}
 
+#    week_data  週間天気の情報   データ形式
+#    week_data = {
+#        予報日時 : {発表日時 : 天気, 発表日時 : 天気, ... },
+#        予報日時 : {発表日時 : 天気, 発表日時 : 天気, ... }
+#    }
+#      発表日時  yymmddhh をintとして持つ   予報日  yymmdd00 をintとして持つ
+week_data = {}
+
 #  天気コード
 #  天気アイコンのURL は  https://weathernews.jp/onebox/img/wxicon/{天気コード}.png
 #     100 500 550 600  晴れ  200  曇り  300  雨  650 小雨  400 450 雪   250  曇り 雪  800 曇り雷 850 大雨
@@ -59,12 +68,18 @@ def main_proc() :
     read_config()
 
     dir_path = datadir
-
     datafile_list = [
         f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
     ]
     for fname in datafile_list :
         read_data(fname)
+
+    dir_path = datadir_week
+    datafile_list = [
+        f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
+    ]
+    for fname in datafile_list :
+        read_data_week(fname)
 
     calc_hit_rate()
     parse_template()
@@ -107,6 +122,44 @@ def read_data(fname) :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
 
+def read_data_week(fname) : 
+
+    datafile = datadir_week + fname
+    f = open(datafile , 'r')
+    header  = f.readline().strip()
+    hh = header.split()
+    date_str = hh[0]
+    dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    start_date = datetime.date(dt.year, dt.month, dt.day) # データの開始日付 date型
+    start_date_int = conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
+    start_hh = int(hh[1])            # データの開始時刻
+
+    body  = f.readline().strip()
+    week_list = body.split(",")        #  week_list は1日ごとの天気
+    f.close()
+
+    pub_date = start_date_int + start_hh   #  発表日時 int  yymmddhh  we_data のvalの辞書のキー として使用
+    #cur_hh = start_hh                # 以下のループで現在の時刻として使用  int 型
+    cur_date = start_date            # 以下のループで現在の日付として使用  date 型
+
+    #print(week_list)
+    for we in week_list :
+        k = conv_date_int(cur_date)     #  we_data の key
+        
+        if k in week_data :       # すでにキーがある場合はそのキーに対応する辞書に追加する
+            val = week_data[k]    # そのキーに対応する辞書
+            val[pub_date] = we  # そのキーに対応する辞書 に天気を追加
+            week_data[k] = val    # we_data にどの辞書を再格納
+        else :
+            timeline_dic = {}   # キーがない場合は辞書を作成し、we_data の値として格納する
+            timeline_dic[pub_date] = we
+            week_data[k] = timeline_dic
+        # cur_hh += 1
+        # if cur_hh == 24 :
+        #     cur_hh = 0
+        cur_date +=  datetime.timedelta(days=1)
+    print(week_data)
+
 #   時間天気予報の表示
 def hour_forecast() :
 
@@ -134,6 +187,53 @@ def hour_forecast() :
         forecast_str = conv_mmddhh_to_str(forecast_date)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
+        cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
+        cur_hh = start_hh
+        while True :
+            k = conv_date_int(cur_date) + cur_hh    # k 発表日時
+            if k in  timeline_dic :
+                we = timeline_dic[k]
+                out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
+                #print(f'発表日時 {k} 天気 {we}')
+            else :
+                out.write("<td>--</td>")
+            cur_hh += 1
+            if cur_hh == 24 :
+                cur_hh = 0
+                cur_date +=  datetime.timedelta(days=1)
+            if cur_date > start_date  : # 
+                break
+        out.write("</tr>\n")
+        #print("---")
+    out.write("</tbody>\n")
+
+#   週間天気予報の表示
+def week_forecast() :
+
+    out.write('<thead><tr><th>予報日時</th>\n')
+    cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
+    cur_hh = start_hh        
+    #  テーブルヘッダ出力
+    while True :
+        out.write(f'<th>{cur_date.day}<br>{cur_hh:02}</th>')
+        cur_hh += 1
+        if cur_hh == 24 :
+            cur_hh = 0
+            cur_date +=  datetime.timedelta(days=1)
+        if cur_date > start_date  : # 
+            break
+    out.write("</tr>\n</thead>\n")
+
+    out.write("<tbody>\n")
+    for forecast_date in  week_data.keys() :     # 予報日時
+        yymmdd = int(forecast_date / 100)
+        if yymmdd < today_yy * 10000 + today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
+            continue 
+
+        #print(f'{forecast_date} の天気')
+        forecast_str = conv_mmddhh_to_str(forecast_date)
+        out.write(f'<tr><td>{forecast_str}</td>\n')
+        timeline_dic = week_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
         while True :
@@ -342,6 +442,9 @@ def parse_template() :
     for line in f :
         if "%hour_forecast%" in line :
             hour_forecast()
+            continue
+        if "%week_forecast%" in line :
+            week_forecast()
             continue
         if "%output_hit_rate%" in line :
             output_hit_rate()
