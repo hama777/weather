@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/11/18 日集計に雨時間を追加 -->
+    <!-- 24/11/28 週間天気の情報を表示 -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -13,13 +13,21 @@
         <span style="font-size:12px;">実行日時   : %today%</span><br><br>
         <div class="container">
             <ul class="menu">
-              <li><a href="#" data-id="forecast" class="active menu_item">予報</a></li>
+              <li><a href="#" data-id="forecast" class="active menu_item">時間予報</a></li>
+              <li><a href="#" data-id="week_forecast" class="menu_item">週間予報</a></li>
               <li><a href="#" data-id="hitrate" class="menu_item">的中率</a></li>
             </ul>
             <div class="content active" id="forecast">
                 <div class="table-container">
                     <table>
                     %hour_forecast%
+                    </table>
+                </div>
+            </div>
+            <div class="content" id="week_forecast">
+                <div class="table-container">
+                    <table>
+                    %week_forecast%
                     </table>
                 </div>
             </div>
