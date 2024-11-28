@@ -10,8 +10,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/11/26 v1.04 週間天気情報出力
-version = "1.04"     
+# 24/11/28 v1.05 iconのURLが変更になった
+version = "1.05"     
 
 out =  ""
 logf = ""
@@ -136,7 +136,7 @@ def analize() :
     for w in weather_items :
         img = w.find('img' ,class_ = "wx__icon")
         icon = img.get('src')
-        icon = icon.replace("https://weathernews.jp/onebox/img/wxicon/","")
+        icon = icon.replace("https://gvs.weathernews.jp/onebox/img/wxicon/","")
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
     
@@ -155,7 +155,7 @@ def analize_week() :
             week_start_dd = dd
         img = w.find('img', class_ = 'wx__icon' )
         icon = img.get('src')
-        icon = icon.replace("//weathernews.jp/onebox/img/wxicon/","")
+        icon = icon.replace("//gvs.weathernews.jp/onebox/img/wxicon/","")
         icon = int(icon.replace(".png",""))
         week_list.append(icon)
 
