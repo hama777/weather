@@ -2,16 +2,16 @@
 # -*- coding: utf-8 -*-
 import os
 import requests
-import urllib.parse
-import codecs
+#import urllib.parse
+#import codecs
 import re
 import datetime
 from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/11/28 v1.05 iconのURLが変更になった
-version = "1.05"     
+# 24/11/29 v1.06 週間天気は6時間おきに採取
+version = "1.06"     
 
 out =  ""
 logf = ""
@@ -21,6 +21,9 @@ outfile_prefix = appdir + "/data/we"
 week_outfile_prefix = appdir + "/week/we" 
 conffile = appdir + "/weather.conf"
 res = ""
+week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
+icon_url = "https://gvs.weathernews.jp/onebox/img/wxicon/"     # 天気アイコンのURL
+icon_url_week = "//gvs.weathernews.jp/onebox/img/wxicon/"
 
 def main_proc() :
     read_config()
@@ -42,7 +45,7 @@ def access_site() :
 
 def output_datafile() :
     
-    today_hh = today_datetime.hour     #  現在の 時
+    #today_hh = today_datetime.hour     #  現在の 時
 
     # 開始日 start_dd には月の情報がないため今日の日付から 開始日付 を作成する
     start_mm = today_mm
@@ -85,7 +88,10 @@ def output_datafile() :
 
 def output_week_datafile() :
     
-    today_hh = today_datetime.hour     #  現在の 時
+    #today_hh = today_datetime.hour     #  現在の 時
+
+    if (today_hh % 3) != 0 :    # 3時間おきに採取
+        return 
 
     # 開始日 start_dd には月の情報がないため今日の日付から 開始日付 を作成する
     start_mm = today_mm
@@ -136,7 +142,7 @@ def analize() :
     for w in weather_items :
         img = w.find('img' ,class_ = "wx__icon")
         icon = img.get('src')
-        icon = icon.replace("https://gvs.weathernews.jp/onebox/img/wxicon/","")
+        icon = icon.replace(icon_url,"")
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
     
@@ -155,7 +161,7 @@ def analize_week() :
             week_start_dd = dd
         img = w.find('img', class_ = 'wx__icon' )
         icon = img.get('src')
-        icon = icon.replace("//gvs.weathernews.jp/onebox/img/wxicon/","")
+        icon = icon.replace(icon_url_week,"")
         icon = int(icon.replace(".png",""))
         week_list.append(icon)
 
@@ -163,13 +169,14 @@ def analize_week() :
     #print(type(week_start_dd))
 
 def date_settings():
-    global  today_date,today_mm,today_dd,today_yy,today_datetime
+    global  today_date,today_mm,today_dd,today_yy,today_datetime,today_hh
 
     today_datetime = datetime.datetime.today()   # datetime 型
     today_date = datetime.date.today()           # date 型
     today_mm = today_date.month
     today_dd = today_date.day
     today_yy = today_date.year
+    today_hh = today_datetime.hour     #  現在の 時
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
