@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/11/28 v1.04 週間天気の情報を表示
-version = "1.04"    
+# 24/11/29 v1.05 週間天気は6時間おきに表示
+version = "1.05"    
 
 out =  ""
 logf = ""
@@ -20,6 +20,7 @@ resultfile = appdir + "/weather.htm"
 conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
 res = ""
+week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
 
 #    we_data  データ形式
 #    we_data = {
@@ -158,7 +159,7 @@ def read_data_week(fname) :
         # if cur_hh == 24 :
         #     cur_hh = 0
         cur_date +=  datetime.timedelta(days=1)
-    print(week_data)
+    #print(week_data)
 
 #   時間天気予報の表示
 def hour_forecast() :
@@ -211,12 +212,13 @@ def hour_forecast() :
 def week_forecast() :
 
     out.write('<thead><tr><th>予報日時</th>\n')
-    cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
-    cur_hh = start_hh        
+    cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の3日前から
+    #cur_hh = start_hh        
+    cur_hh = 0        
     #  テーブルヘッダ出力
     while True :
         out.write(f'<th>{cur_date.day}<br>{cur_hh:02}</th>')
-        cur_hh += 1
+        cur_hh += week_data_interval
         if cur_hh == 24 :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
@@ -234,8 +236,9 @@ def week_forecast() :
         forecast_str = conv_mmddhh_to_str(forecast_date)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = week_data[forecast_date]
-        cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
-        cur_hh = start_hh
+        cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
+        #cur_hh = start_hh
+        cur_hh = 0
         while True :
             k = conv_date_int(cur_date) + cur_hh    # k 発表日時
             if k in  timeline_dic :
@@ -244,7 +247,7 @@ def week_forecast() :
                 #print(f'発表日時 {k} 天気 {we}')
             else :
                 out.write("<td>--</td>")
-            cur_hh += 1
+            cur_hh += week_data_interval
             if cur_hh == 24 :
                 cur_hh = 0
                 cur_date +=  datetime.timedelta(days=1)
