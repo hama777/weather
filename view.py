@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/11/29 v1.05 週間天気は6時間おきに表示
-version = "1.05"    
+# 24/12/04 v1.06 日別的中率を列表示にした
+version = "1.06"    
 
 out =  ""
 logf = ""
@@ -140,7 +140,6 @@ def read_data_week(fname) :
     f.close()
 
     pub_date = start_date_int + start_hh   #  発表日時 int  yymmddhh  we_data のvalの辞書のキー として使用
-    #cur_hh = start_hh                # 以下のループで現在の時刻として使用  int 型
     cur_date = start_date            # 以下のループで現在の日付として使用  date 型
 
     #print(week_list)
@@ -155,9 +154,6 @@ def read_data_week(fname) :
             timeline_dic = {}   # キーがない場合は辞書を作成し、we_data の値として格納する
             timeline_dic[pub_date] = we
             week_data[k] = timeline_dic
-        # cur_hh += 1
-        # if cur_hh == 24 :
-        #     cur_hh = 0
         cur_date +=  datetime.timedelta(days=1)
     #print(week_data)
 
@@ -232,12 +228,10 @@ def week_forecast() :
         if yymmdd < today_yy * 10000 + today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
             continue 
 
-        #print(f'{forecast_date} の天気')
-        forecast_str = conv_mmddhh_to_str(forecast_date)
+        forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = week_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
-        #cur_hh = start_hh
         cur_hh = 0
         while True :
             k = conv_date_int(cur_date) + cur_hh    # k 発表日時
@@ -347,8 +341,20 @@ def output_hit_rate() :
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
 
 #   日的中率の表示
-def daily_hit_rate() :
+def daily_hit_rate(col) :
+    n = 0 
     for forecast_date,hitdata in  daily_rate.items() :   
+        cur_date = conv_mmddhh_to_date(forecast_date*100)  # forecast_date は yymmdd のため *100 して yymmddhh 形式にする
+        if cur_date < today_date - datetime.timedelta(days=39) : 
+            continue 
+        n += 1
+        if col == 1 :
+            if n > 20 :
+                continue
+        if col == 2 :
+            if n <= 20 :
+                continue
+                
         date_str = conv_mmdd_to_date(forecast_date)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
@@ -366,14 +372,15 @@ def daily_hit_rate() :
                   f'<td align="right">{r:5.2f}</td></tr>')
 
 #   int の yymmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
-def conv_mmddhh_to_str(yymmddhh) :
+def conv_mmddhh_to_str(yymmddhh,display_hh=True) :
     yy = int(yymmddhh / 1000000) + 2000
     mm = int(yymmddhh / 10000 % 100)
     dd = int(yymmddhh / 100 % 100)  
     hh = int(yymmddhh % 100)
     dt = datetime.date(yy, mm, dd)
     s = dt.strftime("%d(%a)")
-    s = f'{s}/{hh:02}'
+    if display_hh :
+        s = f'{s}/{hh:02}'
     return s 
 
 #   int の yymmddhh 形式を入力し  date 型の値を返す
@@ -452,8 +459,11 @@ def parse_template() :
         if "%output_hit_rate%" in line :
             output_hit_rate()
             continue
-        if "%daily_hit_rate%" in line :
-            daily_hit_rate()
+        if "%daily_hit_rate1%" in line :
+            daily_hit_rate(1)
+            continue
+        if "%daily_hit_rate2%" in line :
+            daily_hit_rate(2)
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
