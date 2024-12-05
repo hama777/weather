@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/12/04 v1.06 日別的中率を列表示にした
-version = "1.06"    
+# 24/12/05 v1.07 時間別的中率を列表示にした
+version = "1.07"    
 
 out =  ""
 logf = ""
@@ -322,12 +322,17 @@ def add_daily_data(cnt,hit,dd,act) :
     daily_rate[int(dd/100)] = daily_hitdata
 
 #   時間的中率の表示
-def output_hit_rate() :
+def output_hit_rate(col) :
+    n = 0 
     for forecast_date,hitdata in  hit_rate.items() :   
         cur_date = conv_mmddhh_to_date(forecast_date)  # date型
         #  7日以前は表示しない
         if cur_date < today_date - datetime.timedelta(days=7) : 
             continue 
+
+        n += 1
+        if multi_col2(n,col) :
+            continue
         date_str = conv_mmddhh_to_str(forecast_date)
         act = hitdata['act']
         cnt = hitdata['cnt']
@@ -337,7 +342,6 @@ def output_hit_rate() :
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
-                  f'<td align="right">{cnt24}</td><td align="right">{hit24}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
 
 #   日的中率の表示
@@ -348,12 +352,8 @@ def daily_hit_rate(col) :
         if cur_date < today_date - datetime.timedelta(days=39) : 
             continue 
         n += 1
-        if col == 1 :
-            if n > 20 :
-                continue
-        if col == 2 :
-            if n <= 20 :
-                continue
+        if multi_col(n,col) :
+            continue
                 
         date_str = conv_mmdd_to_date(forecast_date)
         cnt = hitdata['cnt']
@@ -370,6 +370,32 @@ def daily_hit_rate(col) :
         out.write(f'<tr><td>{date_str}</td><td><img src="{img}" width="20" height="15"></td>'
                   f'<td align="right">{act}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
+
+#   複数カラムの場合の判定
+#     n  ...  何行目か     col ... 何カラム目か
+#     表示しない場合(continueする場合) true を返す
+def multi_col(n,col) :
+    if col == 1 :
+        if n > 20 :
+            return True
+    if col == 2 :
+        if n <= 20 :
+            return True
+    return False
+
+def multi_col2(n,col) :
+    if col == 1 :
+        if n > 60 :
+            return True
+    if col == 2 :
+        if n <= 60 or n > 120 :
+            return True
+    if col == 3 :
+        if n <= 120 :
+            return True
+    return False
+
+
 
 #   int の yymmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
 def conv_mmddhh_to_str(yymmddhh,display_hh=True) :
@@ -456,8 +482,14 @@ def parse_template() :
         if "%week_forecast%" in line :
             week_forecast()
             continue
-        if "%output_hit_rate%" in line :
-            output_hit_rate()
+        if "%output_hit_rate1%" in line :
+            output_hit_rate(1)
+            continue
+        if "%output_hit_rate2%" in line :
+            output_hit_rate(2)
+            continue
+        if "%output_hit_rate3%" in line :
+            output_hit_rate(3)
             continue
         if "%daily_hit_rate1%" in line :
             daily_hit_rate(1)
