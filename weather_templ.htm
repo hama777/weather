@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/12/04 日別的中率を列表示にした -->
+    <!-- 24/12/05 時間別的中率を列表示にした -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -47,12 +47,27 @@
                         </table>
                     </div>
                 </div>
-                <h1>時間的中率</h1>
-                <table>
-                <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>的中率</th>
-                    <th>回数(24h)</th><th>的中(24h)</th><th>率(24h)</th></tr>
-                %output_hit_rate%
-                </table>
+                <b>時間的中率</b>
+                <div class="flex">
+                    <div class='frame'>
+                        <table>
+                            <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>Rate</th><th>Rate(24h)</th></tr>
+                            %output_hit_rate1%
+                        </table>
+                    </div>
+                    <div class='frame'>
+                        <table>
+                            <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>Rate</th><th>Rate(24h)</th></tr>
+                            %output_hit_rate2%
+                        </table>
+                    </div>
+                    <div class='frame'>
+                        <table>
+                            <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>Rate</th><th>Rate(24h)</th></tr>
+                            %output_hit_rate3%
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
         <script src="weather.js"></script>
