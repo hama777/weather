@@ -7,13 +7,12 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/12/05 v1.07 時間別的中率を列表示にした
-version = "1.07"    
+# 24/12/16 v1.08 週間予報 的中率計算処理追加
+version = "1.08"    
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
-#datafile = appdir + "/data/we.txt" 
 datadir = appdir + "/data/" 
 datadir_week = appdir + "/week/" 
 resultfile = appdir + "/weather.htm" 
@@ -49,8 +48,13 @@ we_data = {}
 week_data = {}
 
 #  天気コード
-#  天気アイコンのURL は  https://weathernews.jp/onebox/img/wxicon/{天気コード}.png
+#   1時間天気
 #     100 500 550 600  晴れ  200  曇り  300  雨  650 小雨  400 450 雪   250  曇り 雪  800 曇り雷 850 大雨
+#  週間天気
+#   100 晴れ  101 晴れのち曇り 102 103 106  晴れのち雨  200 曇り 201 曇りのち晴 202 曇りのち雨  
+#   300 雨 301 雨のち晴れ  302 雨のち曇り   400 雪
+
+#  天気アイコンのURL は  https://weathernews.jp/onebox/img/wxicon/{天気コード}.png
 icon_url = "https://weathernews.jp/onebox/img/wxicon/"
 
 #   hit_rate 的中率のデータ
@@ -83,6 +87,7 @@ def main_proc() :
         read_data_week(fname)
 
     calc_hit_rate()
+    #calc_hit_rate_week()    #  test
     parse_template()
     ftp_upload()
 
@@ -123,6 +128,7 @@ def read_data(fname) :
             cur_hh = 0
             cur_date +=  datetime.timedelta(days=1)
 
+#   週間天気予報データの読み込み
 def read_data_week(fname) : 
 
     datafile = datadir_week + fname
@@ -180,7 +186,6 @@ def hour_forecast() :
         if yymmdd < today_yy * 10000 + today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
             continue 
 
-        #print(f'{forecast_date} の天気')
         forecast_str = conv_mmddhh_to_str(forecast_date)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
@@ -191,7 +196,6 @@ def hour_forecast() :
             if k in  timeline_dic :
                 we = timeline_dic[k]
                 out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
-                #print(f'発表日時 {k} 天気 {we}')
             else :
                 out.write("<td>--</td>")
             cur_hh += 1
@@ -201,15 +205,13 @@ def hour_forecast() :
             if cur_date > start_date  : # 
                 break
         out.write("</tr>\n")
-        #print("---")
     out.write("</tbody>\n")
 
 #   週間天気予報の表示
 def week_forecast() :
 
     out.write('<thead><tr><th>予報日時</th>\n')
-    cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の3日前から
-    #cur_hh = start_hh        
+    cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
     cur_hh = 0        
     #  テーブルヘッダ出力
     while True :
@@ -238,7 +240,6 @@ def week_forecast() :
             if k in  timeline_dic :
                 we = timeline_dic[k]
                 out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
-                #print(f'発表日時 {k} 天気 {we}')
             else :
                 out.write("<td>--</td>")
             cur_hh += week_data_interval
@@ -248,7 +249,6 @@ def week_forecast() :
             if cur_date > start_date  : # 
                 break
         out.write("</tr>\n")
-        #print("---")
     out.write("</tbody>\n")
 
 #   的中率の計算
@@ -265,7 +265,6 @@ def calc_hit_rate() :
             break                              # 現在日時を超えたら終了
         date_str = conv_mmddhh_to_str(forecast_date)
         dd = get_dd_part(forecast_date)         # 日付部分
-        #print(f'{forecast_date} の天気')
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
             act = timeline_dic[forecast_date]   #  実際の天気
@@ -371,6 +370,45 @@ def daily_hit_rate(col) :
                   f'<td align="right">{act}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
 
+
+###################################################################
+#   週間予報的中率の計算
+def calc_hit_rate_week() : 
+    global  hit_rate,daily_rate
+
+    cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
+    cur_dd = 0 
+    for forecast_date in  week_data.keys() :     # 予報日時
+        yymmdd = int(forecast_date / 100)
+        if yymmdd > today_yy * 10000 + today_mm * 100 + today_dd :  # 現在日を超えたら終了
+            continue 
+
+        forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
+        timeline_dic = week_data[forecast_date]
+        cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
+        cur_hh = 0
+        forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
+        if forecast_date_last in  timeline_dic :
+            act = timeline_dic[forecast_date_last]  
+        else :
+            act = 100   #  18時天気がなければ仮に 晴れ
+
+        hit = 0 
+        cnt = 0 
+        for we in timeline_dic.values() :
+            cnt += 1
+            if is_rain_week(we) == is_rain_week(act) :
+                hit += 1 
+        print(forecast_date,cnt,hit)
+
+
+
+    #  最後に当日分のデータを追加する
+    #add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
+
+###################################################################
+
+
 #   複数カラムの場合の判定
 #     n  ...  何行目か     col ... 何カラム目か
 #     表示しない場合(continueする場合) true を返す
@@ -447,6 +485,19 @@ def is_rain(we) :
     if we == 100 or we == 500 or  we == 550 or  we == 600 or we == 200:
         return False
     print(f'ERROR we code {we}')
+    return False
+
+#  雨の時 true を返す
+def is_rain_week(we) :
+    we = int(we)       
+    # 晴れ
+    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or  we == 211 :
+        return True
+    # 雨
+    if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or \
+       we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313:
+        return False
+    print(f'ERROR we week code {we}')
     return False
 
 def date_settings():
