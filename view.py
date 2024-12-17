@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/12/16 v1.08 週間予報 的中率計算処理追加
-version = "1.08"    
+# 24/12/17 v1.09 週間予報 的中率計算処理修正
+version = "1.09"    
 
 out =  ""
 logf = ""
@@ -379,9 +379,10 @@ def calc_hit_rate_week() :
     cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
     cur_dd = 0 
     for forecast_date in  week_data.keys() :     # 予報日時
+        print(f'{forecast_date} の天気は？')
         yymmdd = int(forecast_date / 100)
-        if yymmdd > today_yy * 10000 + today_mm * 100 + today_dd :  # 現在日を超えたら終了
-            continue 
+        if yymmdd >= today_yy * 10000 + today_mm * 100 + today_dd :  # 現在日(を含む)を超えたら終了
+            break
 
         forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
         timeline_dic = week_data[forecast_date]
@@ -390,17 +391,22 @@ def calc_hit_rate_week() :
         forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
         if forecast_date_last in  timeline_dic :
             act = timeline_dic[forecast_date_last]  
+            print(f'act = {act}')
         else :
-            act = 100   #  18時天気がなければ仮に 晴れ
+            #act = 100   #  18時天気がなければ仮に 晴れ
+            print(f'ERROR can note get act  forecast_date = {forecast_date}')
+        daily_hitdata = daily_rate[yymmdd]
+        dd_act = daily_hitdata['act']
+        print(f'ddact = {dd_act}')
 
         hit = 0 
         cnt = 0 
         for we in timeline_dic.values() :
+            print(f'we = {we}')
             cnt += 1
             if is_rain_week(we) == is_rain_week(act) :
                 hit += 1 
         print(forecast_date,cnt,hit)
-
 
 
     #  最後に当日分のデータを追加する
