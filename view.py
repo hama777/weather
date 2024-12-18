@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/12/17 v1.09 週間予報 的中率計算処理修正
-version = "1.09"    
+# 24/12/18 v1.10 週間予報 的中率計算処理修正
+version = "1.10"    
 
 out =  ""
 logf = ""
@@ -20,6 +20,7 @@ conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
+rain_threshold = 4       #  1日で何時間雨の場合、 雨 と判定するか
 
 #    we_data  データ形式
 #    we_data = {
@@ -278,6 +279,8 @@ def calc_hit_rate() :
                 cnt += 1
                 if is_rain(we) == is_rain(act) :
                     hit += 1 
+
+
             #  24時間以内の的中率
             befor24h  = calc_befor24h(forecast_date)
             for dt,we in timeline_dic.items() :
@@ -389,25 +392,28 @@ def calc_hit_rate_week() :
         cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
         cur_hh = 0
         forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
-        if forecast_date_last in  timeline_dic :
-            act = timeline_dic[forecast_date_last]  
-            print(f'act = {act}')
-        else :
-            #act = 100   #  18時天気がなければ仮に 晴れ
-            print(f'ERROR can note get act  forecast_date = {forecast_date}')
+        # if forecast_date_last in  timeline_dic :
+        #     act = timeline_dic[forecast_date_last]  
+        #     print(f'act = {act}')
+        # else :
+        #     #act = 100   #  18時天気がなければ仮に 晴れ
+        #     print(f'ERROR can note get act  forecast_date = {forecast_date}')
         daily_hitdata = daily_rate[yymmdd]
-        dd_act = daily_hitdata['act']
-        print(f'ddact = {dd_act}')
+        rain_time = daily_hitdata['act']   # 1日で何時間雨か
+        print(f'act = {rain_time}')
+        act_is_rain = is_rain_day(rain_time)   # 雨の時  true
 
         hit = 0 
         cnt = 0 
         for we in timeline_dic.values() :
             print(f'we = {we}')
             cnt += 1
-            if is_rain_week(we) == is_rain_week(act) :
+            if is_rain_week(we) == act_is_rain :
                 hit += 1 
+
         print(forecast_date,cnt,hit)
 
+    
 
     #  最後に当日分のデータを追加する
     #add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
@@ -486,8 +492,10 @@ def get_dd_part(yymmddhh) :
 #  雨の時 true を返す
 def is_rain(we) :
     we = int(we)
+    # 雨
     if we == 300 or we == 650 or  we == 400 or  we == 450 or  we == 800 or we == 850 :
         return True
+    # 晴れ
     if we == 100 or we == 500 or  we == 550 or  we == 600 or we == 200:
         return False
     print(f'ERROR we code {we}')
@@ -496,14 +504,20 @@ def is_rain(we) :
 #  雨の時 true を返す
 def is_rain_week(we) :
     we = int(we)       
-    # 晴れ
-    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or  we == 211 :
-        return True
     # 雨
     if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or \
        we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313:
+        return True
+    # 晴れ
+    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or  we == 211 :
         return False
     print(f'ERROR we week code {we}')
+    return False
+
+#  1日のうち rain_threshold 時間以上雨の場合、 true を返す
+def is_rain_day(rain_time) :
+    if rain_time >= rain_threshold  :
+        return True
     return False
 
 def date_settings():
