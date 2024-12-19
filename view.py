@@ -7,8 +7,8 @@ import datetime
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/12/18 v1.10 週間予報 的中率計算処理修正
-version = "1.10"    
+# 24/12/19 v1.11 週間予報 的中率の表示
+version = "1.11"    
 
 out =  ""
 logf = ""
@@ -68,6 +68,11 @@ hit_rate = {}
 #      hitdata 辞書 {  cnt : 総件数 , hit : ヒット件数}
 daily_rate = {}
 
+#   週間天気予報の的中率データ
+#   week_rate  辞書   { yymmdd : hitdata }
+#      hitdata 辞書 {  cnt : 総件数 , hit : ヒット件数}
+week_rate = {}
+
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
     date_settings()
@@ -88,7 +93,7 @@ def main_proc() :
         read_data_week(fname)
 
     calc_hit_rate()
-    #calc_hit_rate_week()    #  test
+    calc_hit_rate_week()    #  test
     parse_template()
     ftp_upload()
 
@@ -155,7 +160,7 @@ def read_data_week(fname) :
         
         if k in week_data :       # すでにキーがある場合はそのキーに対応する辞書に追加する
             val = week_data[k]    # そのキーに対応する辞書
-            val[pub_date] = we  # そのキーに対応する辞書 に天気を追加
+            val[pub_date] = we    # そのキーに対応する辞書 に天気を追加
             week_data[k] = val    # we_data にどの辞書を再格納
         else :
             timeline_dic = {}   # キーがない場合は辞書を作成し、we_data の値として格納する
@@ -373,8 +378,6 @@ def daily_hit_rate(col) :
                   f'<td align="right">{act}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
 
-
-###################################################################
 #   週間予報的中率の計算
 def calc_hit_rate_week() : 
     global  hit_rate,daily_rate
@@ -382,7 +385,6 @@ def calc_hit_rate_week() :
     cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
     cur_dd = 0 
     for forecast_date in  week_data.keys() :     # 予報日時
-        print(f'{forecast_date} の天気は？')
         yymmdd = int(forecast_date / 100)
         if yymmdd >= today_yy * 10000 + today_mm * 100 + today_dd :  # 現在日(を含む)を超えたら終了
             break
@@ -400,25 +402,38 @@ def calc_hit_rate_week() :
         #     print(f'ERROR can note get act  forecast_date = {forecast_date}')
         daily_hitdata = daily_rate[yymmdd]
         rain_time = daily_hitdata['act']   # 1日で何時間雨か
-        print(f'act = {rain_time}')
+        #print(f'act = {rain_time}')
         act_is_rain = is_rain_day(rain_time)   # 雨の時  true
 
         hit = 0 
         cnt = 0 
         for we in timeline_dic.values() :
-            print(f'we = {we}')
+            #print(f'we = {we}')
             cnt += 1
             if is_rain_week(we) == act_is_rain :
                 hit += 1 
 
-        print(forecast_date,cnt,hit)
+        #print(forecast_date,cnt,hit)
+        hitdata = {} 
+        hitdata['cnt'] = cnt
+        hitdata['hit'] = hit
+        week_rate[yymmdd] = hitdata
 
-    
+    #print(week_rate)    
 
-    #  最後に当日分のデータを追加する
-    #add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
-
-###################################################################
+#  週間天気予報 的中率の表示
+def output_week_hit_rate() :
+    for yymmdd, hitdata in week_rate.items() :
+        date_str = conv_mmdd_to_date(yymmdd)
+        cnt = hitdata['cnt']
+        hit = hitdata['hit']
+        if cnt != 0 :
+            r = hit/cnt*100 
+        else :
+            r = 0 
+        out.write(f'<tr><td>{date_str}</td><td>--</td>'
+                  f'<td align="right">--</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
+                  f'<td align="right">{r:5.2f}</td></tr>')
 
 
 #   複数カラムの場合の判定
@@ -552,6 +567,9 @@ def parse_template() :
             continue
         if "%week_forecast%" in line :
             week_forecast()
+            continue
+        if "%week_hit_rate%" in line :
+            output_week_hit_rate()
             continue
         if "%output_hit_rate1%" in line :
             output_hit_rate(1)
