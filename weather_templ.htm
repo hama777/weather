@@ -1,5 +1,5 @@
 <html>
-    <!-- 24/12/05 時間別的中率を列表示にした -->
+    <!-- 24/12/19 v1.11 週間予報 的中率の表示 -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -32,7 +32,12 @@
                 </div>
             </div>
             <div class="content" id="hitrate">
-                <b>日別的中率</b>
+                <b>週間天気 的中率</b>
+                <table>
+                    <tr><th>日</th><th>天気</th><th>雨時間</th><th>回数</th><th>的中</th><th>的中率</th></tr>
+                    %week_hit_rate%
+                </table>
+                <b>1時間天気 日別的中率</b>
                 <div class="flex">
                     <div class='frame'>
                         <table>
@@ -47,7 +52,7 @@
                         </table>
                     </div>
                 </div>
-                <b>時間的中率</b>
+                <b>1時間天気 時間的中率</b>
                 <div class="flex">
                     <div class='frame'>
                         <table>
