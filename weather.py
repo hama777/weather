@@ -2,16 +2,14 @@
 # -*- coding: utf-8 -*-
 import os
 import requests
-#import urllib.parse
-#import codecs
 import re
 import datetime
 from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 24/11/29 v1.06 週間天気は6時間おきに採取
-version = "1.06"     
+# 25/01/08 v1.07 現在の気温を取得するメソッド追加
+version = "1.07"  
 
 out =  ""
 logf = ""
@@ -30,6 +28,7 @@ def main_proc() :
     date_settings()
     access_site()
     analize()
+    temperature = get_current_temperature()
     analize_week()
     output_datafile()
     output_week_datafile()
@@ -87,9 +86,7 @@ def output_datafile() :
     out.close()
 
 def output_week_datafile() :
-    
-    #today_hh = today_datetime.hour     #  現在の 時
-
+   
     if (today_hh % 3) != 0 :    # 3時間おきに採取
         return 
 
@@ -145,7 +142,33 @@ def analize() :
         icon = icon.replace(icon_url,"")
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
-    
+
+#   現在時刻の気温を取得する
+def get_current_temperature() :
+    top = BeautifulSoup(res.text, 'html.parser')
+    div_1hour = top.find('div', id ='flick_list_1hour')
+    daily_items = div_1hour.find_all('div', class_ ='group')
+    for daily in daily_items :              # 日 ごとのループ
+        div_date = daily.find('div', class_ ='date')
+        dd = div_date.text.strip()
+        dd = int(re.sub(r"\D", "", dd))     # 数字部分を抜き出す
+        if dd != today_dd :
+            continue 
+        #print(f'dd = {dd}')
+        hour_items = daily.find_all('ul', class_ ='list')
+        for hour in hour_items :            # 時 ごとのループ
+            time_data = hour.find('li', class_ ='time')  
+            hh = int(time_data.text)
+            #print(f'hh= {hh}')
+            if hh != today_hh :
+                continue 
+            te = hour.find('li', class_ ='temp')    # 気温
+            temperature = te.text.strip()
+            temperature = int(re.sub(r"\D", "", temperature))     # 数字部分を抜き出す
+            #print(temperature)
+            break
+    return temperature
+
 def analize_week() :
     global week_start_dd , week_list 
     top = BeautifulSoup(res.text, 'html.parser')
@@ -164,9 +187,6 @@ def analize_week() :
         icon = icon.replace(icon_url_week,"")
         icon = int(icon.replace(".png",""))
         week_list.append(icon)
-
-        #print(dd,icon)
-    #print(type(week_start_dd))
 
 def date_settings():
     global  today_date,today_mm,today_dd,today_yy,today_datetime,today_hh
