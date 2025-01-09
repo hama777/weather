@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/01/08 v1.07 現在の気温を取得するメソッド追加
-version = "1.07"  
+# 25/01/09 v1.08 現在の気温を出力する
+version = "1.08"  
 
 out =  ""
 logf = ""
@@ -18,12 +18,14 @@ appdir = os.path.dirname(os.path.abspath(__file__))
 outfile_prefix = appdir + "/data/we" 
 week_outfile_prefix = appdir + "/week/we" 
 conffile = appdir + "/weather.conf"
+temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
 icon_url = "https://gvs.weathernews.jp/onebox/img/wxicon/"     # 天気アイコンのURL
 icon_url_week = "//gvs.weathernews.jp/onebox/img/wxicon/"
 
 def main_proc() :
+    global temperature
     read_config()
     date_settings()
     access_site()
@@ -32,6 +34,7 @@ def main_proc() :
     analize_week()
     output_datafile()
     output_week_datafile()
+    output_temperature()
 
 def access_site() :
     global res
@@ -44,8 +47,6 @@ def access_site() :
 
 def output_datafile() :
     
-    #today_hh = today_datetime.hour     #  現在の 時
-
     # 開始日 start_dd には月の情報がないため今日の日付から 開始日付 を作成する
     start_mm = today_mm
     start_yy = today_yy
@@ -86,7 +87,6 @@ def output_datafile() :
     out.close()
 
 def output_week_datafile() :
-   
     if (today_hh % 3) != 0 :    # 3時間おきに採取
         return 
 
@@ -117,6 +117,14 @@ def output_week_datafile() :
     s = ",".join(map(str, data_list))
     out.write(s)
     out.write("\n")
+    out.close()
+
+#   気温データの出力
+#      形式  yy/mm/dd hh:00 tab 気温
+def output_temperature() :
+    dt = f'{today_yy-2000}/{today_mm:02}/{today_dd:02} {today_hh:02}:00'
+    out = open(temperafile , 'a', encoding='utf-8')
+    out.write(f'{dt}\t{temperature}\n')
     out.close()
 
 #   1時間天気の情報を取得
