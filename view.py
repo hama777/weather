@@ -4,11 +4,12 @@ import os
 import re
 import locale
 import datetime
+import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 24/12/19 v1.11 週間予報 的中率の表示
-version = "1.11"    
+# 25/01/10 v1.12 気温グラフ追加
+version = "1.12"    
 
 out =  ""
 logf = ""
@@ -18,6 +19,8 @@ datadir_week = appdir + "/week/"
 resultfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
+temperafile = appdir + "/temperature.txt"    #  実績気温データ  
+
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
 rain_threshold = 4       #  1日で何時間雨の場合、 雨 と判定するか
@@ -73,10 +76,15 @@ daily_rate = {}
 #      hitdata 辞書 {  cnt : 総件数 , hit : ヒット件数}
 week_rate = {}
 
+#   気温のdf  
+df_tempera = ""
+
+
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
     date_settings()
     read_config()
+    read_temperature_data()
 
     dir_path = datadir
     datafile_list = [
@@ -168,6 +176,28 @@ def read_data_week(fname) :
             week_data[k] = timeline_dic
         cur_date +=  datetime.timedelta(days=1)
     #print(week_data)
+
+def read_temperature_data() :
+    global df_tempera
+    date_list = []
+    val_list = []
+
+    with open(temperafile) as f:
+        for line in f:
+            line = line.rstrip()
+            data = line.split("\t")
+            dt = datetime.datetime.strptime(data[0], '%y/%m/%d %H:%M')
+            date_list.append(dt)
+            val_list.append(int(data[1]))
+
+    df_tempera = pd.DataFrame(list(zip(date_list,val_list)), columns = ['date','val'])
+
+#   気温グラフ
+def tempera_graph() :
+    for _,row in df_tempera.iterrows() :
+        date_str = row['date'].strftime('%d %H')
+        v = row['val']
+        out.write(f"['{date_str}',{v}],") 
 
 #   時間天気予報の表示
 def hour_forecast() :
@@ -507,8 +537,8 @@ def get_dd_part(yymmddhh) :
 #  雨の時 true を返す
 def is_rain(we) :
     we = int(we)
-    # 雨
-    if we == 300 or we == 650 or  we == 400 or  we == 450 or  we == 800 or we == 850 :
+    # 雨    430  みぞれ
+    if we == 300 or we == 650 or  we == 400 or  we == 450 or  we == 800 or we == 850 or we == 430 :
         return True
     # 晴れ
     if we == 100 or we == 500 or  we == 550 or  we == 600 or we == 200:
@@ -519,9 +549,9 @@ def is_rain(we) :
 #  雨の時 true を返す
 def is_rain_week(we) :
     we = int(we)       
-    # 雨
+    # 雨     311  雨のち晴れ
     if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or \
-       we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313:
+       we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  :
         return True
     # 晴れ
     if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or  we == 211 :
@@ -585,6 +615,9 @@ def parse_template() :
             continue
         if "%daily_hit_rate2%" in line :
             daily_hit_rate(2)
+            continue
+        if "%tempera_graph%" in line :
+            tempera_graph()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
