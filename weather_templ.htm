@@ -1,11 +1,39 @@
 <html>
-    <!-- 24/12/19 v1.11 週間予報 的中率の表示 -->
+    <!-- 25/01/10 v1.12 気温グラフ追加 -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta http-equiv="Content-Style-Type" content="text/css">
         <link rel="stylesheet" href="weather.css">
     </head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(
+            function() {
+                var data = google.visualization.arrayToDataTable([
+        [       '', '時間'],
+    %tempera_graph%
+                ]);
+        
+                var options = {
+                    title: '気温グラフ',
+                    colors: ['#32a852'] ,
+                    hAxis: {title: '日時'},
+                    chartArea: { backgroundColor: '#b7ebc5' , left:50,right:30 },
+                    curveType: 'function', 
+                    backgroundColor: '#daebdf' ,
+                    legend: {
+                        position: 'none'
+                    }
+                };
+        
+                var chart = new google.visualization.LineChart(document.getElementById('tempera_graph'));
+                chart.draw(data, options);
+            }
+        );
+    </script>
 
     <body>
         <h1>Weather Check</h1>
@@ -30,6 +58,8 @@
                     %week_forecast%
                     </table>
                 </div>
+                <b>気温グラフ</b>
+                <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; " ></div>
             </div>
             <div class="content" id="hitrate">
                 <b>週間天気 的中率</b>
