@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/01/10 v1.12 気温グラフ追加
-version = "1.12"    
+# 25/01/24 v1.13 気温統計情報の計算メソッド追加
+version = "1.13"    
 
 out =  ""
 logf = ""
@@ -101,7 +101,8 @@ def main_proc() :
         read_data_week(fname)
 
     calc_hit_rate()
-    calc_hit_rate_week()    #  test
+    calc_hit_rate_week()    
+    #temperature_info()   #  test
     parse_template()
     ftp_upload()
 
@@ -191,6 +192,13 @@ def read_temperature_data() :
             val_list.append(int(data[1]))
 
     df_tempera = pd.DataFrame(list(zip(date_list,val_list)), columns = ['date','val'])
+
+#   気温の日々の平均値、最高値、最低値を求める
+def temperature_info() :
+    daily_avg = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
+    daily_max = df_tempera.groupby(df_tempera['date'].dt.date)['val'].max()
+    daily_min = df_tempera.groupby(df_tempera['date'].dt.date)['val'].min()
+    #print(daily_max)
 
 #   気温グラフ
 def tempera_graph() :
@@ -424,26 +432,17 @@ def calc_hit_rate_week() :
         cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
         cur_hh = 0
         forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
-        # if forecast_date_last in  timeline_dic :
-        #     act = timeline_dic[forecast_date_last]  
-        #     print(f'act = {act}')
-        # else :
-        #     #act = 100   #  18時天気がなければ仮に 晴れ
-        #     print(f'ERROR can note get act  forecast_date = {forecast_date}')
         daily_hitdata = daily_rate[yymmdd]
         rain_time = daily_hitdata['act']   # 1日で何時間雨か
-        #print(f'act = {rain_time}')
         act_is_rain = is_rain_day(rain_time)   # 雨の時  true
 
         hit = 0 
         cnt = 0 
         for we in timeline_dic.values() :
-            #print(f'we = {we}')
             cnt += 1
             if is_rain_week(we) == act_is_rain :
                 hit += 1 
 
-        #print(forecast_date,cnt,hit)
         hitdata = {} 
         hitdata['cnt'] = cnt
         hitdata['hit'] = hit
@@ -464,7 +463,6 @@ def output_week_hit_rate() :
         out.write(f'<tr><td>{date_str}</td><td>--</td>'
                   f'<td align="right">--</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
-
 
 #   複数カラムの場合の判定
 #     n  ...  何行目か     col ... 何カラム目か
@@ -489,8 +487,6 @@ def multi_col2(n,col) :
         if n <= 120 :
             return True
     return False
-
-
 
 #   int の yymmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
 def conv_mmddhh_to_str(yymmddhh,display_hh=True) :
