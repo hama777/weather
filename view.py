@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/01/24 v1.13 気温統計情報の計算メソッド追加
-version = "1.13"    
+# 25/01/27 v1.14 気温統計情報のデータフレーム作成
+version = "1.14"    
 
 out =  ""
 logf = ""
@@ -195,10 +195,15 @@ def read_temperature_data() :
 
 #   気温の日々の平均値、最高値、最低値を求める
 def temperature_info() :
-    daily_avg = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
-    daily_max = df_tempera.groupby(df_tempera['date'].dt.date)['val'].max()
-    daily_min = df_tempera.groupby(df_tempera['date'].dt.date)['val'].min()
-    #print(daily_max)
+    seri_tmp  = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
+    daily_avg = seri_tmp.rename('avg')
+    seri_tmp = df_tempera.groupby(df_tempera['date'].dt.date)['val'].max()
+    daily_max = seri_tmp.rename('max')
+    seri_tmp = df_tempera.groupby(df_tempera['date'].dt.date)['val'].min()
+    daily_min = seri_tmp.rename('min')
+    daily_info = pd.merge(daily_avg,daily_max,on='date')
+    daily_info = pd.merge(daily_info,daily_min,on='date')
+    print(daily_info)
 
 #   気温グラフ
 def tempera_graph() :
@@ -546,7 +551,7 @@ def is_rain(we) :
 def is_rain_week(we) :
     we = int(we)       
     # 雨     311  雨のち晴れ
-    if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or \
+    if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or \
        we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  :
         return True
     # 晴れ
