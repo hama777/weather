@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/01/27 v1.14 気温統計情報のデータフレーム作成
-version = "1.14"    
+# 25/01/28 v1.15 日別気温データ表示
+version = "1.15"    
 
 out =  ""
 logf = ""
@@ -203,7 +203,12 @@ def temperature_info() :
     daily_min = seri_tmp.rename('min')
     daily_info = pd.merge(daily_avg,daily_max,on='date')
     daily_info = pd.merge(daily_info,daily_min,on='date')
-    print(daily_info)
+    #print(daily_info)
+
+    for index,row in daily_info.iterrows() :
+        out.write(f"<tr><td>{index}</td><td align='right'>{row['avg']:4.1f}</td>"
+                  f"<td align='right'>{row['max']:4.0f}</td>"
+                  f"<td align='right'>{row['min']:4.0f}</td></tr>\n")
 
 #   気温グラフ
 def tempera_graph() :
@@ -619,6 +624,9 @@ def parse_template() :
             continue
         if "%tempera_graph%" in line :
             tempera_graph()
+            continue
+        if "%daily_tempera%" in line :
+            temperature_info()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
