@@ -1,5 +1,5 @@
 <html>
-    <!-- 25/01/10 v1.12 気温グラフ追加 -->
+    <!-- 25/01/28 v1.15 日別気温データ表示 -->
     <head>
         <title>Weather Check</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -60,6 +60,13 @@
                 </div>
                 <b>気温グラフ</b>
                 <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; " ></div>
+                <b>日別気温データ</b>
+                <table>
+                    <tr><th>日付</th><th>平均気温</th><th>最高</th><th>最低</th></tr>
+                    %daily_tempera%
+                </table>
+
+
             </div>
             <div class="content" id="hitrate">
                 <b>週間天気 的中率</b>
