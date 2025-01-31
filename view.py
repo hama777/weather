@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/01/30 v1.17 日別天気情報ファイル出力処理
-version = "1.17"
+# 25/01/31 v1.18 日別天気情報ファイル出力処理
+version = "1.18"
 
 out =  ""
 logf = ""
@@ -412,7 +412,7 @@ def daily_hit_rate(col) :
         if multi_col(n,col) :
             continue
                 
-        date_str = conv_mmdd_to_date(forecast_date)
+        date_str = conv_mmdd_to_datestr(forecast_date)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         act = hitdata['act']
@@ -431,12 +431,24 @@ def daily_hit_rate(col) :
 
 #   日毎の情報をファイルに出力
 def daily_info_output() :
+    # with open(dailyfile , encoding='utf-8') as f:
+    #     for line in f:
+    #         continue
+    
+    # d = line.split('\t')
+    # dt = datetime.datetime.strptime(d[0], '%y/%m/%d %H:%M')
+    # lastdate = dt.date()   #  最終データの日付  date型
+
     dailyf = open(dailyfile , 'w', encoding='utf-8')
-    #   とりあえず全データを出力する
-    #   TODO: 最終日データのみ追記する
     for forecast_date,hitdata in  daily_rate.items() :   
                 
-        date_str = conv_mmdd_to_date(forecast_date,is_year=True)
+        fdate = conv_mmdd_to_date(forecast_date)    # date型
+        # if fdate <= lastdate :   # 最終データより前のデータは出力しない
+        #     print("cont")
+        #     continue
+#        if fdate == today_date :  # 今日のデータは出力しない
+#            break 
+        date_str = conv_mmdd_to_datestr(forecast_date,is_year=True)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         act = hitdata['act']
@@ -482,7 +494,7 @@ def calc_hit_rate_week() :
 #  週間天気予報 的中率の表示
 def output_week_hit_rate() :
     for yymmdd, hitdata in week_rate.items() :
-        date_str = conv_mmdd_to_date(yymmdd)
+        date_str = conv_mmdd_to_datestr(yymmdd)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         if cnt != 0 :
@@ -539,16 +551,25 @@ def conv_mmddhh_to_date(yymmddhh) :
     return dt
 
 #   int の yymmdd 形式を入力し mm/dd(aa) 形式の文字列を返す
-def conv_mmdd_to_date(yymmdd,is_year=False) :
+def conv_mmdd_to_datestr(yymmdd,is_year=False) :
     yy = int(yymmdd / 10000) + 2000
     mm = int(yymmdd / 100 % 100) 
     dd = int(yymmdd % 100)  
     dt = datetime.date(yy, mm, dd)
     if is_year :
-        s = dt.strftime("%y/%m/%d(%a)")
+        s = dt.strftime("%y/%m/%d")
     else :
         s = dt.strftime("%m/%d(%a)")
     return s
+
+#   int の yymmdd 形式を入力し date 型を返す
+def conv_mmdd_to_date(yymmdd) :
+    yy = int(yymmdd / 10000) + 2000
+    mm = int(yymmdd / 100 % 100) 
+    dd = int(yymmdd % 100)  
+    dt = datetime.date(yy, mm, dd)
+    return dt
+
 
 #  int の yymmddhh 形式を入力しその1日前の yymmddhh (int) を返す
 def calc_befor24h(mmddhh) :
