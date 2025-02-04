@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/01/31 v1.18 日別天気情報ファイル出力処理
-version = "1.18"
+# 25/02/04 v1.19 日別天気情報ファイル出力処理
+version = "1.19"
 
 out =  ""
 logf = ""
@@ -431,23 +431,22 @@ def daily_hit_rate(col) :
 
 #   日毎の情報をファイルに出力
 def daily_info_output() :
-    # with open(dailyfile , encoding='utf-8') as f:
-    #     for line in f:
-    #         continue
+    with open(dailyfile , encoding='utf-8') as f:
+        for line in f:
+            continue
     
-    # d = line.split('\t')
-    # dt = datetime.datetime.strptime(d[0], '%y/%m/%d %H:%M')
-    # lastdate = dt.date()   #  最終データの日付  date型
+    d = line.split('\t')
+    dt = datetime.datetime.strptime(d[0], '%y/%m/%d')
+    lastdate = dt.date()   #  最終データの日付  date型
 
-    dailyf = open(dailyfile , 'w', encoding='utf-8')
+    dailyf = open(dailyfile , 'a', encoding='utf-8')
     for forecast_date,hitdata in  daily_rate.items() :   
                 
         fdate = conv_mmdd_to_date(forecast_date)    # date型
-        # if fdate <= lastdate :   # 最終データより前のデータは出力しない
-        #     print("cont")
-        #     continue
-#        if fdate == today_date :  # 今日のデータは出力しない
-#            break 
+        if fdate <= lastdate :   # 最終データより前のデータは出力しない
+            continue
+        if fdate == today_date :  # 今日のデータは出力しない
+           break 
         date_str = conv_mmdd_to_datestr(forecast_date,is_year=True)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
