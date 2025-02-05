@@ -8,8 +8,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/02/04 v1.19 日別天気情報ファイル出力処理
-version = "1.19"
+# 25/02/05 v1.20 日別気温グラフ表示
+version = "1.20"
 
 out =  ""
 logf = ""
@@ -56,7 +56,7 @@ week_data = {}
 #   1時間天気
 #     100 500 550 600  晴れ  200  曇り  300  雨  650 小雨  400 450 雪   250  曇り 雪  800 曇り雷 850 大雨
 #  週間天気
-#   100 晴れ  101 晴れのち曇り 102 103 106  晴れのち雨  200 曇り 201 曇りのち晴 202 曇りのち雨  
+#   100 晴れ  101 晴れのち曇り 102 103 106  晴れのち雨  200 曇り 201 曇りのち晴 202 曇りのち雨  260 曇りのち雪
 #   300 雨 301 雨のち晴れ  302 雨のち曇り   400 雪
 
 #  天気アイコンのURL は  https://weathernews.jp/onebox/img/wxicon/{天気コード}.png
@@ -103,7 +103,7 @@ def main_proc() :
 
     calc_hit_rate()
     calc_hit_rate_week()    
-    #temperature_info()   #  test
+    create_temperature_info()
     parse_template()
     ftp_upload()
     daily_info_output()
@@ -196,7 +196,8 @@ def read_temperature_data() :
     df_tempera = pd.DataFrame(list(zip(date_list,val_list)), columns = ['date','val'])
 
 #   気温の日々の平均値、最高値、最低値を求める
-def temperature_info() :
+def create_temperature_info() :
+    global daily_info
     seri_tmp  = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
     daily_avg = seri_tmp.rename('avg')
     seri_tmp = df_tempera.groupby(df_tempera['date'].dt.date)['val'].max()
@@ -207,6 +208,8 @@ def temperature_info() :
     daily_info = pd.merge(daily_info,daily_min,on='date')
     #print(daily_info)
 
+#   気温の日々の平均値、最高値、最低値の表示
+def temperature_info() :
     for index,row in daily_info.iterrows() :
         out.write(f"<tr><td>{index}</td><td align='right'>{row['avg']:4.1f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
@@ -217,6 +220,12 @@ def tempera_graph() :
     for _,row in df_tempera.iterrows() :
         date_str = row['date'].strftime('%d %H')
         v = row['val']
+        out.write(f"['{date_str}',{v}],") 
+
+def tempera_graph_daily() :
+    for index,row in daily_info.iterrows() :
+        date_str = index.strftime('%m/%d')
+        v = row['avg']
         out.write(f"['{date_str}',{v}],") 
 
 #   時間天気予報の表示
@@ -598,7 +607,8 @@ def is_rain(we) :
 def is_rain_week(we) :
     we = int(we)       
     # 雨     311  雨のち晴れ
-    if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or \
+    # 260  曇りのち雪
+    if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or we == 260 or\
        we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  :
         return True
     # 晴れ
@@ -666,6 +676,9 @@ def parse_template() :
             continue
         if "%tempera_graph%" in line :
             tempera_graph()
+            continue
+        if "%tempera_graph_daily%" in line :
+            tempera_graph_daily()
             continue
         if "%daily_tempera%" in line :
             temperature_info()
