@@ -1,118 +1,197 @@
 <html>
-    <!-- 25/01/28 v1.15 日別気温データ表示 -->
-    <head>
-        <title>Weather Check</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <meta http-equiv="Content-Style-Type" content="text/css">
-        <link rel="stylesheet" href="weather.css">
-    </head>
-    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<!-- 25/02/05 v1.20 日別気温グラフ表示 -->
 
-    <script type="text/javascript">
-        google.load("visualization", "1", {packages:["corechart"]});
-        google.setOnLoadCallback(
-            function() {
-                var data = google.visualization.arrayToDataTable([
-        [       '', '時間'],
-    %tempera_graph%
+<head>
+    <title>Weather Check</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <link rel="stylesheet" href="weather.css">
+</head>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(
+        function () {
+            var data = google.visualization.arrayToDataTable([
+                ['', '時間'],
+                     %tempera_graph%
                 ]);
-        
-                var options = {
-                    title: '気温グラフ',
-                    colors: ['#32a852'] ,
-                    hAxis: {title: '日時'},
-                    chartArea: { backgroundColor: '#b7ebc5' , left:50,right:30 },
-                    curveType: 'function', 
-                    backgroundColor: '#daebdf' ,
-                    legend: {
-                        position: 'none'
-                    }
-                };
-        
-                var chart = new google.visualization.LineChart(document.getElementById('tempera_graph'));
-                chart.draw(data, options);
-            }
-        );
-    </script>
 
-    <body>
-        <h1>Weather Check</h1>
-        <span style="font-size:12px;">Ver : %version%</span>&nbsp;&nbsp;&nbsp;
-        <span style="font-size:12px;">実行日時   : %today%</span><br><br>
-        <div class="container">
-            <ul class="menu">
-                <li><a href="#" data-id="week_forecast" class="active menu_item">週間予報</a></li>
-                <li><a href="#" data-id="forecast" class="menu_item">時間予報</a></li>
-                <li><a href="#" data-id="hitrate" class="menu_item">的中率</a></li>
-            </ul>
-            <div class="content" id="forecast">
-                <div class="table-container">
-                    <table>
+            var options = {
+                title: '気温グラフ',
+                colors: ['#32a852'],
+                hAxis: { title: '日時' },
+                chartArea: { backgroundColor: '#b7ebc5', left: 50, right: 30 },
+                curveType: 'function',
+                backgroundColor: '#daebdf',
+                legend: {
+                    position: 'none'
+                }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('tempera_graph'));
+            chart.draw(data, options);
+        }
+    );
+</script>
+
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(
+        function () {
+            var data = google.visualization.arrayToDataTable([
+                ['', '時間'],
+    %tempera_graph_daily%
+                ]);
+
+            var options = {
+                title: '日毎気温グラフ',
+                colors: ['#32a852'],
+                hAxis: { title: '日時' },
+                chartArea: { backgroundColor: '#b7ebc5', left: 50, right: 30 },
+                curveType: 'function',
+                backgroundColor: '#daebdf',
+                legend: {
+                    position: 'none'
+                }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('tempera_graph_daily'));
+            chart.draw(data, options);
+        }
+    );
+</script>
+
+<body>
+    <h1>Weather Check</h1>
+    <span style="font-size:12px;">Ver : %version%</span>&nbsp;&nbsp;&nbsp;
+    <span style="font-size:12px;">実行日時 : %today%</span><br><br>
+    <div class="container">
+        <ul class="menu">
+            <li><a href="#" data-id="week_forecast" class="active menu_item">週間予報</a></li>
+            <li><a href="#" data-id="forecast" class="menu_item">時間予報</a></li>
+            <li><a href="#" data-id="hitrate" class="menu_item">的中率</a></li>
+        </ul>
+        <div class="content" id="forecast">
+            <div class="table-container">
+                <table>
                     %hour_forecast%
-                    </table>
-                </div>
+                </table>
             </div>
-            <div class="content active" id="week_forecast">
-                <div class="table-container">
-                    <table>
+        </div>
+        <div class="content active" id="week_forecast">
+            <div class="table-container">
+                <table>
                     %week_forecast%
+                </table>
+            </div>
+            <b>時間毎気温グラフ</b>
+            <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
+            <b>日毎気温グラフ</b>
+            <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
+
+            <b>日別気温データ</b>
+            <table>
+                <tr>
+                    <th>日付</th>
+                    <th>平均気温</th>
+                    <th>最高</th>
+                    <th>最低</th>
+                </tr>
+                %daily_tempera%
+            </table>
+
+
+        </div>
+        <div class="content" id="hitrate">
+            <b>週間天気 的中率</b>
+            <table>
+                <tr>
+                    <th>日</th>
+                    <th>天気</th>
+                    <th>雨時間</th>
+                    <th>回数</th>
+                    <th>的中</th>
+                    <th>的中率</th>
+                </tr>
+                %week_hit_rate%
+            </table>
+            <b>1時間天気 日別的中率</b>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日</th>
+                            <th>天気</th>
+                            <th>雨時間</th>
+                            <th>回数</th>
+                            <th>的中</th>
+                            <th>的中率</th>
+                        </tr>
+                        %daily_hit_rate1%
                     </table>
                 </div>
-                <b>気温グラフ</b>
-                <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; " ></div>
-                <b>日別気温データ</b>
-                <table>
-                    <tr><th>日付</th><th>平均気温</th><th>最高</th><th>最低</th></tr>
-                    %daily_tempera%
-                </table>
-
-
-            </div>
-            <div class="content" id="hitrate">
-                <b>週間天気 的中率</b>
-                <table>
-                    <tr><th>日</th><th>天気</th><th>雨時間</th><th>回数</th><th>的中</th><th>的中率</th></tr>
-                    %week_hit_rate%
-                </table>
-                <b>1時間天気 日別的中率</b>
-                <div class="flex">
-                    <div class='frame'>
-                        <table>
-                            <tr><th>日</th><th>天気</th><th>雨時間</th><th>回数</th><th>的中</th><th>的中率</th></tr>
-                            %daily_hit_rate1%
-                        </table>
-                    </div>
-                    <div class='frame'>
-                        <table>
-                            <tr><th>日</th><th>天気</th><th>雨時間</th><th>回数</th><th>的中</th><th>的中率</th></tr>
-                            %daily_hit_rate2%
-                        </table>
-                    </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日</th>
+                            <th>天気</th>
+                            <th>雨時間</th>
+                            <th>回数</th>
+                            <th>的中</th>
+                            <th>的中率</th>
+                        </tr>
+                        %daily_hit_rate2%
+                    </table>
                 </div>
-                <b>1時間天気 時間的中率</b>
-                <div class="flex">
-                    <div class='frame'>
-                        <table>
-                            <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>Rate</th><th>Rate(24h)</th></tr>
-                            %output_hit_rate1%
-                        </table>
-                    </div>
-                    <div class='frame'>
-                        <table>
-                            <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>Rate</th><th>Rate(24h)</th></tr>
-                            %output_hit_rate2%
-                        </table>
-                    </div>
-                    <div class='frame'>
-                        <table>
-                            <tr><th>日時</th><th>天気</th><th>回数</th><th>的中</th><th>Rate</th><th>Rate(24h)</th></tr>
-                            %output_hit_rate3%
-                        </table>
-                    </div>
+            </div>
+            <b>1時間天気 時間的中率</b>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日時</th>
+                            <th>天気</th>
+                            <th>回数</th>
+                            <th>的中</th>
+                            <th>Rate</th>
+                            <th>Rate(24h)</th>
+                        </tr>
+                        %output_hit_rate1%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日時</th>
+                            <th>天気</th>
+                            <th>回数</th>
+                            <th>的中</th>
+                            <th>Rate</th>
+                            <th>Rate(24h)</th>
+                        </tr>
+                        %output_hit_rate2%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日時</th>
+                            <th>天気</th>
+                            <th>回数</th>
+                            <th>的中</th>
+                            <th>Rate</th>
+                            <th>Rate(24h)</th>
+                        </tr>
+                        %output_hit_rate3%
+                    </table>
                 </div>
             </div>
         </div>
-        <script src="weather.js"></script>
+    </div>
+    <script src="weather.js"></script>
 
-    </body>
+</body>
+
 </html>
