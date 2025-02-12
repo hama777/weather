@@ -1,5 +1,5 @@
 <html>
-<!-- 25/02/05 v1.20 日別気温グラフ表示 -->
+<!-- 25/02/12 v1.21 気温グラフを直近2週間にする/気温データの2列表示 -->
 
 <head>
     <title>Weather Check</title>
@@ -92,15 +92,30 @@
             <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
             <b>日別気温データ</b>
-            <table>
-                <tr>
-                    <th>日付</th>
-                    <th>平均気温</th>
-                    <th>最高</th>
-                    <th>最低</th>
-                </tr>
-                %daily_tempera%
-            </table>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th>
+                            <th>平均気温</th>
+                            <th>最高</th>
+                            <th>最低</th>
+                        </tr>
+                        %daily_tempera1%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th>
+                            <th>平均気温</th>
+                            <th>最高</th>
+                            <th>最低</th>
+                        </tr>
+                        %daily_tempera2%
+                    </table>
+                </div>
+            </div>
 
 
         </div>
