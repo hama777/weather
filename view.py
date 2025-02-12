@@ -1,15 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import os
-import re
 import locale
 import datetime
 import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/02/05 v1.20 日別気温グラフ表示
-version = "1.20"
+# 25/02/12 v1.21 気温グラフを直近2週間にする/気温データの2列表示
+version = "1.21"
 
 out =  ""
 logf = ""
@@ -209,19 +208,26 @@ def create_temperature_info() :
     #print(daily_info)
 
 #   気温の日々の平均値、最高値、最低値の表示
-def temperature_info() :
+def temperature_info(col) :
+    n = 0 
     for index,row in daily_info.iterrows() :
-        out.write(f"<tr><td>{index}</td><td align='right'>{row['avg']:4.1f}</td>"
+        n += 1
+        if multi_col(n,col) :
+            continue 
+        date_str = index.strftime('%m/%d(%a)')
+        out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.1f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
                   f"<td align='right'>{row['min']:4.0f}</td></tr>\n")
 
-#   気温グラフ
+#   気温グラフ   時間ごと
 def tempera_graph() :
-    for _,row in df_tempera.iterrows() :
+    df = df_tempera.tail(336)   # 2週間分  24 * 14
+    for _,row in df.iterrows() :
         date_str = row['date'].strftime('%d %H')
         v = row['val']
         out.write(f"['{date_str}',{v}],") 
 
+#   気温グラフ   日ごと
 def tempera_graph_daily() :
     for index,row in daily_info.iterrows() :
         date_str = index.strftime('%m/%d')
@@ -440,6 +446,7 @@ def daily_hit_rate(col) :
 
 #   日毎の情報をファイルに出力
 def daily_info_output() :
+    init_flg = 0           #  1 の時、全データを出力する(初期設定用)。  0 の時、追加分だけ。
     with open(dailyfile , encoding='utf-8') as f:
         for line in f:
             continue
@@ -448,11 +455,14 @@ def daily_info_output() :
     dt = datetime.datetime.strptime(d[0], '%y/%m/%d')
     lastdate = dt.date()   #  最終データの日付  date型
 
-    dailyf = open(dailyfile , 'a', encoding='utf-8')
+    if init_flg == 1 :
+        dailyf = open(dailyfile , 'w', encoding='utf-8')
+    else :
+        dailyf = open(dailyfile , 'a', encoding='utf-8')
     for forecast_date,hitdata in  daily_rate.items() :   
                 
         fdate = conv_mmdd_to_date(forecast_date)    # date型
-        if fdate <= lastdate :   # 最終データより前のデータは出力しない
+        if init_flg == 0 and fdate <= lastdate :   # 最終データより前のデータは出力しない
             continue
         if fdate == today_date :  # 今日のデータは出力しない
            break 
@@ -607,12 +617,14 @@ def is_rain(we) :
 def is_rain_week(we) :
     we = int(we)       
     # 雨     311  雨のち晴れ
-    # 260  曇りのち雪
+    # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪  
     if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or we == 260 or\
-       we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  :
+       we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  or\
+       we == 411 or we == 205 or we == 217  :
         return True
     # 晴れ
-    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or  we == 211 :
+    # 105 晴時々雪   117 晴のち雪
+    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or we == 211 or we == 105 or we == 117 :
         return False
     print(f'ERROR we week code {we}')
     return False
@@ -680,8 +692,11 @@ def parse_template() :
         if "%tempera_graph_daily%" in line :
             tempera_graph_daily()
             continue
-        if "%daily_tempera%" in line :
-            temperature_info()
+        if "%daily_tempera1%" in line :
+            temperature_info(1)
+            continue
+        if "%daily_tempera2%" in line :
+            temperature_info(2)
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
