@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/02/12 v1.21 気温グラフを直近2週間にする/気温データの2列表示
-version = "1.21"
+# 25/02/21 v1.22 日別気温データの表示を直近40日とした
+version = "1.22"
 
 out =  ""
 logf = ""
@@ -210,7 +210,7 @@ def create_temperature_info() :
 #   気温の日々の平均値、最高値、最低値の表示
 def temperature_info(col) :
     n = 0 
-    for index,row in daily_info.iterrows() :
+    for index,row in daily_info.tail(40).iterrows() :
         n += 1
         if multi_col(n,col) :
             continue 
@@ -617,10 +617,10 @@ def is_rain(we) :
 def is_rain_week(we) :
     we = int(we)       
     # 雨     311  雨のち晴れ
-    # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪  
+    # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪   303 雨時々雪
     if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or we == 260 or\
        we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  or\
-       we == 411 or we == 205 or we == 217  :
+       we == 411 or we == 205 or we == 217 or we == 303 :
         return True
     # 晴れ
     # 105 晴時々雪   117 晴のち雪
