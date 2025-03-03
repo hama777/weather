@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/02/21 v1.22 日別気温データの表示を直近40日とした
-version = "1.22"
+# 25/03/03 v1.23 1時間天気時間的中率の表示を7日分とした
+version = "1.23"
 
 out =  ""
 logf = ""
@@ -399,11 +399,11 @@ def output_hit_rate(col) :
     for forecast_date,hitdata in  hit_rate.items() :   
         cur_date = conv_mmddhh_to_date(forecast_date)  # date型
         #  7日以前は表示しない
-        if cur_date < today_date - datetime.timedelta(days=7) : 
+        if cur_date < today_date - datetime.timedelta(days=6) : 
             continue 
 
         n += 1
-        if multi_col2(n,col) :
+        if multi_col2(n,col,56) :
             continue
         date_str = conv_mmddhh_to_str(forecast_date)
         act = hitdata['act']
@@ -470,6 +470,7 @@ def daily_info_output() :
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         act = hitdata['act']
+        #print(f'date_str {date_str},{act}')
         s = f'{date_str}\t{act}\t{cnt}\t{hit}\n'
         dailyf.write(s)
     
@@ -535,15 +536,15 @@ def multi_col(n,col) :
             return True
     return False
 
-def multi_col2(n,col) :
+def multi_col2(n,col,limit) :
     if col == 1 :
-        if n > 60 :
+        if n > limit :
             return True
     if col == 2 :
-        if n <= 60 or n > 120 :
+        if n <= limit or n > (limit * 2)  :
             return True
     if col == 3 :
-        if n <= 120 :
+        if n <= (limit * 2)  :
             return True
     return False
 
@@ -617,10 +618,10 @@ def is_rain(we) :
 def is_rain_week(we) :
     we = int(we)       
     # 雨     311  雨のち晴れ
-    # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪   303 雨時々雪
+    # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪   303 雨時々雪  204 曇り時々雪  400 雪  413 雪のち曇り
     if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or we == 260 or\
        we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  or\
-       we == 411 or we == 205 or we == 217 or we == 303 :
+       we == 411 or we == 205 or we == 217 or we == 303 or we == 204 or we == 400 or we == 413 :
         return True
     # 晴れ
     # 105 晴時々雪   117 晴のち雪
