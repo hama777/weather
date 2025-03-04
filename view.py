@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/03 v1.23 1時間天気時間的中率の表示を7日分とした
-version = "1.23"
+# 25/03/04 v1.24 週間気温グラフ 途中
+version = "1.24"
 
 out =  ""
 logf = ""
@@ -195,8 +195,9 @@ def read_temperature_data() :
     df_tempera = pd.DataFrame(list(zip(date_list,val_list)), columns = ['date','val'])
 
 #   気温の日々の平均値、最高値、最低値を求める
+#   気温の7日移動平均  df_week_tempera  作成
 def create_temperature_info() :
-    global daily_info
+    global daily_info,df_week_tempera
     seri_tmp  = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
     daily_avg = seri_tmp.rename('avg')
     seri_tmp = df_tempera.groupby(df_tempera['date'].dt.date)['val'].max()
@@ -205,7 +206,10 @@ def create_temperature_info() :
     daily_min = seri_tmp.rename('min')
     daily_info = pd.merge(daily_avg,daily_max,on='date')
     daily_info = pd.merge(daily_info,daily_min,on='date')
-    #print(daily_info)
+    seri_week_tempera = daily_info['avg'].rolling(7).mean()
+    df_week_tempera = seri_week_tempera.to_frame()
+
+    #print(df_week_tempera.columns)
 
 #   気温の日々の平均値、最高値、最低値の表示
 def temperature_info(col) :
@@ -464,7 +468,7 @@ def daily_info_output() :
         fdate = conv_mmdd_to_date(forecast_date)    # date型
         if init_flg == 0 and fdate <= lastdate :   # 最終データより前のデータは出力しない
             continue
-        if fdate == today_date :  # 今日のデータは出力しない
+        if fdate >= today_date :  # 今日のデータは出力しない
            break 
         date_str = conv_mmdd_to_datestr(forecast_date,is_year=True)
         cnt = hitdata['cnt']
