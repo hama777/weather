@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/05 v1.25 7日移動平均気温グラフ 途中
-version = "1.25"
+# 25/03/06 v1.26 7日移動平均気温グラフ追加
+version = "1.26"
 
 out =  ""
 logf = ""
@@ -209,8 +209,6 @@ def create_temperature_info() :
     seri_week_tempera = daily_info['avg'].rolling(7).mean()
     df_week_tempera = seri_week_tempera.to_frame()
 
-    print(df_week_tempera)
-
 #   日別気温データ
 #   気温の日々の平均値、最高値、最低値の表示
 def temperature_info(col) :
@@ -237,6 +235,15 @@ def tempera_graph_daily() :
     for index,row in daily_info.iterrows() :
         date_str = index.strftime('%m/%d')
         v = row['avg']
+        out.write(f"['{date_str}',{v}],") 
+
+#   気温グラフ   7日移動平均
+def tempera_graph_week() :
+    for index,row in df_week_tempera.iterrows() :
+        v = row['avg']
+        if pd.isna(v) :
+            continue 
+        date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
 
 #   7日移動平均気温
@@ -707,6 +714,9 @@ def parse_template() :
             continue
         if "%tempera_graph_daily%" in line :
             tempera_graph_daily()
+            continue
+        if "%tempera_graph_week%" in line :
+            tempera_graph_week()
             continue
         if "%daily_tempera1%" in line :
             temperature_info(1)
