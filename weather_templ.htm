@@ -1,5 +1,5 @@
 <html>
-<!-- 25/03/05 v1.25 7日移動平均気温グラフ 途中 -->
+<!-- 25/03/06 v1.26 7日移動平均気温グラフ追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -63,6 +63,33 @@
     );
 </script>
 
+<script type="text/javascript">
+    google.load("visualization", "1", { packages: ["corechart"] });
+    google.setOnLoadCallback(
+        function () {
+            var data = google.visualization.arrayToDataTable([
+                ['', '時間'],
+    %tempera_graph_week%
+                ]);
+
+            var options = {
+                title: '日毎気温グラフ',
+                colors: ['#32a852'],
+                hAxis: { title: '日時' },
+                chartArea: { backgroundColor: '#b7ebc5', left: 50, right: 30 },
+                curveType: 'function',
+                backgroundColor: '#daebdf',
+                legend: {
+                    position: 'none'
+                }
+            };
+
+            var chart = new google.visualization.LineChart(document.getElementById('tempera_graph_week'));
+            chart.draw(data, options);
+        }
+    );
+</script>
+
 <body>
     <h1>Weather Check</h1>
     <span style="font-size:12px;">Ver : %version%</span>&nbsp;&nbsp;&nbsp;
@@ -90,6 +117,8 @@
             <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <b>日毎気温グラフ</b>
             <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
+            <b>7日移動平均気温グラフ</b>
+            <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
             <b>日別気温データ</b>
             <div class="flex">
