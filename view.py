@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/06 v1.26 7日移動平均気温グラフ追加
-version = "1.26"
+# 25/03/07 v1.27 週間天気予報的中率の表示を30日分にした
+version = "1.27"
 
 out =  ""
 logf = ""
@@ -534,7 +534,8 @@ def calc_hit_rate_week() :
 
 #  週間天気予報 的中率の表示
 def output_week_hit_rate() :
-    for yymmdd, hitdata in week_rate.items() :
+    week_rate_last = dict(list(week_rate.items())[-30:])  #  上限00件
+    for yymmdd, hitdata in week_rate_last.items() :
         date_str = conv_mmdd_to_datestr(yymmdd)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
