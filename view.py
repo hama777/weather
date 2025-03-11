@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/07 v1.27 週間天気予報的中率の表示を30日分にした
-version = "1.27"
+# 25/03/11 v1.28 1時間天気 時間的中率 の回数カラム廃止
+version = "1.28"
 
 out =  ""
 logf = ""
@@ -247,13 +247,13 @@ def tempera_graph_week() :
         out.write(f"['{date_str}',{v}],") 
 
 #   7日移動平均気温
-def week_tempera() :
-    for index,row in df_week_tempera.iterrows() :
-        v = row['avg']
-        if pd.isna(v) :
-            continue 
-        date_str = index.strftime('%m/%d')
-        out.write(f"<tr><td>{date_str}</td><td align='right'>{v:4.1f}</td></tr>\n")
+# def week_tempera() :
+#     for index,row in df_week_tempera.iterrows() :
+#         v = row['avg']
+#         if pd.isna(v) :
+#             continue 
+#         date_str = index.strftime('%m/%d')
+#         out.write(f"<tr><td>{date_str}</td><td align='right'>{v:4.1f}</td></tr>\n")
 
 
 #   時間天気予報の表示
@@ -345,6 +345,8 @@ def week_forecast() :
     out.write("</tbody>\n")
 
 #   的中率の計算
+#      hit_rate  辞書   キー  予報日時  値  hitdata
+#      hitdata   辞書   キー  act 実際の天気(天気コード)  cnt 予報回数  hit 的中回数  hit24  24時間用  cnt24  24時間用
 def calc_hit_rate() : 
     global  hit_rate,daily_rate
 
@@ -371,7 +373,6 @@ def calc_hit_rate() :
                 cnt += 1
                 if is_rain(we) == is_rain(act) :
                     hit += 1 
-
 
             #  24時間以内の的中率
             befor24h  = calc_befor24h(forecast_date)
@@ -405,6 +406,9 @@ def calc_hit_rate() :
     #  最後に当日分のデータを追加する
     add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
 
+def is_fine(we) :
+    return not is_rain(we)
+
 #   1日データの追加
 def add_daily_data(cnt,hit,dd,act) :
     global daily_rate
@@ -434,7 +438,6 @@ def output_hit_rate(col) :
         cnt24 = hitdata['cnt24']
         hit24 = hitdata['hit24']
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
-                  f'<td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
 
@@ -725,9 +728,9 @@ def parse_template() :
         if "%daily_tempera2%" in line :
             temperature_info(2)
             continue
-        if "%week_tempera%" in line :
-            week_tempera()
-            continue
+        # if "%week_tempera%" in line :
+        #     week_tempera()
+        #     continue
         if "%version%" in line :
             s = line.replace("%version%",version)
             out.write(s)
