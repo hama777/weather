@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/11 v1.28 1時間天気 時間的中率 の回数カラム廃止
-version = "1.28"
+# 25/03/12 v1.29 週間天気的中率に天気、雨時間を追加
+version = "1.29"
 
 out =  ""
 logf = ""
@@ -502,21 +502,23 @@ def daily_info_output() :
     dailyf.close()
 
 #   週間予報的中率の計算
+#     3日、7日前の予報と実際の天気を比較する
 def calc_hit_rate_week() : 
-    global  hit_rate,daily_rate
+    #global  hit_rate,daily_rate
+    global week_rate
 
-    cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
-    cur_dd = 0 
+    # cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
+    # cur_dd = 0 
     for forecast_date in  week_data.keys() :     # 予報日時
         yymmdd = int(forecast_date / 100)
         if yymmdd >= today_yy * 10000 + today_mm * 100 + today_dd :  # 現在日(を含む)を超えたら終了
             break
 
-        forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
+        #forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
         timeline_dic = week_data[forecast_date]
-        cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
-        cur_hh = 0
-        forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
+        # cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
+        # cur_hh = 0
+        # forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
         daily_hitdata = daily_rate[yymmdd]
         rain_time = daily_hitdata['act']   # 1日で何時間雨か
         act_is_rain = is_rain_day(rain_time)   # 雨の時  true
@@ -531,9 +533,20 @@ def calc_hit_rate_week() :
         hitdata = {} 
         hitdata['cnt'] = cnt
         hitdata['hit'] = hit
+        hitdata['rain_time'] = rain_time
+        hitdata['act'] = act_is_rain
         week_rate[yymmdd] = hitdata
 
     #print(week_rate)    
+
+#   yymmddhh の n 日前の yymmddhh を返す
+# def get_nday_befor(yymmddhh,n) :
+    
+#     hh = yymmddhh % 100
+#     cur_date = conv_mmddhh_to_date(yymmddhh)
+#     t_date = cur_date - datetime.timedelta(days=n)
+#     yymmddhh = conv_date_int(t_date) + hh
+#     return yymmddhh
 
 #  週間天気予報 的中率の表示
 def output_week_hit_rate() :
@@ -542,12 +555,18 @@ def output_week_hit_rate() :
         date_str = conv_mmdd_to_datestr(yymmdd)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
+        rain_time = hitdata['rain_time']
+        act = hitdata['act']
         if cnt != 0 :
             r = hit/cnt*100 
         else :
             r = 0 
-        out.write(f'<tr><td>{date_str}</td><td>--</td>'
-                  f'<td align="right">--</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
+        img = f'{icon_url}100.png'   #  晴れのアイコン 
+        if act :
+            img = f'{icon_url}300.png'   #  晴れのアイコン 
+
+        out.write(f'<tr><td>{date_str}</td><td><img src="{img}" width="20" height="15"></td>'
+                  f'<td align="right">{rain_time}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
 
 #   複数カラムの場合の判定
@@ -614,7 +633,6 @@ def conv_mmdd_to_date(yymmdd) :
     dd = int(yymmdd % 100)  
     dt = datetime.date(yy, mm, dd)
     return dt
-
 
 #  int の yymmddhh 形式を入力しその1日前の yymmddhh (int) を返す
 def calc_befor24h(mmddhh) :
