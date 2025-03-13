@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/12 v1.29 週間天気的中率に天気、雨時間を追加
-version = "1.29"
+# 25/03/13 v1.30 週間雨時間グラフ  開発中
+version = "1.30"
 
 out =  ""
 logf = ""
@@ -106,6 +106,7 @@ def main_proc() :
     parse_template()
     ftp_upload()
     daily_info_output()
+    #week_rain_time_graph()     #  tmp
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -245,16 +246,6 @@ def tempera_graph_week() :
             continue 
         date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
-
-#   7日移動平均気温
-# def week_tempera() :
-#     for index,row in df_week_tempera.iterrows() :
-#         v = row['avg']
-#         if pd.isna(v) :
-#             continue 
-#         date_str = index.strftime('%m/%d')
-#         out.write(f"<tr><td>{date_str}</td><td align='right'>{v:4.1f}</td></tr>\n")
-
 
 #   時間天気予報の表示
 def hour_forecast() :
@@ -568,6 +559,25 @@ def output_week_hit_rate() :
         out.write(f'<tr><td>{date_str}</td><td><img src="{img}" width="20" height="15"></td>'
                   f'<td align="right">{rain_time}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
+
+#  週間雨時間移動平均グラフ
+def week_rain_time_graph() :
+    global df_week_rain
+
+    date_list = [] 
+    rate_list = []
+    with open(dailyfile , encoding='utf-8') as f:
+        for line in f:
+            dt = line.split("\t")
+            date_str = dt[0]
+            rain = dt[1]
+            tdate = datetime.datetime.strptime(date_str, '%y/%m/%d')            
+            date_list.append(tdate)
+            rate_list.append(rain)
+
+    df_week_rain = pd.DataFrame(list(zip(date_list,rate_list)), columns = ['date','rain'])
+    print(df_week_rain)
+
 
 #   複数カラムの場合の判定
 #     n  ...  何行目か     col ... 何カラム目か
