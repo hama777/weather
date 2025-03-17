@@ -7,8 +7,8 @@ import pandas as pd
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/13 v1.30 週間雨時間グラフ  開発中
-version = "1.30"
+# 25/03/17 v1.31 週間雨時間移動平均グラフ追加
+version = "1.31"
 
 out =  ""
 logf = ""
@@ -79,6 +79,7 @@ week_rate = {}
 #   気温のdf  
 df_tempera = ""
 
+df_week_rain = ""   #  1日雨時間の7日間移動平均   date(index)  rain
 
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
@@ -103,10 +104,10 @@ def main_proc() :
     calc_hit_rate()
     calc_hit_rate_week()    
     create_temperature_info()
+    create_df_week_rain()  
     parse_template()
     ftp_upload()
     daily_info_output()
-    #week_rain_time_graph()     #  tmp
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -560,8 +561,8 @@ def output_week_hit_rate() :
                   f'<td align="right">{rain_time}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
 
-#  週間雨時間移動平均グラフ
-def week_rain_time_graph() :
+#  週間雨時間移動平均 df_week_rain の作成
+def create_df_week_rain() :
     global df_week_rain
 
     date_list = [] 
@@ -576,7 +577,18 @@ def week_rain_time_graph() :
             rate_list.append(rain)
 
     df_week_rain = pd.DataFrame(list(zip(date_list,rate_list)), columns = ['date','rain'])
-    print(df_week_rain)
+    df_week_rain = df_week_rain.set_index("date")
+    seri_week_rain = df_week_rain['rain'].rolling(7).mean()
+    df_week_rain = seri_week_rain.to_frame()
+
+#  週間雨時間移動平均グラフ
+def week_rain_time_graph() :
+    for index,row in df_week_rain.iterrows() :
+        v = row['rain']
+        if pd.isna(v) :
+            continue 
+        date_str = index.strftime('%m/%d')
+        out.write(f"['{date_str}',{v}],") 
 
 
 #   複数カラムの場合の判定
@@ -755,6 +767,9 @@ def parse_template() :
             continue
         if "%daily_tempera2%" in line :
             temperature_info(2)
+            continue
+        if "%week_rain_time_graph%" in line :
+            week_rain_time_graph()
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
