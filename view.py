@@ -4,11 +4,12 @@ import os
 import locale
 import datetime
 import pandas as pd
+import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/17 v1.31 週間雨時間移動平均グラフ追加
-version = "1.31"
+# 25/03/18 v1.32 一部処理を別ファイルの移動
+version = "1.32"
 
 out =  ""
 logf = ""
@@ -119,7 +120,7 @@ def read_data(fname) :
     date_str = hh[0]
     dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
     start_date = datetime.date(dt.year, dt.month, dt.day) # データの開始日付 date型
-    start_date_int = conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
+    start_date_int = com.conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
     start_hh = int(hh[1])            # データの開始時刻
 
     body  = f.readline().strip()
@@ -131,7 +132,7 @@ def read_data(fname) :
     cur_date = start_date            # 以下のループで現在の日付として使用  date 型
 
     for we in we_list :
-        k = conv_date_int(cur_date) + cur_hh    #  we_data の key
+        k = com.conv_date_int(cur_date) + cur_hh    #  we_data の key
         
         if k in we_data :       # すでにキーがある場合はそのキーに対応する辞書に追加する
             val = we_data[k]    # そのキーに対応する辞書
@@ -156,7 +157,7 @@ def read_data_week(fname) :
     date_str = hh[0]
     dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
     start_date = datetime.date(dt.year, dt.month, dt.day) # データの開始日付 date型
-    start_date_int = conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
+    start_date_int = com.conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
     start_hh = int(hh[1])            # データの開始時刻
 
     body  = f.readline().strip()
@@ -168,7 +169,7 @@ def read_data_week(fname) :
 
     #print(week_list)
     for we in week_list :
-        k = conv_date_int(cur_date)     #  we_data の key
+        k = com.conv_date_int(cur_date)     #  we_data の key
         
         if k in week_data :       # すでにキーがある場合はそのキーに対応する辞書に追加する
             val = week_data[k]    # そのキーに対応する辞書
@@ -217,7 +218,7 @@ def temperature_info(col) :
     n = 0 
     for index,row in daily_info.tail(40).iterrows() :
         n += 1
-        if multi_col(n,col) :
+        if com.multi_col(n,col) :
             continue 
         date_str = index.strftime('%m/%d(%a)')
         out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.1f}</td>"
@@ -271,13 +272,13 @@ def hour_forecast() :
         if yymmdd < today_yy * 10000 + today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
             continue 
 
-        forecast_str = conv_mmddhh_to_str(forecast_date)
+        forecast_str = com.conv_mmddhh_to_str(forecast_date)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
         cur_hh = start_hh
         while True :
-            k = conv_date_int(cur_date) + cur_hh    # k 発表日時
+            k = com.conv_date_int(cur_date) + cur_hh    # k 発表日時
             if k in  timeline_dic :
                 we = timeline_dic[k]
                 out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
@@ -315,13 +316,13 @@ def week_forecast() :
         if yymmdd < today_yy * 10000 + today_mm * 100 + today_dd :  # 昨日以前の情報は出さない
             continue 
 
-        forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
+        forecast_str = com.conv_mmddhh_to_str(forecast_date,display_hh=False)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = week_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
         cur_hh = 0
         while True :
-            k = conv_date_int(cur_date) + cur_hh    # k 発表日時
+            k = com.conv_date_int(cur_date) + cur_hh    # k 発表日時
             if k in  timeline_dic :
                 we = timeline_dic[k]
                 out.write(f'<td><img src="{icon_url}{we}.png" width="20" height="15"></td>\n')
@@ -350,12 +351,12 @@ def calc_hit_rate() :
     for forecast_date in  we_data.keys() :     # 予報日時
         if forecast_date > cur_mmddhh :
             break                              # 現在日時を超えたら終了
-        date_str = conv_mmddhh_to_str(forecast_date)
-        dd = get_dd_part(forecast_date)         # 日付部分
+        date_str = com.conv_mmddhh_to_str(forecast_date)
+        dd = com.get_dd_part(forecast_date)         # 日付部分
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
             act = timeline_dic[forecast_date]   #  実際の天気
-            if is_rain(act) :
+            if com.is_rain(act) :
                 daily_rain += 1    #  1日のうち 雨の回数をカウント 
             hit = 0 
             cnt = 0 
@@ -363,16 +364,16 @@ def calc_hit_rate() :
             cnt24 = 0 
             for we in timeline_dic.values() :
                 cnt += 1
-                if is_rain(we) == is_rain(act) :
+                if com.is_rain(we) == com.is_rain(act) :
                     hit += 1 
 
             #  24時間以内の的中率
-            befor24h  = calc_befor24h(forecast_date)
+            befor24h  = com.calc_befor24h(forecast_date)
             for dt,we in timeline_dic.items() :
                 if dt < befor24h :
                     continue 
                 cnt24 += 1
-                if is_rain(we) == is_rain(act) :
+                if com.is_rain(we) == com.is_rain(act) :
                     hit24 += 1 
 
         hitdata = {}
@@ -385,7 +386,7 @@ def calc_hit_rate() :
 
         #  1日データの集計
         if dd != cur_dd :    # 日が変わったら1日データを追加する
-            befor = calc_befor24h(forecast_date)   # forecast_date は新しい日になっているので1日前を取得
+            befor = com.calc_befor24h(forecast_date)   # forecast_date は新しい日になっているので1日前を取得
             add_daily_data(daily_cnt,daily_hit,befor,daily_rain)
             daily_cnt = 0 
             daily_hit = 0
@@ -398,8 +399,8 @@ def calc_hit_rate() :
     #  最後に当日分のデータを追加する
     add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
 
-def is_fine(we) :
-    return not is_rain(we)
+# def is_fine(we) :
+#     return not is_rain(we)
 
 #   1日データの追加
 def add_daily_data(cnt,hit,dd,act) :
@@ -415,15 +416,15 @@ def add_daily_data(cnt,hit,dd,act) :
 def output_hit_rate(col) :
     n = 0 
     for forecast_date,hitdata in  hit_rate.items() :   
-        cur_date = conv_mmddhh_to_date(forecast_date)  # date型
+        cur_date = com.conv_mmddhh_to_date(forecast_date)  # date型
         #  7日以前は表示しない
         if cur_date < today_date - datetime.timedelta(days=6) : 
             continue 
 
         n += 1
-        if multi_col2(n,col,56) :
+        if com.multi_col2(n,col,56) :
             continue
-        date_str = conv_mmddhh_to_str(forecast_date)
+        date_str = com.conv_mmddhh_to_str(forecast_date)
         act = hitdata['act']
         cnt = hitdata['cnt']
         hit = hitdata['hit']
@@ -437,14 +438,14 @@ def output_hit_rate(col) :
 def daily_hit_rate(col) :
     n = 0 
     for forecast_date,hitdata in  daily_rate.items() :   
-        cur_date = conv_mmddhh_to_date(forecast_date*100)  # forecast_date は yymmdd のため *100 して yymmddhh 形式にする
+        cur_date = com.conv_mmddhh_to_date(forecast_date*100)  # forecast_date は yymmdd のため *100 して yymmddhh 形式にする
         if cur_date < today_date - datetime.timedelta(days=39) : 
             continue 
         n += 1
-        if multi_col(n,col) :
+        if com.multi_col(n,col) :
             continue
                 
-        date_str = conv_mmdd_to_datestr(forecast_date)
+        date_str = com.conv_mmdd_to_datestr(forecast_date)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         act = hitdata['act']
@@ -478,12 +479,12 @@ def daily_info_output() :
         dailyf = open(dailyfile , 'a', encoding='utf-8')
     for forecast_date,hitdata in  daily_rate.items() :   
                 
-        fdate = conv_mmdd_to_date(forecast_date)    # date型
+        fdate = com.conv_mmdd_to_date(forecast_date)    # date型
         if init_flg == 0 and fdate <= lastdate :   # 最終データより前のデータは出力しない
             continue
         if fdate >= today_date :  # 今日のデータは出力しない
            break 
-        date_str = conv_mmdd_to_datestr(forecast_date,is_year=True)
+        date_str = com.conv_mmdd_to_datestr(forecast_date,is_year=True)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         act = hitdata['act']
@@ -494,23 +495,15 @@ def daily_info_output() :
     dailyf.close()
 
 #   週間予報的中率の計算
-#     3日、7日前の予報と実際の天気を比較する
 def calc_hit_rate_week() : 
-    #global  hit_rate,daily_rate
     global week_rate
 
-    # cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
-    # cur_dd = 0 
     for forecast_date in  week_data.keys() :     # 予報日時
         yymmdd = int(forecast_date / 100)
         if yymmdd >= today_yy * 10000 + today_mm * 100 + today_dd :  # 現在日(を含む)を超えたら終了
             break
 
-        #forecast_str = conv_mmddhh_to_str(forecast_date,display_hh=False)
         timeline_dic = week_data[forecast_date]
-        # cur_date = today_date - datetime.timedelta(days=10)    # 予報は今日の10日前から
-        # cur_hh = 0
-        # forecast_date_last = forecast_date + 18   #   その日の最終(18時)天気をその日の実際の天気とみなす
         daily_hitdata = daily_rate[yymmdd]
         rain_time = daily_hitdata['act']   # 1日で何時間雨か
         act_is_rain = is_rain_day(rain_time)   # 雨の時  true
@@ -519,7 +512,7 @@ def calc_hit_rate_week() :
         cnt = 0 
         for we in timeline_dic.values() :
             cnt += 1
-            if is_rain_week(we) == act_is_rain :
+            if com.is_rain_week(we) == act_is_rain :
                 hit += 1 
 
         hitdata = {} 
@@ -529,22 +522,11 @@ def calc_hit_rate_week() :
         hitdata['act'] = act_is_rain
         week_rate[yymmdd] = hitdata
 
-    #print(week_rate)    
-
-#   yymmddhh の n 日前の yymmddhh を返す
-# def get_nday_befor(yymmddhh,n) :
-    
-#     hh = yymmddhh % 100
-#     cur_date = conv_mmddhh_to_date(yymmddhh)
-#     t_date = cur_date - datetime.timedelta(days=n)
-#     yymmddhh = conv_date_int(t_date) + hh
-#     return yymmddhh
-
 #  週間天気予報 的中率の表示
 def output_week_hit_rate() :
     week_rate_last = dict(list(week_rate.items())[-30:])  #  上限00件
     for yymmdd, hitdata in week_rate_last.items() :
-        date_str = conv_mmdd_to_datestr(yymmdd)
+        date_str = com.conv_mmdd_to_datestr(yymmdd)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         rain_time = hitdata['rain_time']
@@ -591,111 +573,6 @@ def week_rain_time_graph() :
         out.write(f"['{date_str}',{v}],") 
 
 
-#   複数カラムの場合の判定
-#     n  ...  何行目か     col ... 何カラム目か
-#     表示しない場合(continueする場合) true を返す
-def multi_col(n,col) :
-    if col == 1 :
-        if n > 20 :
-            return True
-    if col == 2 :
-        if n <= 20 :
-            return True
-    return False
-
-def multi_col2(n,col,limit) :
-    if col == 1 :
-        if n > limit :
-            return True
-    if col == 2 :
-        if n <= limit or n > (limit * 2)  :
-            return True
-    if col == 3 :
-        if n <= (limit * 2)  :
-            return True
-    return False
-
-#   int の yymmddhh 形式を入力し  dd(曜日)/hh  形式の文字列を返す
-def conv_mmddhh_to_str(yymmddhh,display_hh=True) :
-    yy = int(yymmddhh / 1000000) + 2000
-    mm = int(yymmddhh / 10000 % 100)
-    dd = int(yymmddhh / 100 % 100)  
-    hh = int(yymmddhh % 100)
-    dt = datetime.date(yy, mm, dd)
-    s = dt.strftime("%d(%a)")
-    if display_hh :
-        s = f'{s}/{hh:02}'
-    return s 
-
-#   int の yymmddhh 形式を入力し  date 型の値を返す
-def conv_mmddhh_to_date(yymmddhh) :
-    yy = int(yymmddhh / 1000000) + 2000
-    mm = int(yymmddhh / 10000 % 100)
-    dd = int(yymmddhh / 100 % 100)  
-    hh = int(yymmddhh % 100)
-    dt = datetime.date(yy, mm, dd)
-    return dt
-
-#   int の yymmdd 形式を入力し mm/dd(aa) 形式の文字列を返す
-def conv_mmdd_to_datestr(yymmdd,is_year=False) :
-    yy = int(yymmdd / 10000) + 2000
-    mm = int(yymmdd / 100 % 100) 
-    dd = int(yymmdd % 100)  
-    dt = datetime.date(yy, mm, dd)
-    if is_year :
-        s = dt.strftime("%y/%m/%d")
-    else :
-        s = dt.strftime("%m/%d(%a)")
-    return s
-
-#   int の yymmdd 形式を入力し date 型を返す
-def conv_mmdd_to_date(yymmdd) :
-    yy = int(yymmdd / 10000) + 2000
-    mm = int(yymmdd / 100 % 100) 
-    dd = int(yymmdd % 100)  
-    dt = datetime.date(yy, mm, dd)
-    return dt
-
-#  int の yymmddhh 形式を入力しその1日前の yymmddhh (int) を返す
-def calc_befor24h(mmddhh) :
-    hh = int(mmddhh % 100)
-    dt = conv_mmddhh_to_date(mmddhh)   # date型に変換
-    dt = dt - datetime.timedelta(days=1)  # 1日前
-    yy = dt.year - 2000
-    return yy * 1000000 + dt.month * 10000 + dt.day * 100 + hh
-
-#   yymmddhh 形式(int) から日付 dd 部分を取り出す
-def get_dd_part(yymmddhh) :
-    return int(yymmddhh / 100) % 10000  
-
-#  雨の時 true を返す
-def is_rain(we) :
-    we = int(we)
-    # 雨    430  みぞれ
-    if we == 300 or we == 650 or  we == 400 or  we == 450 or  we == 800 or we == 850 or we == 430 :
-        return True
-    # 晴れ
-    if we == 100 or we == 500 or  we == 550 or  we == 600 or we == 200:
-        return False
-    print(f'ERROR we code {we}')
-    return False
-
-#  雨の時 true を返す
-def is_rain_week(we) :
-    we = int(we)       
-    # 雨     311  雨のち晴れ
-    # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪   303 雨時々雪  204 曇り時々雪  400 雪  413 雪のち曇り
-    if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or we == 260 or\
-       we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  or\
-       we == 411 or we == 205 or we == 217 or we == 303 or we == 204 or we == 400 or we == 413 :
-        return True
-    # 晴れ
-    # 105 晴時々雪   117 晴のち雪
-    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or we == 211 or we == 105 or we == 117 :
-        return False
-    print(f'ERROR we week code {we}')
-    return False
-
 #  1日のうち rain_threshold 時間以上雨の場合、 true を返す
 def is_rain_day(rain_time) :
     if rain_time >= rain_threshold  :
@@ -713,11 +590,6 @@ def date_settings():
     today_hh = today_datetime.hour
     today_yymmddhh = today_yy * 1000000 +  today_mm * 10000 + today_dd * 100 + today_hh 
 
-#   date 型のデータを int型の yymmdd00 にして返す
-def conv_date_int(d) :
-    yy = d.year - 2000   #  年は西暦下2桁にする
-    i = yy * 1000000 + d.month * 10000 + d.day * 100 
-    return i
 
 def output_current_date(line) :
     date_str = today_datetime.strftime("%m/%d(%a) %H:%M:%S ")
