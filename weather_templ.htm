@@ -1,5 +1,5 @@
 <html>
-<!-- 25/03/17 v1.31 週間雨時間移動平均グラフ追加 -->
+<!-- 25/03/26 v1.33 週間天気的中率を2列にした -->
 
 <head>
     <title>Weather Check</title>
@@ -178,17 +178,34 @@
         </div>
         <div class="content" id="hitrate">
             <b>週間天気 的中率</b>
-            <table>
-                <tr>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                    <tr>
                     <th>日</th>
                     <th>天気</th>
                     <th>雨時間</th>
                     <th>回数</th>
                     <th>的中</th>
                     <th>的中率</th>
-                </tr>
-                %week_hit_rate%
-            </table>
+                    </tr>
+                    %week_hit_rate1%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr>
+                    <th>日</th>
+                    <th>天気</th>
+                    <th>雨時間</th>
+                    <th>回数</th>
+                    <th>的中</th>
+                    <th>的中率</th>
+                    </tr>
+                    %week_hit_rate2%
+                    </table>
+                </div>
+            </div>
             <b>1時間天気 日別的中率</b>
             <div class="flex">
                 <div class='frame'>
