@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/18 v1.32 一部処理を別ファイルの移動
-version = "1.32"
+# 25/03/26 v1.33 週間天気的中率を2列にした
+version = "1.33"
 
 out =  ""
 logf = ""
@@ -523,9 +523,14 @@ def calc_hit_rate_week() :
         week_rate[yymmdd] = hitdata
 
 #  週間天気予報 的中率の表示
-def output_week_hit_rate() :
-    week_rate_last = dict(list(week_rate.items())[-30:])  #  上限00件
+def output_week_hit_rate(col) :
+    n = 0 
+    week_rate_last = dict(list(week_rate.items())[-40:])  #  上限00件
     for yymmdd, hitdata in week_rate_last.items() :
+        n += 1
+        if com.multi_col(n,col) :
+            continue
+
         date_str = com.conv_mmdd_to_datestr(yymmdd)
         cnt = hitdata['cnt']
         hit = hitdata['hit']
@@ -607,8 +612,11 @@ def parse_template() :
         if "%week_forecast%" in line :
             week_forecast()
             continue
-        if "%week_hit_rate%" in line :
-            output_week_hit_rate()
+        if "%week_hit_rate1%" in line :
+            output_week_hit_rate(1)
+            continue
+        if "%week_hit_rate2%" in line :
+            output_week_hit_rate(2)
             continue
         if "%output_hit_rate1%" in line :
             output_hit_rate(1)
