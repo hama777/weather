@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/03/26 v1.33 週間天気的中率を2列にした
-version = "1.33"
+# 25/04/18 v1.34 日別気温データの過去最高値、最低値を表示
+version = "1.34"
 
 out =  ""
 logf = ""
@@ -224,6 +224,28 @@ def temperature_info(col) :
         out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.1f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
                   f"<td align='right'>{row['min']:4.0f}</td></tr>\n")
+
+#   日別気温データの過去最高値、最低値を表示
+def min_max_temperature() :
+    avg_max = 0   #日平均気温のmax
+    avg_min = 99  #日平均気温のmin
+    top_max = 0   #日最高気温のmax  
+    top_min = 99  #日最高気温のmin
+    low_max = 0   #日最低気温のmax
+    low_min = 0   #日最低気温のmin
+    for index,row in daily_info.iterrows() :
+        avg = row['avg']
+        if avg >= avg_max :
+            avg_max = avg
+            avg_max_date = index
+        if avg <= avg_min :
+            avg_min = avg
+            avg_min_date = index
+    avg_max_date_str = avg_max_date.strftime('%m/%d(%a)')
+    avg_min_date_str = avg_min_date.strftime('%m/%d(%a)')
+    out.write(f'日平均気温最高値 : {avg_max:4.1f} {avg_max_date_str} /  最低値 : {avg_min:4.1f} {avg_min_date_str}\n')
+
+
 
 #   気温グラフ   時間ごと
 def tempera_graph() :
@@ -650,6 +672,9 @@ def parse_template() :
             continue
         if "%week_rain_time_graph%" in line :
             week_rain_time_graph()
+            continue
+        if "%min_max_temperature%" in line :
+            min_max_temperature()
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
