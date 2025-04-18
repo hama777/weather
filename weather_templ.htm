@@ -1,5 +1,5 @@
 <html>
-<!-- 25/03/26 v1.33 週間天気的中率を2列にした -->
+<!-- 25/04/18 v1.34 日別気温データの過去最高値、最低値を表示 -->
 
 <head>
     <title>Weather Check</title>
@@ -146,6 +146,9 @@
             <b>7日移動平均気温グラフ</b>
             <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
+            <b>最高最低気温</b><br>
+            %min_max_temperature%
+            <br>
             <b>日別気温データ</b>
             <div class="flex">
                 <div class='frame'>
@@ -171,7 +174,6 @@
                     </table>
                 </div>
             </div>
-
             <b>7日移動平均1日雨時間グラフ</b>
             <div id="week_rain_time_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
