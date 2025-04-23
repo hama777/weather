@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/04/18 v1.34 日別気温データの過去最高値、最低値を表示
-version = "1.34"
+# 25/04/23 v1.35 日最高気温、最低気温を表示
+version = "1.35"
 
 out =  ""
 logf = ""
@@ -241,9 +241,30 @@ def min_max_temperature() :
         if avg <= avg_min :
             avg_min = avg
             avg_min_date = index
+        max = row['max']
+        if max >= top_max :
+            top_max = max
+            top_max_date = index
+        if max <= top_min :
+            top_min = max
+            top_min_date = index
+        min = row['min']
+        if min >= low_max :
+            low_max = min
+            low_max_date = index
+        if min <= low_min :
+            low_min = min
+            low_min_date = index
+
     avg_max_date_str = avg_max_date.strftime('%m/%d(%a)')
     avg_min_date_str = avg_min_date.strftime('%m/%d(%a)')
-    out.write(f'日平均気温最高値 : {avg_max:4.1f} {avg_max_date_str} /  最低値 : {avg_min:4.1f} {avg_min_date_str}\n')
+    top_max_date_str = top_max_date.strftime('%m/%d(%a)')
+    top_min_date_str = top_min_date.strftime('%m/%d(%a)')
+    low_max_date_str = top_max_date.strftime('%m/%d(%a)')
+    low_min_date_str = top_min_date.strftime('%m/%d(%a)')
+    out.write(f'日平均気温最高値 : {avg_max:4.1f} {avg_max_date_str} /  最低値 : {avg_min:4.1f} {avg_min_date_str}<br>\n')
+    out.write(f'日最高気温最高値 : {top_max:4.1f} {top_max_date_str} /  最低値 : {top_min:4.1f} {top_min_date_str}<br>\n')
+    out.write(f'日最低気温最高値 : {low_max:4.1f} {low_max_date_str} /  最低値 : {low_min:4.1f} {low_min_date_str}<br>\n')
 
 
 
