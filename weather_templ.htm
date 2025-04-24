@@ -1,5 +1,5 @@
 <html>
-<!-- 25/04/18 v1.34 日別気温データの過去最高値、最低値を表示 -->
+<!-- 25/04/24 気温、雨タブ追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -122,23 +122,13 @@
     <span style="font-size:12px;">実行日時 : %today%</span><br><br>
     <div class="container">
         <ul class="menu">
-            <li><a href="#" data-id="week_forecast" class="active menu_item">週間予報</a></li>
+            <li><a href="#" data-id="temperature" class="active menu_item" >気温</a></li>
+            <li><a href="#" data-id="rain" class="menu_item">雨</a></li>
+            <li><a href="#" data-id="week_forecast" class="menu_item">週間予報</a></li>
             <li><a href="#" data-id="forecast" class="menu_item">時間予報</a></li>
             <li><a href="#" data-id="hitrate" class="menu_item">的中率</a></li>
         </ul>
-        <div class="content" id="forecast">
-            <div class="table-container">
-                <table>
-                    %hour_forecast%
-                </table>
-            </div>
-        </div>
-        <div class="content active" id="week_forecast">
-            <div class="table-container">
-                <table>
-                    %week_forecast%
-                </table>
-            </div>
+        <div class="content  active" id="temperature">
             <b>時間毎気温グラフ</b>
             <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <b>日毎気温グラフ</b>
@@ -174,8 +164,26 @@
                     </table>
                 </div>
             </div>
-            <b>7日移動平均1日雨時間グラフ</b>
-            <div id="week_rain_time_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
+        </div>
+        <div class="content" id="rain">
+            <b>7日移動平均1日雨時間グラフ</b> 
+            <div id="week_rain_time_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div> 
+            <!--  <div id="week_rain_time_graph"  style="position: static;"></div>-->
+        </div>
+
+        <div class="content" id="forecast">
+            <div class="table-container">
+                <table>
+                    %hour_forecast%
+                </table>
+            </div>
+        </div>
+        <div class="content" id="week_forecast">
+            <div class="table-container">
+                <table>
+                    %week_forecast%
+                </table>
+            </div>
 
         </div>
         <div class="content" id="hitrate">
