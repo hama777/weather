@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/04/23 v1.35 日最高気温、最低気温を表示
-version = "1.35"
+# 25/04/25 v1.36 日最高気温、最低気温を表示バグ修正
+version = "1.36"
 
 out =  ""
 logf = ""
@@ -260,8 +260,8 @@ def min_max_temperature() :
     avg_min_date_str = avg_min_date.strftime('%m/%d(%a)')
     top_max_date_str = top_max_date.strftime('%m/%d(%a)')
     top_min_date_str = top_min_date.strftime('%m/%d(%a)')
-    low_max_date_str = top_max_date.strftime('%m/%d(%a)')
-    low_min_date_str = top_min_date.strftime('%m/%d(%a)')
+    low_max_date_str = low_max_date.strftime('%m/%d(%a)')
+    low_min_date_str = low_min_date.strftime('%m/%d(%a)')
     out.write(f'日平均気温最高値 : {avg_max:4.1f} {avg_max_date_str} /  最低値 : {avg_min:4.1f} {avg_min_date_str}<br>\n')
     out.write(f'日最高気温最高値 : {top_max:4.1f} {top_max_date_str} /  最低値 : {top_min:4.1f} {top_min_date_str}<br>\n')
     out.write(f'日最低気温最高値 : {low_max:4.1f} {low_max_date_str} /  最低値 : {low_min:4.1f} {low_min_date_str}<br>\n')
