@@ -1,5 +1,5 @@
 <html>
-<!-- 25/04/24 気温、雨タブ追加 -->
+<!-- 25/04/28 タブ追加でグラフのサイズが不正になるのを修正 -->
 
 <head>
     <title>Weather Check</title>
@@ -107,7 +107,9 @@
                 backgroundColor: '#daebdf',
                 legend: {
                     position: 'none'
-                }
+                },
+                width: 900,   /* タブのとき、div のサイズが無視されるようなのでここで指定 */
+                height: 400
             };
 
             var chart = new google.visualization.LineChart(document.getElementById('week_rain_time_graph'));
