@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/08 v1.37 日別気温データの過去最高値、最低値を表にした
-version = "1.37"
+# 25/05/09 v1.38 過去30日間の日別気温データの過去最高値、最低値表示
+version = "1.38"
 
 out =  ""
 logf = ""
@@ -228,38 +228,48 @@ def temperature_info(col) :
                   f"<td align='right'>{row['max']:4.0f}</td>"
                   f"<td align='right'>{row['min']:4.0f}</td></tr>\n")
 
+
 #   日別気温データの過去最高値、最低値を表示
 def min_max_temperature() :
-    tdate = daily_info['avg'].idxmax()
-    avg_max = daily_info.loc[tdate, 'avg']
+    min_max_temperature_com(daily_info)
+
+#   過去30日間の日別気温データの過去最高値、最低値を表示
+def min_max_temperature_30days() :
+    df_30 = daily_info.tail(30)
+    min_max_temperature_com(df_30)
+
+#   日別気温データの過去最高値、最低値を取得
+def min_max_temperature_com(arg_df) :
+    tdate = arg_df['avg'].idxmax()
+    avg_max = arg_df.loc[tdate, 'avg']
     avg_max_date_str = tdate.strftime('%m/%d(%a)')
 
-    tdate = daily_info['avg'].idxmin()
-    avg_min = daily_info.loc[tdate, 'avg']
+    tdate = arg_df['avg'].idxmin()
+    avg_min = arg_df.loc[tdate, 'avg']
     avg_min_date_str = tdate.strftime('%m/%d(%a)')
 
-    tdate = daily_info['max'].idxmax()
-    top_max = daily_info.loc[tdate, 'max']
+    tdate = arg_df['max'].idxmax()
+    top_max = arg_df.loc[tdate, 'max']
     top_max_date_str = tdate.strftime('%m/%d(%a)')
 
-    tdate = daily_info['max'].idxmin()
-    top_min = daily_info.loc[tdate, 'max']
+    tdate = arg_df['max'].idxmin()
+    top_min = arg_df.loc[tdate, 'max']
     top_min_date_str = tdate.strftime('%m/%d(%a)')
 
-    tdate = daily_info['min'].idxmax()
-    low_max = daily_info.loc[tdate, 'min']
+    tdate = arg_df['min'].idxmax()
+    low_max = arg_df.loc[tdate, 'min']
     low_max_date_str = tdate.strftime('%m/%d(%a)')
 
-    tdate = daily_info['min'].idxmin()
-    low_min = daily_info.loc[tdate, 'min']
+    tdate = arg_df['min'].idxmin()
+    low_min = arg_df.loc[tdate, 'min']
     low_min_date_str = tdate.strftime('%m/%d(%a)')
 
-    out.write(f'<tr><td>日平均気温</td><td>{avg_max:4.1f}</td><td>{avg_max_date_str}</td>'
-              f'<td>{avg_min:4.1f}</td><td>{avg_min_date_str}</td></tr>\n')
-    out.write(f'<tr><td>日最高気温</td><td>{top_max:4.1f}</td><td>{top_max_date_str}</td>'
-              f'<td>{top_min:4.1f}</td><td>{top_min_date_str}</td></tr>\n')
-    out.write(f'<tr><td>日最低気温</td><td>{low_max:4.1f}</td><td>{low_max_date_str}</td>'
-              f'<td>{low_min:4.1f}</td><td>{low_min_date_str}</td></tr>\n')
+    out.write(f'<tr><td>日平均気温</td><td align="right">{avg_max:4.1f}</td><td>{avg_max_date_str}</td>'
+              f'<td align="right">{avg_min:4.1f}</td><td>{avg_min_date_str}</td></tr>\n')
+    out.write(f'<tr><td>日最高気温</td><td align="right">{top_max:4.1f}</td><td>{top_max_date_str}</td>'
+              f'<td align="right">{top_min:4.1f}</td><td>{top_min_date_str}</td></tr>\n')
+    out.write(f'<tr><td>日最低気温</td><td align="right">{low_max:4.1f}</td><td>{low_max_date_str}</td>'
+              f'<td align="right">{low_min:4.1f}</td><td>{low_min_date_str}</td></tr>\n')
 
 #   気温グラフ   時間ごと
 def tempera_graph() :
@@ -524,7 +534,6 @@ def daily_info_output() :
         cnt = hitdata['cnt']
         hit = hitdata['hit']
         act = hitdata['act']
-        #print(f'date_str {date_str},{act}')
         s = f'{date_str}\t{act}\t{cnt}\t{hit}\n'
         dailyf.write(s)
     
@@ -689,6 +698,9 @@ def parse_template() :
             continue
         if "%min_max_temperature%" in line :
             min_max_temperature()
+            continue
+        if "%min_max_temperature_30days%" in line :
+            min_max_temperature_30days()
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
