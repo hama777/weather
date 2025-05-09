@@ -1,5 +1,5 @@
 <html>
-<!-- 25/05/08 v1.37 日別気温データの過去最高値、最低値を表にした -->
+<!-- 25/05/09 v1.38 過去30日間の日別気温データの過去最高値、最低値表示 -->
 
 <head>
     <title>Weather Check</title>
@@ -144,6 +144,13 @@
                     <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
                 </tr>
                 %min_max_temperature%
+            </table>
+            <b>最高最低気温 過去30日</b><br>
+            <table>
+                <tr>
+                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
+                </tr>
+                %min_max_temperature_30days%
             </table>
             <br>
             <b>日別気温データ</b>
