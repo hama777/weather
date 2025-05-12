@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/09 v1.38 過去30日間の日別気温データの過去最高値、最低値表示
-version = "1.38"
+# 25/05/12 v1.39 月ごとの平均気温集計処理作成
+version = "1.39"
 
 out =  ""
 logf = ""
@@ -112,6 +112,7 @@ def main_proc() :
     parse_template()
     ftp_upload()
     daily_info_output()
+    #monthly_tempera()    debug
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -215,6 +216,12 @@ def create_temperature_info() :
     seri_week_tempera = daily_info['avg'].rolling(7).mean()
     df_week_tempera = seri_week_tempera.to_frame()
 
+    daily_info = daily_info.reset_index()   # すでに date が index になっているので戻す
+    daily_info['date'] = pd.to_datetime(daily_info['date'])  # date を datetime 型にする
+    daily_info = daily_info.set_index('date')    #  date をindexにする
+    #print(daily_info.columns)  
+    #print(daily_info)
+
 #   日別気温データ
 #   気温の日々の平均値、最高値、最低値の表示
 def temperature_info(col) :
@@ -270,6 +277,15 @@ def min_max_temperature_com(arg_df) :
               f'<td align="right">{top_min:4.1f}</td><td>{top_min_date_str}</td></tr>\n')
     out.write(f'<tr><td>日最低気温</td><td align="right">{low_max:4.1f}</td><td>{low_max_date_str}</td>'
               f'<td align="right">{low_min:4.1f}</td><td>{low_min_date_str}</td></tr>\n')
+
+def monthly_tempera() :
+
+    monthly_summary = daily_info.resample('M').agg({
+        'avg': ['mean', 'max', 'min'],
+        'max': ['mean', 'max', 'min'],
+        'min': ['mean', 'max', 'min']
+    })    
+    print(monthly_summary)
 
 #   気温グラフ   時間ごと
 def tempera_graph() :
