@@ -1,5 +1,5 @@
 <html>
-<!-- 25/05/09 v1.38 過去30日間の日別気温データの過去最高値、最低値表示 -->
+<!-- 25/05/13 v1.40 月ごとの平均気温一覧追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -152,6 +152,14 @@
                 </tr>
                 %min_max_temperature_30days%
             </table>
+            <b>月別気温データ</b>
+            <table>
+                <tr>
+                    <th>年月</th><th>平均気温</th><th>平均最高</th><th>平均最低</th><th>最高</th><th>最低</th>
+                </tr>
+                %monthly_tempera%
+            </table>
+
             <br>
             <b>日別気温データ</b>
             <div class="flex">
