@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/12 v1.39 月ごとの平均気温集計処理作成
-version = "1.39"
+# 25/05/13 v1.40 月ごとの平均気温一覧追加
+version = "1.40"
 
 out =  ""
 logf = ""
@@ -112,7 +112,6 @@ def main_proc() :
     parse_template()
     ftp_upload()
     daily_info_output()
-    #monthly_tempera()    debug
 
 def read_data(fname) : 
     global start_date,start_hh,we_list
@@ -279,13 +278,19 @@ def min_max_temperature_com(arg_df) :
               f'<td align="right">{low_min:4.1f}</td><td>{low_min_date_str}</td></tr>\n')
 
 def monthly_tempera() :
-
-    monthly_summary = daily_info.resample('M').agg({
+    # 月ごとに avg max min の 平均値、最大値、最小値 を求める
+    monthly_summary = daily_info.resample('ME').agg({
         'avg': ['mean', 'max', 'min'],
-        'max': ['mean', 'max', 'min'],
-        'min': ['mean', 'max', 'min']
+        'max': [ 'mean', 'max', 'min'],
+        'min': [ 'mean', 'max', 'min']
     })    
-    print(monthly_summary)
+    for index,row in monthly_summary.iterrows() :
+        date_str = index.strftime('%y/%m')
+        out.write(f'<tr><td>{date_str}</td><td align="right">{row["avg"]["mean"]:4.1f}</td>'
+                  f'<td align="right">{row["avg"]["max"]:4.1f}</td>'
+                  f'<td align="right">{row["avg"]["min"]:4.1f}</td>'
+                  f'<td align="right">{row["max"]["max"]}</td>'
+                  f'<td align="right">{row["min"]["min"]}</td></tr>\n')
 
 #   気温グラフ   時間ごと
 def tempera_graph() :
@@ -717,6 +722,9 @@ def parse_template() :
             continue
         if "%min_max_temperature_30days%" in line :
             min_max_temperature_30days()
+            continue
+        if "%monthly_tempera%" in line :
+            monthly_tempera()
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
