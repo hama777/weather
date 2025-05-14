@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/13 v1.40 月ごとの平均気温一覧追加
-version = "1.40"
+# 25/05/14 v1.41 月ごとの雨時間機能追加準備
+version = "1.41"
 
 out =  ""
 logf = ""
@@ -616,7 +616,7 @@ def output_week_hit_rate(col) :
 
 #  週間雨時間移動平均 df_week_rain の作成
 def create_df_week_rain() :
-    global df_week_rain
+    global df_week_rain,df_daily_rain
 
     date_list = [] 
     rate_list = []
@@ -629,10 +629,17 @@ def create_df_week_rain() :
             date_list.append(tdate)
             rate_list.append(rain)
 
-    df_week_rain = pd.DataFrame(list(zip(date_list,rate_list)), columns = ['date','rain'])
-    df_week_rain = df_week_rain.set_index("date")
-    seri_week_rain = df_week_rain['rain'].rolling(7).mean()
+    df_daily_rain = pd.DataFrame(list(zip(date_list,rate_list)), columns = ['date','rain'])
+    df_daily_rain['rain'] = pd.to_numeric(df_daily_rain['rain'], errors='coerce')
+    df_daily_rain['date'] = pd.to_datetime(df_daily_rain['date']) 
+    df_daily_rain = df_daily_rain.set_index("date")
+    seri_week_rain = df_daily_rain['rain'].rolling(7).mean()
     df_week_rain = seri_week_rain.to_frame()
+
+def monthly_rain_time() :
+    monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max']})
+    print(monthly_stats)
+
 
 #  週間雨時間移動平均グラフ
 def week_rain_time_graph() :
