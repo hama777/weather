@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/14 v1.41 月ごとの雨時間機能追加準備
-version = "1.41"
+# 25/05/15 v1.42 月ごとの1日雨時間機能追加
+version = "1.42"
 
 out =  ""
 logf = ""
@@ -636,10 +636,15 @@ def create_df_week_rain() :
     seri_week_rain = df_daily_rain['rain'].rolling(7).mean()
     df_week_rain = seri_week_rain.to_frame()
 
+#   月別 1日平均雨時間テーブル
 def monthly_rain_time() :
     monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max']})
     print(monthly_stats)
-
+    for index,row in monthly_stats.iterrows() :
+        ave = row['rain']['mean']
+        max = row['rain']['max']
+        date_str = index.strftime('%y/%m')
+        out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td><td align="right">{max}</td></tr>')
 
 #  週間雨時間移動平均グラフ
 def week_rain_time_graph() :
@@ -724,8 +729,11 @@ def parse_template() :
         if "%week_rain_time_graph%" in line :
             week_rain_time_graph()
             continue
-        if "%min_max_temperature%" in line :
-            min_max_temperature()
+        if "%week_rain_time_graph%" in line :
+            week_rain_time_graph()
+            continue
+        if "%monthly_rain_time%" in line :
+            monthly_rain_time()
             continue
         if "%min_max_temperature_30days%" in line :
             min_max_temperature_30days()
