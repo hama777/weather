@@ -1,5 +1,5 @@
 <html>
-<!-- 25/05/13 v1.40 月ごとの平均気温一覧追加 -->
+<!-- 25/05/15 v1.42 月ごとの1日雨時間機能追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -191,6 +191,14 @@
             <b>7日移動平均1日雨時間グラフ</b> 
             <div id="week_rain_time_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div> 
             <!--  <div id="week_rain_time_graph"  style="position: static;"></div>-->
+            <b>月別雨時間</b> 
+            <table>
+                <tr>
+                    <th>年月</th><th>1日平均雨時間</th><th>1日最大雨時間</th>
+                </tr>
+                %monthly_rain_time%
+            </table>
+
         </div>
 
         <div class="content" id="forecast">
