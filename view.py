@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/15 v1.42 月ごとの1日雨時間機能追加
-version = "1.42"
+# 25/05/16 v1.43 日別気温データの処理変更
+version = "1.43"
 
 out =  ""
 logf = ""
@@ -246,36 +246,25 @@ def min_max_temperature_30days() :
 
 #   日別気温データの過去最高値、最低値を取得
 def min_max_temperature_com(arg_df) :
-    tdate = arg_df['avg'].idxmax()
-    avg_max = arg_df.loc[tdate, 'avg']
-    avg_max_date_str = tdate.strftime('%m/%d(%a)')
+    item_list = ['avg','max','min'] 
+    item_name = {'avg' : '日平均気温','max' : '日最高気温','min' :'日最低気温'}
+    aggmax = {}
+    aggmax_date = {}
+    aggmin = {}
+    aggmin_date = {}
+    for item in item_list :
+        tdate = arg_df[item].idxmax()
+        aggmax_date[item] = tdate.strftime('%m/%d(%a)')
+        aggmax[item] = arg_df.loc[tdate,item ]
 
-    tdate = arg_df['avg'].idxmin()
-    avg_min = arg_df.loc[tdate, 'avg']
-    avg_min_date_str = tdate.strftime('%m/%d(%a)')
+        tdate = arg_df[item].idxmin()
+        aggmin_date[item] = tdate.strftime('%m/%d(%a)')
+        aggmin[item] = arg_df.loc[tdate,item ]
 
-    tdate = arg_df['max'].idxmax()
-    top_max = arg_df.loc[tdate, 'max']
-    top_max_date_str = tdate.strftime('%m/%d(%a)')
-
-    tdate = arg_df['max'].idxmin()
-    top_min = arg_df.loc[tdate, 'max']
-    top_min_date_str = tdate.strftime('%m/%d(%a)')
-
-    tdate = arg_df['min'].idxmax()
-    low_max = arg_df.loc[tdate, 'min']
-    low_max_date_str = tdate.strftime('%m/%d(%a)')
-
-    tdate = arg_df['min'].idxmin()
-    low_min = arg_df.loc[tdate, 'min']
-    low_min_date_str = tdate.strftime('%m/%d(%a)')
-
-    out.write(f'<tr><td>日平均気温</td><td align="right">{avg_max:4.1f}</td><td>{avg_max_date_str}</td>'
-              f'<td align="right">{avg_min:4.1f}</td><td>{avg_min_date_str}</td></tr>\n')
-    out.write(f'<tr><td>日最高気温</td><td align="right">{top_max:4.1f}</td><td>{top_max_date_str}</td>'
-              f'<td align="right">{top_min:4.1f}</td><td>{top_min_date_str}</td></tr>\n')
-    out.write(f'<tr><td>日最低気温</td><td align="right">{low_max:4.1f}</td><td>{low_max_date_str}</td>'
-              f'<td align="right">{low_min:4.1f}</td><td>{low_min_date_str}</td></tr>\n')
+    for item in item_list :
+        out.write(f'<tr><td>{item_name[item]}</td>')
+        out.write(f'<td align="right">{aggmax[item]:4.1f}</td><td>{aggmax_date[item]}</td>'
+                  f'<td align="right">{aggmin[item]:4.1f}</td><td>{aggmin_date[item]}</td></tr>\n')
 
 def monthly_tempera() :
     # 月ごとに avg max min の 平均値、最大値、最小値 を求める
@@ -465,9 +454,6 @@ def calc_hit_rate() :
 
     #  最後に当日分のデータを追加する
     add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
-
-# def is_fine(we) :
-#     return not is_rain(we)
 
 #   1日データの追加
 def add_daily_data(cnt,hit,dd,act) :
@@ -729,11 +715,11 @@ def parse_template() :
         if "%week_rain_time_graph%" in line :
             week_rain_time_graph()
             continue
-        if "%week_rain_time_graph%" in line :
-            week_rain_time_graph()
-            continue
         if "%monthly_rain_time%" in line :
             monthly_rain_time()
+            continue
+        if "%min_max_temperature%" in line :
+            min_max_temperature()
             continue
         if "%min_max_temperature_30days%" in line :
             min_max_temperature_30days()
