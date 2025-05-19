@@ -5,11 +5,12 @@ import locale
 import datetime
 import pandas as pd
 import com
+import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/16 v1.43 日別気温データの処理変更
-version = "1.43"
+# 25/05/19 v1.44 雨関係をrain.pyに分離
+version = "1.44"
 
 out =  ""
 logf = ""
@@ -83,7 +84,7 @@ df_tempera = ""
 #   日々の平均、最高、最低気温   カラム   date  avg  max min  
 daily_info = ""
 
-df_week_rain = ""   #  1日雨時間の7日間移動平均   date(index)  rain
+#df_week_rain  = ""  #  1日雨時間の7日間移動平均   date(index)  rain
 
 def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
@@ -108,7 +109,7 @@ def main_proc() :
     calc_hit_rate()
     calc_hit_rate_week()    
     create_temperature_info()
-    create_df_week_rain()  
+    rain.create_df_week_rain()  
     parse_template()
     ftp_upload()
     daily_info_output()
@@ -601,7 +602,7 @@ def output_week_hit_rate(col) :
                   f'<td align="right">{r:5.2f}</td></tr>')
 
 #  週間雨時間移動平均 df_week_rain の作成
-def create_df_week_rain() :
+def create_df_week_rain_old() :
     global df_week_rain,df_daily_rain
 
     date_list = [] 
@@ -623,7 +624,7 @@ def create_df_week_rain() :
     df_week_rain = seri_week_rain.to_frame()
 
 #   月別 1日平均雨時間テーブル
-def monthly_rain_time() :
+def monthly_rain_time_old() :
     monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max']})
     print(monthly_stats)
     for index,row in monthly_stats.iterrows() :
@@ -633,7 +634,7 @@ def monthly_rain_time() :
         out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td><td align="right">{max}</td></tr>')
 
 #  週間雨時間移動平均グラフ
-def week_rain_time_graph() :
+def week_rain_time_graph_old() :
     for index,row in df_week_rain.iterrows() :
         v = row['rain']
         if pd.isna(v) :
@@ -713,10 +714,10 @@ def parse_template() :
             temperature_info(2)
             continue
         if "%week_rain_time_graph%" in line :
-            week_rain_time_graph()
+            rain.week_rain_time_graph(out)
             continue
         if "%monthly_rain_time%" in line :
-            monthly_rain_time()
+            rain.monthly_rain_time(out)
             continue
         if "%min_max_temperature%" in line :
             min_max_temperature()
