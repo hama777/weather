@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/19 v1.44 雨関係をrain.pyに分離
-version = "1.44"
+# 25/05/20 v1.45 1時間ごとの実際の天気をファイルに出力
+version = "1.45"
 
 out =  ""
 logf = ""
@@ -22,6 +22,7 @@ conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 dailyfile = appdir + "/dailyinfo.txt"
+act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
 
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
@@ -108,6 +109,7 @@ def main_proc() :
 
     calc_hit_rate()
     calc_hit_rate_week()    
+    output_act_weather_file()
     create_temperature_info()
     rain.create_df_week_rain()  
     parse_template()
@@ -487,6 +489,14 @@ def output_hit_rate(col) :
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
+
+def output_act_weather_file() :
+    f = open(act_weather_file,"w")
+    for forecast_date,hitdata in  hit_rate.items() :   
+        date_str = com.conv_mmddhh_to_hh_str(forecast_date)
+        act = hitdata['act']
+        f.write(f'{date_str} {act}\n')
+    f.close()
 
 #   日的中率の表示
 def daily_hit_rate(col) :
