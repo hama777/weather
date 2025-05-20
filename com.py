@@ -1,13 +1,10 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-#import os
-#import locale
 import datetime
-#import pandas as pd
 from datetime import date,timedelta
 
-# 25/03/18 v1.00 新規
-version = "1.00"
+# 25/05/20 v1.01 conv_mmddhh_to_hh_str()追加
+version = "1.01"
 
 #  雨の時 true を返す
 def is_rain(we) :
@@ -48,6 +45,17 @@ def conv_mmddhh_to_str(yymmddhh,display_hh=True) :
     if display_hh :
         s = f'{s}/{hh:02}'
     return s 
+
+#   int の yymmddhh 形式を入力し  yy/mm/dd hh  形式の文字列を返す
+def conv_mmddhh_to_hh_str(yymmddhh) :
+    yy = int(yymmddhh / 1000000) + 2000
+    mm = int(yymmddhh / 10000 % 100)
+    dd = int(yymmddhh / 100 % 100)  
+    hh = int(yymmddhh % 100)
+    dt = datetime.date(yy, mm, dd)
+    s = dt.strftime("%y/%m/%d")
+    ret = f'{s} {hh:02}'
+    return ret
 
 #   int の yymmddhh 形式を入力し  date 型の値を返す
 def conv_mmddhh_to_date(yymmddhh) :
