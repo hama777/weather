@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/20 v1.45 1時間ごとの実際の天気をファイルに出力
-version = "1.45"
+# 25/05/21 v1.46 気温情報の表示桁数変更
+version = "1.46"
 
 out =  ""
 logf = ""
@@ -233,7 +233,7 @@ def temperature_info(col) :
         if com.multi_col(n,col) :
             continue 
         date_str = index.strftime('%m/%d(%a)')
-        out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.1f}</td>"
+        out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.2f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
                   f"<td align='right'>{row['min']:4.0f}</td></tr>\n")
 
@@ -266,8 +266,8 @@ def min_max_temperature_com(arg_df) :
 
     for item in item_list :
         out.write(f'<tr><td>{item_name[item]}</td>')
-        out.write(f'<td align="right">{aggmax[item]:4.1f}</td><td>{aggmax_date[item]}</td>'
-                  f'<td align="right">{aggmin[item]:4.1f}</td><td>{aggmin_date[item]}</td></tr>\n')
+        out.write(f'<td align="right">{aggmax[item]:4.2f}</td><td>{aggmax_date[item]}</td>'
+                  f'<td align="right">{aggmin[item]:4.2f}</td><td>{aggmin_date[item]}</td></tr>\n')
 
 def monthly_tempera() :
     # 月ごとに avg max min の 平均値、最大値、最小値 を求める
@@ -278,9 +278,9 @@ def monthly_tempera() :
     })    
     for index,row in monthly_summary.iterrows() :
         date_str = index.strftime('%y/%m')
-        out.write(f'<tr><td>{date_str}</td><td align="right">{row["avg"]["mean"]:4.1f}</td>'
-                  f'<td align="right">{row["avg"]["max"]:4.1f}</td>'
-                  f'<td align="right">{row["avg"]["min"]:4.1f}</td>'
+        out.write(f'<tr><td>{date_str}</td><td align="right">{row["avg"]["mean"]:4.2f}</td>'
+                  f'<td align="right">{row["avg"]["max"]:4.2f}</td>'
+                  f'<td align="right">{row["avg"]["min"]:4.2f}</td>'
                   f'<td align="right">{row["max"]["max"]}</td>'
                   f'<td align="right">{row["min"]["min"]}</td></tr>\n')
 
@@ -567,7 +567,10 @@ def calc_hit_rate_week() :
             break
 
         timeline_dic = week_data[forecast_date]
-        daily_hitdata = daily_rate[yymmdd]
+        try:
+            daily_hitdata = daily_rate[yymmdd]
+        except KeyError:
+            break
         rain_time = daily_hitdata['act']   # 1日で何時間雨か
         act_is_rain = is_rain_day(rain_time)   # 雨の時  true
 
