@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/19 v0.00 新規
-version = "0.00"
+# 25/05/22 v1.01 雨日数追加
+version = "1.01"
 
 out =  ""
 logf = ""
@@ -30,6 +30,7 @@ def create_df_week_rain() :
 
     date_list = [] 
     rate_list = []
+    is_rain_list = []   # 1時間でも雨があれば 1  全日晴れなら 0
     with open(dailyfile , encoding='utf-8') as f:
         for line in f:
             dt = line.split("\t")
@@ -38,14 +39,17 @@ def create_df_week_rain() :
             tdate = datetime.datetime.strptime(date_str, '%y/%m/%d')            
             date_list.append(tdate)
             rate_list.append(rain)
+            is_rain = 0 
+            if int(rain) >= 1 :
+                is_rain = 1 
+            is_rain_list.append(is_rain)
 
-    df_daily_rain = pd.DataFrame(list(zip(date_list,rate_list)), columns = ['date','rain'])
+    df_daily_rain = pd.DataFrame(list(zip(date_list,rate_list,is_rain_list)), columns = ['date','rain','is_rain'])
     df_daily_rain['rain'] = pd.to_numeric(df_daily_rain['rain'], errors='coerce')
     df_daily_rain['date'] = pd.to_datetime(df_daily_rain['date']) 
     df_daily_rain = df_daily_rain.set_index("date")
     seri_week_rain = df_daily_rain['rain'].rolling(7).mean()
     df_week_rain = seri_week_rain.to_frame()
-
 
 #  週間雨時間移動平均グラフ
 def week_rain_time_graph(out) :
@@ -58,11 +62,13 @@ def week_rain_time_graph(out) :
 
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
-    monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max']})
+    monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
     print(monthly_stats)
     for index,row in monthly_stats.iterrows() :
         ave = row['rain']['mean']
         max = row['rain']['max']
+        days_rain = row['is_rain']['sum']
         date_str = index.strftime('%y/%m')
-        out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td><td align="right">{max}</td></tr>')
+        out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td>'
+                  f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td></tr>')
 
