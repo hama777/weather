@@ -3,8 +3,8 @@
 import datetime
 from datetime import date,timedelta
 
-# 25/05/20 v1.01 conv_mmddhh_to_hh_str()追加
-version = "1.01"
+# 25/05/22 v1.02 is_rain_week 天気コード追加
+version = "1.02"     
 
 #  雨の時 true を返す
 def is_rain(we) :
@@ -25,7 +25,7 @@ def is_rain_week(we) :
     # 260  曇りのち雪     411 雪のち晴   205 曇り時々雪   217 曇りのち雪   303 雨時々雪  204 曇り時々雪  400 雪  413 雪のち曇り
     if we == 102 or we == 103 or we == 106 or we == 114 or  we == 202 or we == 206 or we == 260 or\
        we == 203 or we == 214 or we == 300 or we == 301 or we == 302 or we == 313 or we == 311  or\
-       we == 411 or we == 205 or we == 217 or we == 303 or we == 204 or we == 400 or we == 413 :
+       we == 411 or we == 205 or we == 217 or we == 303 or we == 204 or we == 400 or we == 413 or we == 882 or we == 872  :
         return True
     # 晴れ
     # 105 晴時々雪   117 晴のち雪
