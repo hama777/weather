@@ -3,8 +3,8 @@
 import datetime
 from datetime import date,timedelta
 
-# 25/05/22 v1.02 is_rain_week 天気コード追加
-version = "1.02"     
+# 25/05/23 v1.03 conv_mmddhh_to_hh_str の返却値の形式変更
+version = "1.03"     
 
 #  雨の時 true を返す
 def is_rain(we) :
@@ -53,8 +53,8 @@ def conv_mmddhh_to_hh_str(yymmddhh) :
     dd = int(yymmddhh / 100 % 100)  
     hh = int(yymmddhh % 100)
     dt = datetime.date(yy, mm, dd)
-    s = dt.strftime("%y/%m/%d")
-    ret = f'{s} {hh:02}'
+    s = dt.strftime("%y%m%d")
+    ret = f'{s}{hh:02}'
     return ret
 
 #   int の yymmddhh 形式を入力し  date 型の値を返す
