@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/22 v1.01 雨日数追加
-version = "1.01"
+# 25/05/23 v1.02 連続雨時間解析追加
+version = "1.02"
 
 out =  ""
 logf = ""
@@ -21,6 +21,7 @@ conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 dailyfile = appdir + "/dailyinfo.txt"
+act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
 
 df_week_rain = ""
 
@@ -62,8 +63,9 @@ def week_rain_time_graph(out) :
 
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
-    monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
-    print(monthly_stats)
+    continuous_rain()
+    monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
+    #print(monthly_stats)
     for index,row in monthly_stats.iterrows() :
         ave = row['rain']['mean']
         max = row['rain']['max']
@@ -71,4 +73,21 @@ def monthly_rain_time(out) :
         date_str = index.strftime('%y/%m')
         out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td>'
                   f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td></tr>')
+
+#   連続雨時間解析
+def continuous_rain() :
+    with open(act_weather_file , encoding='utf-8') as f:
+        rain_con = 0
+        prev_datestr = ""
+        for line in f:
+            dt = line.split("\t")
+            date_str = dt[0]
+            act = dt[1]
+            if com.is_rain(act) :
+                rain_con += 1
+                prev_datestr = date_str
+            else :
+                if rain_con != 0 :
+                    #print(f'{prev_datestr} {rain_con}')
+                    rain_con = 0
 
