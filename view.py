@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/21 v1.46 気温情報の表示桁数変更
-version = "1.46"
+# 25/05/23 v1.47 気温情報に標準偏差追加
+version = "1.47"
 
 out =  ""
 logf = ""
@@ -203,7 +203,7 @@ def read_temperature_data() :
 
     df_tempera = pd.DataFrame(list(zip(date_list,val_list)), columns = ['date','val'])
 
-#   気温の日々の平均値、最高値、最低値を求める
+#   気温の日々の平均値、最高値、最低値、標準偏差を求める
 #   気温の7日移動平均  df_week_tempera  作成
 def create_temperature_info() :
     global daily_info,df_week_tempera
@@ -213,8 +213,11 @@ def create_temperature_info() :
     daily_max = seri_tmp.rename('max')
     seri_tmp = df_tempera.groupby(df_tempera['date'].dt.date)['val'].min()
     daily_min = seri_tmp.rename('min')
+    seri_tmp = df_tempera.groupby(df_tempera['date'].dt.date)['val'].std()
+    daily_std = seri_tmp.rename('std')
     daily_info = pd.merge(daily_avg,daily_max,on='date')
     daily_info = pd.merge(daily_info,daily_min,on='date')
+    daily_info = pd.merge(daily_info,daily_std,on='date')
     seri_week_tempera = daily_info['avg'].rolling(7).mean()
     df_week_tempera = seri_week_tempera.to_frame()
 
@@ -235,7 +238,8 @@ def temperature_info(col) :
         date_str = index.strftime('%m/%d(%a)')
         out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.2f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
-                  f"<td align='right'>{row['min']:4.0f}</td></tr>\n")
+                  f"<td align='right'>{row['min']:4.0f}</td>"
+                  f"<td align='right'>{row['std']:4.2f}</td></tr>\n")
 
 
 #   日別気温データの過去最高値、最低値を表示
@@ -495,7 +499,7 @@ def output_act_weather_file() :
     for forecast_date,hitdata in  hit_rate.items() :   
         date_str = com.conv_mmddhh_to_hh_str(forecast_date)
         act = hitdata['act']
-        f.write(f'{date_str} {act}\n')
+        f.write(f'{date_str}\t{act}\n')
     f.close()
 
 #   日的中率の表示
@@ -613,48 +617,6 @@ def output_week_hit_rate(col) :
         out.write(f'<tr><td>{date_str}</td><td><img src="{img}" width="20" height="15"></td>'
                   f'<td align="right">{rain_time}</td><td align="right">{cnt}</td><td align="right">{hit}</td>'
                   f'<td align="right">{r:5.2f}</td></tr>')
-
-#  週間雨時間移動平均 df_week_rain の作成
-def create_df_week_rain_old() :
-    global df_week_rain,df_daily_rain
-
-    date_list = [] 
-    rate_list = []
-    with open(dailyfile , encoding='utf-8') as f:
-        for line in f:
-            dt = line.split("\t")
-            date_str = dt[0]
-            rain = dt[1]
-            tdate = datetime.datetime.strptime(date_str, '%y/%m/%d')            
-            date_list.append(tdate)
-            rate_list.append(rain)
-
-    df_daily_rain = pd.DataFrame(list(zip(date_list,rate_list)), columns = ['date','rain'])
-    df_daily_rain['rain'] = pd.to_numeric(df_daily_rain['rain'], errors='coerce')
-    df_daily_rain['date'] = pd.to_datetime(df_daily_rain['date']) 
-    df_daily_rain = df_daily_rain.set_index("date")
-    seri_week_rain = df_daily_rain['rain'].rolling(7).mean()
-    df_week_rain = seri_week_rain.to_frame()
-
-#   月別 1日平均雨時間テーブル
-def monthly_rain_time_old() :
-    monthly_stats = df_daily_rain.resample('M').agg({'rain': ['mean', 'max']})
-    print(monthly_stats)
-    for index,row in monthly_stats.iterrows() :
-        ave = row['rain']['mean']
-        max = row['rain']['max']
-        date_str = index.strftime('%y/%m')
-        out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td><td align="right">{max}</td></tr>')
-
-#  週間雨時間移動平均グラフ
-def week_rain_time_graph_old() :
-    for index,row in df_week_rain.iterrows() :
-        v = row['rain']
-        if pd.isna(v) :
-            continue 
-        date_str = index.strftime('%m/%d')
-        out.write(f"['{date_str}',{v}],") 
-
 
 #  1日のうち rain_threshold 時間以上雨の場合、 true を返す
 def is_rain_day(rain_time) :
