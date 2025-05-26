@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/23 v1.02 連続雨時間解析追加
-version = "1.02"
+# 25/05/26 v1.03 連続雨時間情報追加
+version = "1.03"
 
 out =  ""
 logf = ""
@@ -63,7 +63,7 @@ def week_rain_time_graph(out) :
 
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
-    continuous_rain()
+    continuous_fine_rain()
     monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
     #print(monthly_stats)
     for index,row in monthly_stats.iterrows() :
@@ -75,19 +75,40 @@ def monthly_rain_time(out) :
                   f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td></tr>')
 
 #   連続雨時間解析
-def continuous_rain() :
+def continuous_fine_rain() :
+    global rain_date_list,rain_con_list
+    global fine_date_list,fine_con_list
     with open(act_weather_file , encoding='utf-8') as f:
         rain_con = 0
+        fine_con = 0 
+        rain_date_list = []
+        rain_con_list = []
+        fine_date_list = []
+        fine_con_list = []
         prev_datestr = ""
+        date_str = ""
         for line in f:
             dt = line.split("\t")
+            prev_datestr = date_str
             date_str = dt[0]
             act = dt[1]
             if com.is_rain(act) :
+                if fine_con != 0 :
+                    fine_date_list.append(prev_datestr)
+                    fine_con_list.append(fine_con)
+                    fine_con = 0 
                 rain_con += 1
-                prev_datestr = date_str
             else :
                 if rain_con != 0 :
-                    #print(f'{prev_datestr} {rain_con}')
+                    rain_date_list.append(prev_datestr)
+                    rain_con_list.append(rain_con)
                     rain_con = 0
+                fine_con += 1
+
+    #print(rain_date_list,rain_con_list)
+    #print(fine_date_list,fine_con_list)
+
+def continuous_rain(out) :
+    for rdate , rtime in zip(rain_date_list,rain_con_list) :
+        out.write(f'<tr><td>{rdate}</td><td align="right">{rtime}</td></tr>\n')
 
