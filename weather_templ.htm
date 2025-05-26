@@ -1,5 +1,5 @@
 <html>
-<!-- 25/05/23 v1.47 気温情報に標準偏差追加 -->
+<!-- 25/05/26 連続雨時間情報追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -191,6 +191,13 @@
                     <th>年月</th><th>1日平均雨時間</th><th>1日最大雨時間</th><th>雨日数</th>
                 </tr>
                 %monthly_rain_time%
+            </table>
+            <b>連続晴・雨時間</b> 
+            <table>
+                <tr>
+                    <th>日付</th><th>連続雨時間</th>
+                </tr>
+                %continuous_rain%
             </table>
 
         </div>
