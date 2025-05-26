@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/23 v1.47 気温情報に標準偏差追加
-version = "1.47"
+# 25/05/26 v1.48 連続雨時間情報追加
+version = "1.48"
 
 out =  ""
 logf = ""
@@ -693,6 +693,9 @@ def parse_template() :
             continue
         if "%monthly_rain_time%" in line :
             rain.monthly_rain_time(out)
+            continue
+        if "%continuous_rain%" in line :
+            rain.continuous_rain(out)
             continue
         if "%min_max_temperature%" in line :
             min_max_temperature()
