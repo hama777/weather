@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/26 v1.03 連続雨時間情報追加
-version = "1.03"
+# 25/05/27 v1.04 連続晴時間情報追加
+version = "1.04"
 
 out =  ""
 logf = ""
@@ -110,5 +110,12 @@ def continuous_fine_rain() :
 
 def continuous_rain(out) :
     for rdate , rtime in zip(rain_date_list,rain_con_list) :
+        if rtime <= 3 :
+            continue
         out.write(f'<tr><td>{rdate}</td><td align="right">{rtime}</td></tr>\n')
 
+def continuous_fine(out) :
+    for rdate , rtime in zip(fine_date_list,fine_con_list) :
+        if rtime <= 24 :
+            continue
+        out.write(f'<tr><td>{rdate}</td><td align="right">{rtime}</td></tr>\n')
