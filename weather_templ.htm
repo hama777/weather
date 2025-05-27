@@ -1,5 +1,5 @@
 <html>
-<!-- 25/05/26 連続雨時間情報追加 -->
+<!-- 25/05/27 連続晴時間情報追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -192,13 +192,25 @@
                 </tr>
                 %monthly_rain_time%
             </table>
-            <b>連続晴・雨時間</b> 
-            <table>
-                <tr>
-                    <th>日付</th><th>連続雨時間</th>
-                </tr>
-                %continuous_rain%
-            </table>
+            <div class="flex">
+                <b>連続晴・雨時間</b><br>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>連続雨時間</th>
+                        </tr>
+                        %continuous_rain%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>連続晴時間</th>
+                        </tr>
+                        %continuous_fine%
+                    </table>
+                </div>
+            </div>
 
         </div>
 
