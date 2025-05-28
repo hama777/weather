@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/27 v1.49 連続晴時間情報追加
-version = "1.49"
+# 25/05/28 v1.50 月別気温データに標準偏差を追加
+version = "1.50"
 
 out =  ""
 logf = ""
@@ -276,7 +276,7 @@ def min_max_temperature_com(arg_df) :
 def monthly_tempera() :
     # 月ごとに avg max min の 平均値、最大値、最小値 を求める
     monthly_summary = daily_info.resample('ME').agg({
-        'avg': ['mean', 'max', 'min'],
+        'avg': ['mean', 'max', 'min','std'],
         'max': [ 'mean', 'max', 'min'],
         'min': [ 'mean', 'max', 'min']
     })    
@@ -286,7 +286,8 @@ def monthly_tempera() :
                   f'<td align="right">{row["avg"]["max"]:4.2f}</td>'
                   f'<td align="right">{row["avg"]["min"]:4.2f}</td>'
                   f'<td align="right">{row["max"]["max"]}</td>'
-                  f'<td align="right">{row["min"]["min"]}</td></tr>\n')
+                  f'<td align="right">{row["min"]["min"]}</td>'
+                  f'<td align="right">{row["avg"]["std"]:4.2f}</td></tr>\n')
 
 #   気温グラフ   時間ごと
 def tempera_graph() :
