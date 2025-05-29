@@ -6,11 +6,12 @@ import datetime
 import pandas as pd
 import com
 import rain
+import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/28 v1.50 月別気温データに標準偏差を追加
-version = "1.50"
+# 25/05/29 v1.51 tempera.pyを分離
+version = "1.51"
 
 out =  ""
 logf = ""
@@ -91,7 +92,7 @@ def main_proc() :
     locale.setlocale(locale.LC_TIME, '')
     date_settings()
     read_config()
-    read_temperature_data()
+    tempera.read_temperature_data()
 
     dir_path = datadir
     datafile_list = [
@@ -110,7 +111,7 @@ def main_proc() :
     calc_hit_rate()
     calc_hit_rate_week()    
     output_act_weather_file()
-    create_temperature_info()
+    tempera.create_temperature_info()
     rain.create_df_week_rain()  
     parse_template()
     ftp_upload()
@@ -188,7 +189,7 @@ def read_data_week(fname) :
         cur_date +=  datetime.timedelta(days=1)
     #print(week_data)
 
-def read_temperature_data() :
+def read_temperature_data_old() :
     global df_tempera
     date_list = []
     val_list = []
@@ -205,7 +206,7 @@ def read_temperature_data() :
 
 #   気温の日々の平均値、最高値、最低値、標準偏差を求める
 #   気温の7日移動平均  df_week_tempera  作成
-def create_temperature_info() :
+def create_temperature_info_old() :
     global daily_info,df_week_tempera
     seri_tmp  = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
     daily_avg = seri_tmp.rename('avg')
@@ -229,7 +230,7 @@ def create_temperature_info() :
 
 #   日別気温データ
 #   気温の日々の平均値、最高値、最低値の表示
-def temperature_info(col) :
+def temperature_info_old(col) :
     n = 0 
     for index,row in daily_info.tail(40).iterrows() :
         n += 1
@@ -243,16 +244,16 @@ def temperature_info(col) :
 
 
 #   日別気温データの過去最高値、最低値を表示
-def min_max_temperature() :
+def min_max_temperature_old() :
     min_max_temperature_com(daily_info)
 
 #   過去30日間の日別気温データの過去最高値、最低値を表示
-def min_max_temperature_30days() :
+def min_max_temperature_30days_old() :
     df_30 = daily_info.tail(30)
     min_max_temperature_com(df_30)
 
 #   日別気温データの過去最高値、最低値を取得
-def min_max_temperature_com(arg_df) :
+def min_max_temperature_com_old(arg_df) :
     item_list = ['avg','max','min'] 
     item_name = {'avg' : '日平均気温','max' : '日最高気温','min' :'日最低気温'}
     aggmax = {}
@@ -273,7 +274,7 @@ def min_max_temperature_com(arg_df) :
         out.write(f'<td align="right">{aggmax[item]:4.2f}</td><td>{aggmax_date[item]}</td>'
                   f'<td align="right">{aggmin[item]:4.2f}</td><td>{aggmin_date[item]}</td></tr>\n')
 
-def monthly_tempera() :
+def monthly_tempera_old() :
     # 月ごとに avg max min の 平均値、最大値、最小値 を求める
     monthly_summary = daily_info.resample('ME').agg({
         'avg': ['mean', 'max', 'min','std'],
@@ -290,7 +291,7 @@ def monthly_tempera() :
                   f'<td align="right">{row["avg"]["std"]:4.2f}</td></tr>\n')
 
 #   気温グラフ   時間ごと
-def tempera_graph() :
+def tempera_graph_old() :
     df = df_tempera.tail(336)   # 2週間分  24 * 14
     for _,row in df.iterrows() :
         date_str = row['date'].strftime('%d %H')
@@ -298,14 +299,14 @@ def tempera_graph() :
         out.write(f"['{date_str}',{v}],") 
 
 #   気温グラフ   日ごと
-def tempera_graph_daily() :
+def tempera_graph_daily_old() :
     for index,row in daily_info.iterrows() :
         date_str = index.strftime('%m/%d')
         v = row['avg']
         out.write(f"['{date_str}',{v}],") 
 
 #   気温グラフ   7日移動平均
-def tempera_graph_week() :
+def tempera_graph_week_old() :
     for index,row in df_week_tempera.iterrows() :
         v = row['avg']
         if pd.isna(v) :
@@ -675,19 +676,28 @@ def parse_template() :
             daily_hit_rate(2)
             continue
         if "%tempera_graph%" in line :
-            tempera_graph()
+            tempera.tempera_graph(out)
             continue
         if "%tempera_graph_daily%" in line :
-            tempera_graph_daily()
+            tempera.tempera_graph_daily(out)
             continue
         if "%tempera_graph_week%" in line :
-            tempera_graph_week()
+            tempera.tempera_graph_week(out)
             continue
         if "%daily_tempera1%" in line :
-            temperature_info(1)
+            tempera.temperature_info(out,1)
             continue
         if "%daily_tempera2%" in line :
-            temperature_info(2)
+            tempera.temperature_info(out,2)
+            continue
+        if "%min_max_temperature%" in line :
+            tempera.min_max_temperature(out)
+            continue
+        if "%min_max_temperature_30days%" in line :
+            tempera.min_max_temperature_30days(out)
+            continue
+        if "%monthly_tempera%" in line :
+            tempera.monthly_tempera(out)
             continue
         if "%week_rain_time_graph%" in line :
             rain.week_rain_time_graph(out)
@@ -700,15 +710,6 @@ def parse_template() :
             continue
         if "%continuous_fine%" in line :
             rain.continuous_fine(out)
-            continue
-        if "%min_max_temperature%" in line :
-            min_max_temperature()
-            continue
-        if "%min_max_temperature_30days%" in line :
-            min_max_temperature_30days()
-            continue
-        if "%monthly_tempera%" in line :
-            monthly_tempera()
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
