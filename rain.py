@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/27 v1.04 連続晴時間情報追加
-version = "1.04"
+# 25/06/02 v1.05 連続晴時間情報の日付の表示形式変更
+version = "1.05"
 
 out =  ""
 logf = ""
@@ -110,12 +110,20 @@ def continuous_fine_rain() :
 
 def continuous_rain(out) :
     for rdate , rtime in zip(rain_date_list,rain_con_list) :
-        if rtime <= 3 :
+        if rtime <= 3 :   #  連続3時間以内は無視
             continue
-        out.write(f'<tr><td>{rdate}</td><td align="right">{rtime}</td></tr>\n')
+        yymmddhh  = int(rdate)
+        dt = com.conv_mmddhh_to_date(yymmddhh)
+        hh = yymmddhh % 100
+        date_str = dt.strftime('%m/%d (%a)')
+        out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}</td></tr>\n')
 
 def continuous_fine(out) :
     for rdate , rtime in zip(fine_date_list,fine_con_list) :
-        if rtime <= 24 :
+        if rtime <= 24 :  #  連続24時間以内は無視
             continue
-        out.write(f'<tr><td>{rdate}</td><td align="right">{rtime}</td></tr>\n')
+        yymmddhh  = int(rdate)
+        dt = com.conv_mmddhh_to_date(yymmddhh)
+        hh = yymmddhh % 100
+        date_str = dt.strftime('%m/%d (%a)')
+        out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}</td></tr>\n')
