@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/30 v1.52 tempera.py分離部分を削除
-version = "1.52"
+# 25/06/03 v1.53 1時間予報の表示を1日前0時からに変更
+version = "1.53"
 
 out =  ""
 logf = ""
@@ -193,9 +193,12 @@ def read_data_week(fname) :
 #   時間天気予報の表示
 def hour_forecast() :
 
+    display_start_day = 1   #  display_start_day 前から表示を開始する 
+    display_start_hh = 0    #  表示を開始する時刻   1日前の0時から表示する
     out.write('<thead><tr><th>予報日時</th>\n')
-    cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
-    cur_hh = start_hh        
+    cur_date = today_date - datetime.timedelta(days=display_start_day)    # 予報は今日のdisplay_start_day日前から
+    #cur_hh = start_hh        
+    cur_hh = display_start_hh        
     #  テーブルヘッダ出力
     while True :
         out.write(f'<th>{cur_date.day}<br>{cur_hh:02}</th>')
@@ -216,8 +219,9 @@ def hour_forecast() :
         forecast_str = com.conv_mmddhh_to_str(forecast_date)
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
-        cur_date = today_date - datetime.timedelta(days=3)    # 予報は今日の3日前から
-        cur_hh = start_hh
+        cur_date = today_date - datetime.timedelta(days=display_start_day)    # 予報は今日のdisplay_start_day日前から
+        #cur_hh = start_hh
+        cur_hh = display_start_hh
         while True :
             k = com.conv_date_int(cur_date) + cur_hh    # k 発表日時
             if k in  timeline_dic :
