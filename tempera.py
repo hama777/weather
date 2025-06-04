@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/05/29 v1.00 view.pyから分離
-version = "1.00"
+# 25/06/04 v1.01 夏日を集計する
+version = "1.01"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -122,6 +122,10 @@ def monthly_tempera(out) :
                   f'<td align="right">{row["max"]["max"]}</td>'
                   f'<td align="right">{row["min"]["min"]}</td>'
                   f'<td align="right">{row["avg"]["std"]:4.2f}</td></tr>\n')
+    count_avg_over_25 = (daily_info['max'] >= 25).resample('ME').sum().astype(int)
+    count_avg_over_25.name = ('avg', 'summerday_25')  # MultiIndexの列名に合わせる
+    monthly_summary[('avg', 'summerday_25')] = count_avg_over_25
+    #print(monthly_summary)
 
 #   気温グラフ   時間ごと
 def tempera_graph(out) :
