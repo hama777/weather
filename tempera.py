@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/04 v1.01 夏日を集計する
-version = "1.01"
+# 25/06/05 v1.02 夏日の日数を出力する
+version = "1.02"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -108,12 +108,20 @@ def min_max_temperature_com(out,arg_df) :
                   f'<td align="right">{aggmin[item]:4.2f}</td><td>{aggmin_date[item]}</td></tr>\n')
 
 def monthly_tempera(out) :
-    # 月ごとに avg max min の 平均値、最大値、最小値 を求める
+    # 月ごとに avg max min の 平均値、最大値、最小値、夏日日数 を求める
+    summerday_limit = [25,30,35]
+
     monthly_summary = daily_info.resample('ME').agg({
         'avg': ['mean', 'max', 'min','std'],
         'max': [ 'mean', 'max', 'min'],
         'min': [ 'mean', 'max', 'min']
     })    
+    for lim in summerday_limit :
+        count_summerday = (daily_info['max'] >= lim).resample('ME').sum().astype(int)
+        col_name = f'summerday_{lim}'
+        count_summerday.name = ('avg', col_name)  # MultiIndexの列名に合わせる
+        monthly_summary[('avg', col_name)] = count_summerday
+
     for index,row in monthly_summary.iterrows() :
         date_str = index.strftime('%y/%m')
         out.write(f'<tr><td>{date_str}</td><td align="right">{row["avg"]["mean"]:4.2f}</td>'
@@ -121,11 +129,10 @@ def monthly_tempera(out) :
                   f'<td align="right">{row["avg"]["min"]:4.2f}</td>'
                   f'<td align="right">{row["max"]["max"]}</td>'
                   f'<td align="right">{row["min"]["min"]}</td>'
-                  f'<td align="right">{row["avg"]["std"]:4.2f}</td></tr>\n')
-    count_avg_over_25 = (daily_info['max'] >= 25).resample('ME').sum().astype(int)
-    count_avg_over_25.name = ('avg', 'summerday_25')  # MultiIndexの列名に合わせる
-    monthly_summary[('avg', 'summerday_25')] = count_avg_over_25
-    #print(monthly_summary)
+                  f'<td align="right">{row["avg"]["std"]:4.2f}</td>'
+                  f'<td align="right">{row["avg"]["summerday_25"]:3.0f}</td>'
+                  f'<td align="right">{row["avg"]["summerday_30"]:3.0f}</td>'
+                  f'<td align="right">{row["avg"]["summerday_35"]:3.0f}</td></tr>\n')
 
 #   気温グラフ   時間ごと
 def tempera_graph(out) :
