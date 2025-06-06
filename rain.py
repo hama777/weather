@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/02 v1.05 連続晴時間情報の日付の表示形式変更
-version = "1.05"
+# 25/06/06 v1.06 連続晴時間情報の時間表示形式追加
+version = "1.06"
 
 out =  ""
 logf = ""
@@ -126,4 +126,6 @@ def continuous_fine(out) :
         dt = com.conv_mmddhh_to_date(yymmddhh)
         hh = yymmddhh % 100
         date_str = dt.strftime('%m/%d (%a)')
-        out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}</td></tr>\n')
+        days = rtime // 24
+        fine_hh = rtime % 24
+        out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}({days}日{fine_hh:02}時間)</td></tr>\n')
