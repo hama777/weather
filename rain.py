@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/06 v1.06 連続晴時間情報の時間表示形式追加
-version = "1.06"
+# 25/06/11 v1.07 現在の連続晴雨時間を表示
+version = "1.07"
 
 out =  ""
 logf = ""
@@ -78,15 +78,17 @@ def monthly_rain_time(out) :
 def continuous_fine_rain() :
     global rain_date_list,rain_con_list
     global fine_date_list,fine_con_list
+    global cur_continuous_data 
+    cur_continuous_data = {}    # 現在の連続天気情報   key date , count , rain(雨の時 1)  
+    rain_con = 0
+    fine_con = 0 
+    rain_date_list = []
+    rain_con_list = []
+    fine_date_list = []
+    fine_con_list = []
+    prev_datestr = ""
+    date_str = ""
     with open(act_weather_file , encoding='utf-8') as f:
-        rain_con = 0
-        fine_con = 0 
-        rain_date_list = []
-        rain_con_list = []
-        fine_date_list = []
-        fine_con_list = []
-        prev_datestr = ""
-        date_str = ""
         for line in f:
             dt = line.split("\t")
             prev_datestr = date_str
@@ -105,6 +107,18 @@ def continuous_fine_rain() :
                     rain_con = 0
                 fine_con += 1
 
+    if rain_con != 0 :
+        cur_continuous_data['date'] = date_str
+        cur_continuous_data['count'] = rain_con
+        cur_continuous_data['rain'] = 1
+        print(rain_con,date_str)
+    if fine_con != 0 :
+        cur_continuous_data['date'] = date_str
+        cur_continuous_data['count'] = fine_con
+        cur_continuous_data['rain'] = 0
+        print(fine_con,date_str)
+
+    print(cur_continuous_data)
     #print(rain_date_list,rain_con_list)
     #print(fine_date_list,fine_con_list)
 
@@ -129,3 +143,15 @@ def continuous_fine(out) :
         days = rtime // 24
         fine_hh = rtime % 24
         out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}({days}日{fine_hh:02}時間)</td></tr>\n')
+
+def cur_continuous(out) :
+    if cur_continuous_data['rain'] == 0 :
+        s = "連続晴情報 "
+    else :
+        s = "連続雨情報 "
+    yymmddhh  = int(cur_continuous_data['date'])
+    dt = com.conv_mmddhh_to_date(yymmddhh)
+    hh = yymmddhh % 100
+    date_str = dt.strftime('%m/%d (%a)')
+    out.write(f"{s} {cur_continuous_data['count']} 時間 {date_str} {hh}時 現在\n")
+
