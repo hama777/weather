@@ -10,13 +10,14 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/11 v1.54 現在の連続晴雨時間を表示
-version = "1.54"
+# 25/06/17 v1.55 実績天気データ作成  暫定
+version = "1.55"
 
 out =  ""
 logf = ""
 appdir = os.path.dirname(os.path.abspath(__file__))
 datadir = appdir + "/data/" 
+olddatadir = appdir + "/old/data/" 
 datadir_week = appdir + "/week/" 
 resultfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
@@ -24,6 +25,7 @@ templatefile = appdir + "/weather_templ.htm"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 dailyfile = appdir + "/dailyinfo.txt"
 act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
+act_weather_file2 = appdir + "/actweather2.txt"   #  実績天気データ  1時間ごと  暫定
 
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
@@ -382,6 +384,42 @@ def output_act_weather_file() :
         date_str = com.conv_mmddhh_to_hh_str(forecast_date)
         act = hitdata['act']
         f.write(f'{date_str}\t{act}\n')
+    f.close()
+    create_act_weather_file()
+
+#  過去からのファイルを読んで 実際の天気の情報をファイルに出力する  作成中
+def create_act_weather_file() :
+    actf = open(act_weather_file2,'w')
+    # dir_path = olddatadir
+    # datafile_list = [
+    #     f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
+    # ]
+    # for fname in datafile_list :
+    #     read_one_hour(fname,actf)
+
+    dir_path = datadir
+    datafile_list = [
+        f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
+    ]
+    for fname in datafile_list :
+        read_one_hour(fname,actf)
+    actf.close()
+
+def read_one_hour(fname,actf) :
+    datafile = datadir + fname
+    f = open(datafile , 'r')
+    header  = f.readline().strip()
+    hh = header.split()
+    date_str = hh[0]
+    start_hh = int(hh[1])   
+    dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    start_date = datetime.date(dt.year, dt.month, dt.day) # データの開始日付 date型
+    start_date_int = com.conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
+    start_date_int += start_hh
+
+    body  = f.readline().strip()
+    we_data = body.split(",")[0]        #  we_list は1時間ごとの天気
+    actf.write(f'{start_date_int}\t{we_data}\n') 
     f.close()
 
 #   日的中率の表示
