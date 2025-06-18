@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/01/09 v1.08 現在の気温を出力する
-version = "1.08"  
+# 25/06/08 v1.09 実際の天気をファイルに出力する
+version = "1.09"  
 
 out =  ""
 logf = ""
@@ -19,6 +19,7 @@ outfile_prefix = appdir + "/data/we"
 week_outfile_prefix = appdir + "/week/we" 
 conffile = appdir + "/weather.conf"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
+act_weather_file = appdir + "/actweather2.txt"   #  実績天気データ  1時間ごと  暫定
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
 icon_url = "https://gvs.weathernews.jp/onebox/img/wxicon/"     # 天気アイコンのURL
@@ -85,6 +86,17 @@ def output_datafile() :
     out.write(s)
     out.write("\n")
     out.close()
+    datefmt = f'{today_yy-2000}{today_mm:02}{today_dd:02}{rec_hh:02}' 
+    # データの先頭 data_list[0] が実際の天気を示す
+    output_act_weather(datefmt,data_list[0])
+
+#   実際の天気をファイルに出力する
+#   act_weather_file に yymmddhh tab 天気コード の形式で追記する
+def output_act_weather(fmt,act) :
+    actf = open(act_weather_file , 'a', encoding='utf-8')
+    actf.write(f'{fmt}\t{act}\n')
+    actf.close()
+
 
 def output_week_datafile() :
     if (today_hh % 3) != 0 :    # 3時間おきに採取
