@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/06/08 v1.09 実際の天気をファイルに出力する
-version = "1.09"  
+# 25/06/19 v1.10 実際の天気をファイルに出力する
+version = "1.10"  
 
 out =  ""
 logf = ""
@@ -19,7 +19,7 @@ outfile_prefix = appdir + "/data/we"
 week_outfile_prefix = appdir + "/week/we" 
 conffile = appdir + "/weather.conf"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
-act_weather_file = appdir + "/actweather2.txt"   #  実績天気データ  1時間ごと  暫定
+act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと  暫定
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
 icon_url = "https://gvs.weathernews.jp/onebox/img/wxicon/"     # 天気アイコンのURL
