@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/17 v1.55 実績天気データ作成  暫定
-version = "1.55"
+# 25/06/19 v1.56 actweather.txtファイルはweather.pyで出力する
+version = "1.56"
 
 out =  ""
 logf = ""
@@ -112,7 +112,7 @@ def main_proc() :
 
     calc_hit_rate()
     calc_hit_rate_week()    
-    output_act_weather_file()
+    #output_act_weather_file()
     tempera.create_temperature_info()
     rain.create_df_week_rain()  
     parse_template()
@@ -390,23 +390,24 @@ def output_act_weather_file() :
 #  過去からのファイルを読んで 実際の天気の情報をファイルに出力する  作成中
 def create_act_weather_file() :
     actf = open(act_weather_file2,'w')
-    # dir_path = olddatadir
-    # datafile_list = [
-    #     f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
-    # ]
-    # for fname in datafile_list :
-    #     read_one_hour(fname,actf)
+    dir_path = olddatadir
+    datafile_list = [
+        f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
+    ]
+    for fname in datafile_list :
+        print(dir_path + fname)
+        read_one_hour(dir_path + fname,actf)
 
     dir_path = datadir
     datafile_list = [
         f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
     ]
     for fname in datafile_list :
-        read_one_hour(fname,actf)
+        read_one_hour(dir_path + fname,actf)
     actf.close()
 
 def read_one_hour(fname,actf) :
-    datafile = datadir + fname
+    datafile =  fname
     f = open(datafile , 'r')
     header  = f.readline().strip()
     hh = header.split()
