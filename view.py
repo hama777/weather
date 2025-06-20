@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/19 v1.56 actweather.txtファイルはweather.pyで出力する
-version = "1.56"
+# 25/06/20 v1.57 continuous_fine_rain()をparse前に呼び出す
+version = "1.57"
 
 out =  ""
 logf = ""
@@ -24,8 +24,8 @@ conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 dailyfile = appdir + "/dailyinfo.txt"
-act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
-act_weather_file2 = appdir + "/actweather2.txt"   #  実績天気データ  1時間ごと  暫定
+#act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
+#act_weather_file2 = appdir + "/actweather2.txt"   #  実績天気データ  1時間ごと  暫定
 
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
@@ -112,9 +112,9 @@ def main_proc() :
 
     calc_hit_rate()
     calc_hit_rate_week()    
-    #output_act_weather_file()
     tempera.create_temperature_info()
     rain.create_df_week_rain()  
+    rain.continuous_fine_rain()
     parse_template()
     ftp_upload()
     daily_info_output()
@@ -377,51 +377,6 @@ def output_hit_rate(col) :
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
-
-def output_act_weather_file() :
-    f = open(act_weather_file,"w")
-    for forecast_date,hitdata in  hit_rate.items() :   
-        date_str = com.conv_mmddhh_to_hh_str(forecast_date)
-        act = hitdata['act']
-        f.write(f'{date_str}\t{act}\n')
-    f.close()
-    create_act_weather_file()
-
-#  過去からのファイルを読んで 実際の天気の情報をファイルに出力する  作成中
-def create_act_weather_file() :
-    actf = open(act_weather_file2,'w')
-    dir_path = olddatadir
-    datafile_list = [
-        f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
-    ]
-    for fname in datafile_list :
-        print(dir_path + fname)
-        read_one_hour(dir_path + fname,actf)
-
-    dir_path = datadir
-    datafile_list = [
-        f for f in os.listdir(dir_path) if os.path.isfile(os.path.join(dir_path, f))
-    ]
-    for fname in datafile_list :
-        read_one_hour(dir_path + fname,actf)
-    actf.close()
-
-def read_one_hour(fname,actf) :
-    datafile =  fname
-    f = open(datafile , 'r')
-    header  = f.readline().strip()
-    hh = header.split()
-    date_str = hh[0]
-    start_hh = int(hh[1])   
-    dt = datetime.datetime.strptime(date_str, '%Y-%m-%d')
-    start_date = datetime.date(dt.year, dt.month, dt.day) # データの開始日付 date型
-    start_date_int = com.conv_date_int(start_date)            # データの開始日付 yymmddhh の int型 キーとして使用
-    start_date_int += start_hh
-
-    body  = f.readline().strip()
-    we_data = body.split(",")[0]        #  we_list は1時間ごとの天気
-    actf.write(f'{start_date_int}\t{we_data}\n') 
-    f.close()
 
 #   日的中率の表示
 def daily_hit_rate(col) :
