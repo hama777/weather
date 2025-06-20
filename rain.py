@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/11 v1.07 現在の連続晴雨時間を表示
-version = "1.07"
+# 25/06/20 v1.08 連続晴雨時間を直近20件のみ表示
+version = "1.08"
 
 out =  ""
 logf = ""
@@ -63,7 +63,7 @@ def week_rain_time_graph(out) :
 
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
-    continuous_fine_rain()
+    #continuous_fine_rain()
     monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
     #print(monthly_stats)
     for index,row in monthly_stats.iterrows() :
@@ -111,21 +111,20 @@ def continuous_fine_rain() :
         cur_continuous_data['date'] = date_str
         cur_continuous_data['count'] = rain_con
         cur_continuous_data['rain'] = 1
-        print(rain_con,date_str)
     if fine_con != 0 :
         cur_continuous_data['date'] = date_str
         cur_continuous_data['count'] = fine_con
         cur_continuous_data['rain'] = 0
-        print(fine_con,date_str)
 
-    print(cur_continuous_data)
+    #print(cur_continuous_data)
     #print(rain_date_list,rain_con_list)
     #print(fine_date_list,fine_con_list)
 
 def continuous_rain(out) :
-    for rdate , rtime in zip(rain_date_list,rain_con_list) :
-        if rtime <= 3 :   #  連続3時間以内は無視
-            continue
+    last = 20    # 直近、n件のみ表示する
+    for rdate , rtime in zip(rain_date_list[-last:],rain_con_list[-last:]) :
+        # if rtime <= 3 :   #  連続3時間以内は無視
+        #     continue
         yymmddhh  = int(rdate)
         dt = com.conv_mmddhh_to_date(yymmddhh)
         hh = yymmddhh % 100
@@ -133,9 +132,10 @@ def continuous_rain(out) :
         out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}</td></tr>\n')
 
 def continuous_fine(out) :
-    for rdate , rtime in zip(fine_date_list,fine_con_list) :
-        if rtime <= 24 :  #  連続24時間以内は無視
-            continue
+    last = 20
+    for rdate , rtime in zip(fine_date_list[-last:],fine_con_list[-last:]) :
+        # if rtime <= 24 :  #  連続24時間以内は無視
+        #     continue
         yymmddhh  = int(rdate)
         dt = com.conv_mmddhh_to_date(yymmddhh)
         hh = yymmddhh % 100
