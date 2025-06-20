@@ -3,8 +3,8 @@
 import datetime
 from datetime import date,timedelta
 
-# 25/05/26 v1.04 天気コード追加
-version = "1.04"     
+# 25/06/20 v1.05 天気コード追加
+version = "1.05"     
 
 #  雨の時 true を返す
 def is_rain(we) :
@@ -29,8 +29,9 @@ def is_rain_week(we) :
        we == 882 or we == 872 or we == 852 or we == 850 :
         return True
     # 晴れ
-    # 105 晴時々雪   117 晴のち雪
-    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or we == 211 or we == 105 or we == 117 :
+    # 105 晴時々雪   117 晴のち雪    550 猛暑
+    if we == 100 or we == 101 or we == 111 or we == 200 or  we == 201 or we == 211 or we == 105 or\
+       we == 117 or we == 550 or we == 552:
         return False
     print(f'ERROR we week code {we}')
     return False
