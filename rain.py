@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/20 v1.08 連続晴雨時間を直近20件のみ表示
-version = "1.08"
+# 25/06/23 v1.09 連続晴雨時間に継続中の情報も追加
+version = "1.09"
 
 out =  ""
 logf = ""
@@ -111,10 +111,15 @@ def continuous_fine_rain() :
         cur_continuous_data['date'] = date_str
         cur_continuous_data['count'] = rain_con
         cur_continuous_data['rain'] = 1
+        rain_date_list.append(date_str)
+        rain_con_list.append(rain_con)
+
     if fine_con != 0 :
         cur_continuous_data['date'] = date_str
         cur_continuous_data['count'] = fine_con
         cur_continuous_data['rain'] = 0
+        fine_date_list.append(date_str)
+        fine_con_list.append(fine_con)
 
     #print(cur_continuous_data)
     #print(rain_date_list,rain_con_list)
