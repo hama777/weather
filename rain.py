@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/24 v1.10 連続雨時間Topを表示
-version = "1.10"
+# 25/06/25 v1.11 連続晴時間Topを表示
+version = "1.11"
 
 out =  ""
 logf = ""
@@ -79,7 +79,7 @@ def continuous_fine_rain() :
     global rain_date_list,rain_con_list
     global fine_date_list,fine_con_list
     global cur_continuous_data 
-    global df_cont_rain
+    global df_cont_rain,df_cont_fine
     cur_continuous_data = {}    # 現在の連続天気情報   key date , count , rain(雨の時 1)  
     rain_con = 0
     fine_con = 0 
@@ -126,7 +126,8 @@ def continuous_fine_rain() :
     #print(rain_date_list,rain_con_list)
     #print(fine_date_list,fine_con_list)
 
-    df_cont_rain = pd.DataFrame(list(zip(rain_date_list,rain_con_list)), columns = ['yymmddhh','cont_rain'])
+    df_cont_rain = pd.DataFrame(list(zip(rain_date_list,rain_con_list)), columns = ['yymmddhh','cont'])
+    df_cont_fine = pd.DataFrame(list(zip(fine_date_list,fine_con_list)), columns = ['yymmddhh','cont'])
     #print(df_cont_rain)
 
 def continuous_rain(out) :
@@ -141,17 +142,24 @@ def continuous_rain(out) :
         out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{rtime}</td></tr>\n')
 
 def top_continuous_rain(out) :
-    df_top = df_cont_rain.sort_values('cont_rain',ascending=False)
-    print(df_top)
+    df_top = df_cont_rain.sort_values('cont',ascending=False)
+    top_continuous_com(out,df_top) 
+
+def top_continuous_fine(out) :
+    df_top = df_cont_fine.sort_values('cont',ascending=False)
+    top_continuous_com(out,df_top) 
+
+def top_continuous_com(out,df_top) :
     for index,row in df_top.head(5).iterrows() :
         yymmddhh  = int(row['yymmddhh'])
         dt = com.conv_mmddhh_to_date(yymmddhh)
         hh = yymmddhh % 100
         date_str = dt.strftime('%m/%d (%a)')
-        hh = yymmddhh % 100
-        count = row['cont_rain']
-        out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{count}</td></tr>\n')
+        count = row['cont']
+        days = count // 24
+        fine_hh = count % 24
 
+        out.write(f'<tr><td>{date_str} {hh:02}時</td><td align="right">{count}({days:2}日{fine_hh:02}時間)</td></tr>\n')
 
 def continuous_fine(out) :
     last = 20
