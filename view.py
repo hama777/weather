@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/23 v1.58 連続雨時間Topを表示
-version = "1.58"
+# 25/06/25 v1.59 連続晴時間Topを表示
+version = "1.59"
 
 out =  ""
 logf = ""
@@ -590,6 +590,9 @@ def parse_template() :
             continue
         if "%top_continuous_rain%" in line :
             rain.top_continuous_rain(out)
+            continue
+        if "%top_continuous_fine%" in line :
+            rain.top_continuous_fine(out)
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
