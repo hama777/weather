@@ -1,5 +1,5 @@
 <html>
-<!-- 25/06/24 連続雨時間Topを表示 -->
+<!-- 25/06/25 連続晴時間Topを表示 -->
 
 <head>
     <title>Weather Check</title>
@@ -196,13 +196,26 @@
                 </tr>
                 %monthly_rain_time%
             </table>
-            <b>連続雨時間Top</b><br>
-            <table>
-                <tr>
-                    <th>日付</th><th>連続雨時間</th>
-                </tr>
-                %top_continuous_rain%
-            </table>
+            <b>連続晴・雨時間Top</b><br>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>連続雨時間</th>
+                        </tr>
+                        %top_continuous_rain%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>連続晴時間</th>
+                        </tr>
+                        %top_continuous_fine%
+                    </table>
+                </div>
+            </div>
+
 
             <b>連続晴・雨時間</b><br>
             <div class="flex">
