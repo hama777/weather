@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/05 v1.02 夏日の日数を出力する
-version = "1.02"
+# 25/06/30 v1.03 日平均気温ランキング追加
+version = "1.03"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -157,3 +157,14 @@ def tempera_graph_week(out) :
             continue 
         date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
+
+#   平均気温ランキング
+def ranking_tempera(out) :
+    df_top = daily_info.sort_values('avg',ascending=False)
+    i = 0 
+    for index,row in df_top.head(10).iterrows() :
+        i += 1
+        dt = index
+        date_str = index.strftime('%m/%d (%a)')
+        avg = row['avg']
+        out.write(f'<tr><td align="right">{i}</td><td>{date_str}</td><td>{avg:5.2f}</td></tr>\n')
