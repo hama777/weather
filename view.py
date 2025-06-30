@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/25 v1.59 連続晴時間Topを表示
-version = "1.59"
+# 25/06/30 v1.60 日平均気温ランキング追加
+version = "1.60"
 
 out =  ""
 logf = ""
@@ -572,6 +572,9 @@ def parse_template() :
             continue
         if "%monthly_tempera%" in line :
             tempera.monthly_tempera(out)
+            continue
+        if "%ranking_tempera%" in line :
+            tempera.ranking_tempera(out)
             continue
         if "%week_rain_time_graph%" in line :
             rain.week_rain_time_graph(out)
