@@ -1,5 +1,5 @@
 <html>
-<!-- 25/06/30 日平均気温ランキング追加 -->
+<!-- 25/07/01 日最高最低気温ランキング追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -181,11 +181,27 @@
                     </table>
                 </div>
             </div>
-            <b>ランキング 平均気温</b>
-            <table>
-                <tr><th>順位</th><th>日付</th><th>平均気温</th></tr>
-                %ranking_tempera%
-            </table>
+            <b>ランキング 気温</b>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>平均気温</th></tr>
+                    %ranking_ave_tempera%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>最高気温</th></tr>
+                    %ranking_max_tempera%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>最低気温</th></tr>
+                    %ranking_min_tempera%
+                    </table>
+                </div>
+            </div>
 
         </div>
         <div class="content" id="rain">
