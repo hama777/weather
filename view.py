@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/30 v1.60 日平均気温ランキング追加
-version = "1.60"
+# 25/07/01 v1.61 日最高最低気温ランキング追加
+version = "1.61"
 
 out =  ""
 logf = ""
@@ -573,8 +573,14 @@ def parse_template() :
         if "%monthly_tempera%" in line :
             tempera.monthly_tempera(out)
             continue
-        if "%ranking_tempera%" in line :
-            tempera.ranking_tempera(out)
+        if "%ranking_ave_tempera%" in line :
+            tempera.ranking_ave_tempera(out)
+            continue
+        if "%ranking_max_tempera%" in line :
+            tempera.ranking_max_tempera(out)
+            continue
+        if "%ranking_min_tempera%" in line :
+            tempera.ranking_min_tempera(out)
             continue
         if "%week_rain_time_graph%" in line :
             rain.week_rain_time_graph(out)
