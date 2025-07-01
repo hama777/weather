@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/06/30 v1.03 日平均気温ランキング追加
-version = "1.03"
+# 25/07/01 v1.04 日最高最低気温ランキング追加
+version = "1.04"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -159,12 +159,22 @@ def tempera_graph_week(out) :
         out.write(f"['{date_str}',{v}],") 
 
 #   平均気温ランキング
-def ranking_tempera(out) :
+def ranking_ave_tempera(out) :
     df_top = daily_info.sort_values('avg',ascending=False)
+    ranking_tempera_com(df_top.head(10),'avg',out)
+
+def ranking_max_tempera(out) :
+    df_max = daily_info.sort_values('max',ascending=False)
+    ranking_tempera_com(df_max.head(10),'max',out)
+
+def ranking_min_tempera(out) :
+    df_min = daily_info.sort_values('min',ascending=False)
+    ranking_tempera_com(df_min.head(10),'min',out)
+
+def ranking_tempera_com(df,col,out) :
     i = 0 
-    for index,row in df_top.head(10).iterrows() :
+    for index,row in df.iterrows() :
         i += 1
-        dt = index
         date_str = index.strftime('%m/%d (%a)')
-        avg = row['avg']
-        out.write(f'<tr><td align="right">{i}</td><td>{date_str}</td><td>{avg:5.2f}</td></tr>\n')
+        val = row[col]
+        out.write(f'<tr><td align="right">{i}</td><td>{date_str}</td><td align="right">{val:5.2f}</td></tr>\n')
