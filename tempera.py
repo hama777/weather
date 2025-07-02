@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/07/01 v1.04 日最高最低気温ランキング追加
-version = "1.04"
+# 25/07/02 v1.05 日別気温データで前日差追加
+version = "1.05"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -59,7 +59,26 @@ def create_temperature_info() :
     daily_info['date'] = pd.to_datetime(daily_info['date'])  # date を datetime 型にする
     daily_info = daily_info.set_index('date')    #  date をindexにする
     #print(daily_info.columns)  
-    #print(daily_info)
+    diff_list = calc_differencr()
+    daily_info['diff'] = diff_list
+    print(daily_info)
+
+#   前日との気温差を計算
+def calc_differencr() :
+    i = 0 
+    prev = 99
+    diff_list = []
+    for index,row in daily_info.iterrows() :
+        i += 1 
+        if i == 1 : 
+            prev = row['avg']
+            diff_list.append(0)
+            continue
+        diff = row['avg'] - prev
+        diff_list.append(diff)
+        prev = row['avg']
+
+    return diff_list 
 
 #   日別気温データ
 #   気温の日々の平均値、最高値、最低値の表示
@@ -73,7 +92,8 @@ def temperature_info(out,col) :
         out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.2f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
                   f"<td align='right'>{row['min']:4.0f}</td>"
-                  f"<td align='right'>{row['std']:4.2f}</td></tr>\n")
+                  f"<td align='right'>{row['std']:4.2f}</td>"
+                  f"<td align='right'>{row['diff']:4.2f}</td></tr>\n")
 
 
 #   日別気温データの過去最高値、最低値を表示
