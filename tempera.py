@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/07/02 v1.05 日別気温データで前日差追加
-version = "1.05"
+# 25/07/03 v1.06 ランキングで当日、前日を色分け
+version = "1.06"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -58,10 +58,8 @@ def create_temperature_info() :
     daily_info = daily_info.reset_index()   # すでに date が index になっているので戻す
     daily_info['date'] = pd.to_datetime(daily_info['date'])  # date を datetime 型にする
     daily_info = daily_info.set_index('date')    #  date をindexにする
-    #print(daily_info.columns)  
     diff_list = calc_differencr()
     daily_info['diff'] = diff_list
-    print(daily_info)
 
 #   前日との気温差を計算
 def calc_differencr() :
@@ -89,11 +87,16 @@ def temperature_info(out,col) :
         if com.multi_col(n,col) :
             continue 
         date_str = index.strftime('%m/%d(%a)')
+        diff = row['diff']
+        diff_str = f"{diff:4.2f}"
+        if diff < 0 :
+            diff_str = f"<span class=red>{diff_str}</span>"
+
         out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.2f}</td>"
                   f"<td align='right'>{row['max']:4.0f}</td>"
                   f"<td align='right'>{row['min']:4.0f}</td>"
                   f"<td align='right'>{row['std']:4.2f}</td>"
-                  f"<td align='right'>{row['diff']:4.2f}</td></tr>\n")
+                  f"<td align='right'>{diff_str}</td></tr>\n")
 
 
 #   日別気温データの過去最高値、最低値を表示
@@ -193,8 +196,15 @@ def ranking_min_tempera(out) :
 
 def ranking_tempera_com(df,col,out) :
     i = 0 
+    today_date = datetime.date.today()  
+    yesterday = today_date - timedelta(days=1)
     for index,row in df.iterrows() :
         i += 1
         date_str = index.strftime('%m/%d (%a)')
+        #print(index,today_date)
+        if index.date() == today_date :
+            date_str = f'<span class=red>{date_str}</span>'
+        if index.date() == yesterday :
+            date_str = f'<span class=blue>{date_str}</span>'
         val = row[col]
         out.write(f'<tr><td align="right">{i}</td><td>{date_str}</td><td align="right">{val:5.2f}</td></tr>\n')
