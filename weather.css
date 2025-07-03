@@ -1,4 +1,4 @@
-/*  24/11/06    */
+/*  25/07/03  span blue 追加    */
 
 table {
     /*width: auto;*/
@@ -117,6 +117,9 @@ td.right{
 span.red {
     color : red;
 }
+span.blue {
+    color : blue;
+}
 
   .container {
     padding: 0;
@@ -164,11 +167,17 @@ span.red {
     padding: 7px 10px;
     line-height: 1.4;
     min-height: 150px;
-    display: none;
     background: #fff;
     color: #000;
+    display: none;
     
   }
   .content.active {
-    display: block;
+    font-size: 14px;
+    padding: 7px 10px;
+    line-height: 1.4;
+    min-height: 150px;
+    background: #fff;
+    color: #000;
+    display: block;  
   }
