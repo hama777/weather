@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/07/03 v1.06 ランキングで当日、前日を色分け
-version = "1.06"
+# 25/07/18 v1.07 小数点を含む気温に対応
+version = "1.07"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -33,7 +33,7 @@ def read_temperature_data() :
             data = line.split("\t")
             dt = datetime.datetime.strptime(data[0], '%y/%m/%d %H:%M')
             date_list.append(dt)
-            val_list.append(int(data[1]))
+            val_list.append(float(data[1]))
 
     df_tempera = pd.DataFrame(list(zip(date_list,val_list)), columns = ['date','val'])
 
