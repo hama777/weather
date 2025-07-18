@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/06/19 v1.10 実際の天気をファイルに出力する
-version = "1.10"  
+# 25/07/18 v1.11 気温を観測値から取得する
+version = "1.11"  
 
 out =  ""
 logf = ""
@@ -32,6 +32,7 @@ def main_proc() :
     access_site()
     analize()
     temperature = get_current_temperature()
+    #get_current_temperature_new2()   #  temp
     analize_week()
     output_datafile()
     output_week_datafile()
@@ -164,7 +165,7 @@ def analize() :
         we_list.append(icon)
 
 #   現在時刻の気温を取得する
-def get_current_temperature() :
+def get_current_temperature_old() :
     top = BeautifulSoup(res.text, 'html.parser')
     div_1hour = top.find('div', id ='flick_list_1hour')
     daily_items = div_1hour.find_all('div', class_ ='group')
@@ -188,6 +189,24 @@ def get_current_temperature() :
             #print(temperature)
             break
     return temperature
+
+#   現在時刻の気温を取得する  New
+def get_current_temperature_new() :
+    top = BeautifulSoup(res.text, 'html.parser')
+    div_obser = top.find('div', id ='card_observation')    # 実況天気・観測値
+    table_item = div_obser.find('table', class_ ='dataTable')    
+    tbody = table_item.find('tbody')   
+    row = tbody.find('tr')      #  現在時刻の気温を取得するので先頭行のみ
+    cols = row.find_all('td')
+    temperature = cols[1].text
+    return temperature
+
+#   現在時刻の気温を取得する  New
+def get_current_temperature() :
+    top = BeautifulSoup(res.text, 'html.parser')
+    obs_block = top.find('li', class_ ='obs_block')    # 気温は1つめにあるので find で取得
+    val = obs_block.find('p', class_ ='value')    
+    return  val.text
 
 def analize_week() :
     global week_start_dd , week_list 
