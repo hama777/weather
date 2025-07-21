@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/07/18 v1.07 小数点を含む気温に対応
-version = "1.07"
+# 25/07/21 v1.08 日別気温データを小数点を含む気温に対応
+version = "1.08"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -93,8 +93,8 @@ def temperature_info(out,col) :
             diff_str = f"<span class=red>{diff_str}</span>"
 
         out.write(f"<tr><td>{date_str}</td><td align='right'>{row['avg']:4.2f}</td>"
-                  f"<td align='right'>{row['max']:4.0f}</td>"
-                  f"<td align='right'>{row['min']:4.0f}</td>"
+                  f"<td align='right'>{row['max']:4.1f}</td>"
+                  f"<td align='right'>{row['min']:4.1f}</td>"
                   f"<td align='right'>{row['std']:4.2f}</td>"
                   f"<td align='right'>{diff_str}</td></tr>\n")
 
