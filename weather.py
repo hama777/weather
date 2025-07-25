@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/07/18 v1.11 気温を観測値から取得する
-version = "1.11"  
+# 25/07/25 v1.13 降水量を観測値から取得する
+version = "1.13"  
 
 out =  ""
 logf = ""
@@ -19,6 +19,7 @@ outfile_prefix = appdir + "/data/we"
 week_outfile_prefix = appdir + "/week/we" 
 conffile = appdir + "/weather.conf"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
+precipitationfile = appdir + "/precipitation.txt"    #  実績降水量データ  
 act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと  暫定
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
@@ -32,11 +33,11 @@ def main_proc() :
     access_site()
     analize()
     temperature = get_current_temperature()
-    #get_current_temperature_new2()   #  temp
     analize_week()
     output_datafile()
     output_week_datafile()
     output_temperature()
+    output_precipitation()
 
 def access_site() :
     global res
@@ -140,6 +141,13 @@ def output_temperature() :
     out.write(f'{dt}\t{temperature}\n')
     out.close()
 
+def output_precipitation() :
+    precipitation = get_current_precipitation()
+    dt = f'{today_yy-2000}/{today_mm:02}/{today_dd:02} {today_hh:02}:00'
+    out = open(precipitationfile , 'a', encoding='utf-8')
+    out.write(f'{dt}\t{precipitation}\n')
+    out.close()
+
 #   1時間天気の情報を取得
 #      start_dd   記録されている最初の  日   (月の情報はない)
 #      start_hh   記録されている最初の  時
@@ -164,49 +172,21 @@ def analize() :
         icon = int(icon.replace(".png",""))
         we_list.append(icon)
 
-#   現在時刻の気温を取得する
-def get_current_temperature_old() :
-    top = BeautifulSoup(res.text, 'html.parser')
-    div_1hour = top.find('div', id ='flick_list_1hour')
-    daily_items = div_1hour.find_all('div', class_ ='group')
-    for daily in daily_items :              # 日 ごとのループ
-        div_date = daily.find('div', class_ ='date')
-        dd = div_date.text.strip()
-        dd = int(re.sub(r"\D", "", dd))     # 数字部分を抜き出す
-        if dd != today_dd :
-            continue 
-        #print(f'dd = {dd}')
-        hour_items = daily.find_all('ul', class_ ='list')
-        for hour in hour_items :            # 時 ごとのループ
-            time_data = hour.find('li', class_ ='time')  
-            hh = int(time_data.text)
-            #print(f'hh= {hh}')
-            if hh != today_hh :
-                continue 
-            te = hour.find('li', class_ ='temp')    # 気温
-            temperature = te.text.strip()
-            temperature = int(re.sub(r"\D", "", temperature))     # 数字部分を抜き出す
-            #print(temperature)
-            break
-    return temperature
-
-#   現在時刻の気温を取得する  New
-def get_current_temperature_new() :
-    top = BeautifulSoup(res.text, 'html.parser')
-    div_obser = top.find('div', id ='card_observation')    # 実況天気・観測値
-    table_item = div_obser.find('table', class_ ='dataTable')    
-    tbody = table_item.find('tbody')   
-    row = tbody.find('tr')      #  現在時刻の気温を取得するので先頭行のみ
-    cols = row.find_all('td')
-    temperature = cols[1].text
-    return temperature
-
 #   現在時刻の気温を取得する  New
 def get_current_temperature() :
     top = BeautifulSoup(res.text, 'html.parser')
     obs_block = top.find('li', class_ ='obs_block')    # 気温は1つめにあるので find で取得
     val = obs_block.find('p', class_ ='value')    
     return  val.text
+
+#   降水量を取得する
+#       実況天気・観測値 から取得   先頭業は必ずしもその時刻でない可能性があるがとりあえず最新時のものを取得
+def get_current_precipitation() :
+    top = BeautifulSoup(res.text, 'html.parser')
+    dataTable = top.find('table', class_ ='dataTable')   
+    row = dataTable.find_all('tr') 
+    col = row[1].find_all('td')     # 最新時は2行目 row[1] にある
+    return int(col[4].text)         # 降水量は5カラム目 col[4] にある
 
 def analize_week() :
     global week_start_dd , week_list 
