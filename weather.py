@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/07/25 v1.13 降水量を観測値から取得する
-version = "1.13"  
+# 25/08/07 v1.14 降水量を取得ができなかったのを修正
+version = "1.14"  
 
 out =  ""
 logf = ""
@@ -186,7 +186,7 @@ def get_current_precipitation() :
     dataTable = top.find('table', class_ ='dataTable')   
     row = dataTable.find_all('tr') 
     col = row[1].find_all('td')     # 最新時は2行目 row[1] にある
-    return int(col[4].text)         # 降水量は5カラム目 col[4] にある
+    return float(col[4].text)         # 降水量は5カラム目 col[4] にある
 
 def analize_week() :
     global week_start_dd , week_list 
