@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/07/01 v1.61 日最高最低気温ランキング追加
-version = "1.61"
+# 25/08/08 v1.62 rainの前処理をまとめた
+version = "1.62"
 
 out =  ""
 logf = ""
@@ -113,8 +113,8 @@ def main_proc() :
     calc_hit_rate()
     calc_hit_rate_week()    
     tempera.create_temperature_info()
-    rain.create_df_week_rain()  
-    rain.continuous_fine_rain()
+    rain.preprocess()  
+    #rain.continuous_fine_rain()
     parse_template()
     ftp_upload()
     daily_info_output()
