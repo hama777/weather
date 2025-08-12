@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/08 v1.13 降水量df作成処理追加
-version = "1.13"
+# 25/08/12 v1.14 降水量df作成処理追加
+version = "1.14"
 
 out =  ""
 logf = ""
@@ -19,10 +19,10 @@ datadir_week = appdir + "/week/"
 resultfile = appdir + "/weather.htm" 
 conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
-temperafile = appdir + "/temperature.txt"    #  実績気温データ  
+#temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 dailyfile = appdir + "/dailyinfo.txt"
 act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
-prec_file = appdir + "/precipitation.txt"     #  降水量データ
+precfile = appdir + "/precipitation.txt"     #  降水量データ
 
 df_week_rain = ""
 
@@ -37,7 +37,7 @@ def create_df_prec() :
     global df_prec
     date_list = [] 
     prec_list = []
-    with open(prec_file , encoding='utf-8') as f:
+    with open(precfile , encoding='utf-8') as f:
         for line in f:
             dt = line.split("\t")
             date_str = dt[0] 
@@ -47,7 +47,10 @@ def create_df_prec() :
             prec_list.append(prec)
 
     df_prec = pd.DataFrame(list(zip(date_list,prec_list)), columns = ['pdate','prec'])
-    print(df_prec)
+    df_prec = df_prec.set_index('pdate')  
+    df_prec_daily = df_prec.resample('D').sum()
+    df_prec_monthly = df_prec.resample('M').agg( total =('prec', 'sum'), ave =('prec', 'mean') )
+    print(df_prec_monthly)
 
 
 #  週間雨時間移動平均 df_week_rain の作成
