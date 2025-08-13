@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/12 v1.14 降水量df作成処理追加
-version = "1.14"
+# 25/08/13 v1.13 日別降水量テーブル追加
+version = "1.13"
 
 out =  ""
 logf = ""
@@ -34,7 +34,7 @@ def preprocess() :
 #   降水量のdfを作成
 #         df_prec    date prec
 def create_df_prec() :
-    global df_prec
+    global df_prec_daily,df_prec_monthly
     date_list = [] 
     prec_list = []
     with open(precfile , encoding='utf-8') as f:
@@ -49,9 +49,8 @@ def create_df_prec() :
     df_prec = pd.DataFrame(list(zip(date_list,prec_list)), columns = ['pdate','prec'])
     df_prec = df_prec.set_index('pdate')  
     df_prec_daily = df_prec.resample('D').sum()
-    df_prec_monthly = df_prec.resample('M').agg( total =('prec', 'sum'), ave =('prec', 'mean') )
-    print(df_prec_monthly)
-
+    df_prec_monthly = df_prec.resample('ME').agg( total =('prec', 'sum'), ave =('prec', 'mean') )
+    #print(df_prec_monthly)
 
 #  週間雨時間移動平均 df_week_rain の作成
 def create_df_week_rain() :
@@ -99,6 +98,17 @@ def monthly_rain_time(out) :
         date_str = index.strftime('%y/%m')
         out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td>'
                   f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td></tr>')
+
+
+def daily_precipitation(out) :
+    for index,row in df_prec_daily.iterrows() :
+        prec = row['prec']
+        if prec == 0 :
+            continue
+        date_str = index.strftime('%m/%d (%a)')
+        out.write(f'<tr><td>{date_str}</td><td align="right">{prec:5.2f}</td></tr>\n')
+
+
 
 #   連続雨時間解析  df 作成
 def continuous_fine_rain() :
