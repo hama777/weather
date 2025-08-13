@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/08 v1.62 rainの前処理をまとめた
-version = "1.62"
+# 25/08/13 v1.63 日別降水量テーブル追加
+version = "1.63"
 
 out =  ""
 logf = ""
@@ -24,8 +24,6 @@ conffile = appdir + "/weather.conf"
 templatefile = appdir + "/weather_templ.htm"
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 dailyfile = appdir + "/dailyinfo.txt"
-#act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
-#act_weather_file2 = appdir + "/actweather2.txt"   #  実績天気データ  1時間ごと  暫定
 
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
@@ -114,7 +112,6 @@ def main_proc() :
     calc_hit_rate_week()    
     tempera.create_temperature_info()
     rain.preprocess()  
-    #rain.continuous_fine_rain()
     parse_template()
     ftp_upload()
     daily_info_output()
@@ -587,6 +584,9 @@ def parse_template() :
             continue
         if "%monthly_rain_time%" in line :
             rain.monthly_rain_time(out)
+            continue
+        if "%daily_precipitation%" in line :
+            rain.daily_precipitation(out)
             continue
         if "%continuous_rain%" in line :
             rain.continuous_rain(out)
