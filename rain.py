@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/13 v1.13 日別降水量テーブル追加
-version = "1.13"
+# 25/08/14 v1.14 月別雨時間に降水量追加
+version = "1.14"
 
 out =  ""
 logf = ""
@@ -90,16 +90,30 @@ def week_rain_time_graph(out) :
 
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
-    monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
+    #monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
+    monthly_stats = df_daily_rain.resample('ME').agg(
+        rain_ave=('rain', 'mean'),
+        rain_max=('rain', 'max'),
+        is_rain_count=('is_rain', 'sum')
+    )
+    monthly_stats = pd.concat([monthly_stats, df_prec_monthly], axis=1)
     for index,row in monthly_stats.iterrows() :
-        ave = row['rain']['mean']
-        max = row['rain']['max']
-        days_rain = row['is_rain']['sum']
+        ave = row['rain_ave']
+        max = row['rain_max']
+        days_rain = row['is_rain_count']
+        total = row['total']
+        if pd.isna(total) :
+            prec_total = "-"
+            prec_ave = "-"
+        else :
+            prec_total = total
+            prec_ave = f'{row["ave"]:4.2f}'
         date_str = index.strftime('%y/%m')
         out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td>'
-                  f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td></tr>')
+                  f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td>'
+                  f'<td align="right">{prec_total}</td><td align="right">{prec_ave}</td></tr>')
 
-
+#   日別降水量テーブル
 def daily_precipitation(out) :
     for index,row in df_prec_daily.iterrows() :
         prec = row['prec']
