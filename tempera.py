@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/07/21 v1.08 日別気温データを小数点を含む気温に対応
-version = "1.08"
+# 25/08/22 v1.09 日気温グラフを6ヶ月にした
+version = "1.09"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -167,7 +167,7 @@ def tempera_graph(out) :
 
 #   気温グラフ   日ごと
 def tempera_graph_daily(out) :
-    for index,row in daily_info.iterrows() :
+    for index,row in daily_info.tail(180).iterrows() :
         date_str = index.strftime('%m/%d')
         v = row['avg']
         out.write(f"['{date_str}',{v}],") 
