@@ -1,5 +1,5 @@
 <html>
-<!-- 25/08/15 v1.15 月別雨時間に日最大降水量追加 -->
+<!-- 25/08/25 v1.10 日寒暖差ランキング追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -199,6 +199,21 @@
                     <table>
                     <tr><th>順位</th><th>日付</th><th>最低気温</th></tr>
                     %ranking_min_tempera%
+                    </table>
+                </div>
+            </div>
+            <b>寒暖差 ランキング</b>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>前日差</th></tr>
+                    %ranking_diff_top%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>前日差</th></tr>
+                    %ranking_diff_low%
                     </table>
                 </div>
             </div>
