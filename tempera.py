@@ -9,17 +9,16 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/22 v1.09 日気温グラフを6ヶ月にした
-version = "1.09"
+# 25/08/25 v1.10 日寒暖差ランキング追加
+version = "1.10"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
 
-
 #   気温のdf  
 df_tempera = ""
 
-#   日々の平均、最高、最低気温   カラム   date  avg  max min  
+#  日々の気温データ df カラム date avg(日平均) max min  diff(前日差) 
 daily_info = ""
 
 def read_temperature_data() :
@@ -60,6 +59,23 @@ def create_temperature_info() :
     daily_info = daily_info.set_index('date')    #  date をindexにする
     diff_list = calc_differencr()
     daily_info['diff'] = diff_list
+
+def ranking_diff_top(out) :
+    df_diff_top = daily_info.sort_values('diff',ascending=False).head(10)
+    i = 0 
+    for index,row in df_diff_top.iterrows() :
+        i += 1
+        date_str = index.strftime('%m/%d(%a)')
+        out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{row["diff"]:4.2f}</td></tr>\n')
+
+def ranking_diff_low(out) :
+    df_diff_top = daily_info.sort_values('diff',ascending=True).head(10)
+    i = 0 
+    for index,row in df_diff_top.iterrows() :
+        i += 1
+        date_str = index.strftime('%m/%d(%a)')
+        out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{row["diff"]:4.2f}</td></tr>\n')
+
 
 #   前日との気温差を計算
 def calc_differencr() :
