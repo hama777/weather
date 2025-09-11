@@ -9,8 +9,10 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/25 v1.10 日寒暖差ランキング追加
-version = "1.10"
+# 25/09/11 v1.11 日寒暖差ランキングで本日、昨日は色を変える機能追加
+version = "1.11"
+
+# TODO: today_date  yesterday を共通化する
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 temperafile = appdir + "/temperature.txt"    #  実績気温データ  
@@ -62,20 +64,25 @@ def create_temperature_info() :
 
 def ranking_diff_top(out) :
     df_diff_top = daily_info.sort_values('diff',ascending=False).head(10)
-    i = 0 
-    for index,row in df_diff_top.iterrows() :
-        i += 1
-        date_str = index.strftime('%m/%d(%a)')
-        out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{row["diff"]:4.2f}</td></tr>\n')
+    ranking_diff_com(df_diff_top,out)
 
 def ranking_diff_low(out) :
     df_diff_top = daily_info.sort_values('diff',ascending=True).head(10)
+    ranking_diff_com(df_diff_top,out)
+
+def ranking_diff_com(arg_df,out) :
+    today_date = datetime.date.today()  
+    yesterday = today_date - timedelta(days=1)
+
     i = 0 
-    for index,row in df_diff_top.iterrows() :
+    for index,row in arg_df.iterrows() :
         i += 1
         date_str = index.strftime('%m/%d(%a)')
+        if index.date() == today_date :
+            date_str = f'<span class=red>{date_str}</span>'
+        if index.date() == yesterday :
+            date_str = f'<span class=blue>{date_str}</span>'
         out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{row["diff"]:4.2f}</td></tr>\n')
-
 
 #   前日との気温差を計算
 def calc_differencr() :
