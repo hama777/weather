@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/15 v1.15 月別雨時間に日最大降水量追加
-version = "1.15"
+# 25/09/11 v1.16 デバッグ出力を削除
+version = "1.16"
 
 out =  ""
 logf = ""
@@ -50,7 +50,6 @@ def create_df_prec() :
     df_prec = df_prec.set_index('pdate')  
     df_prec_daily = df_prec.resample('D').sum()
     df_prec_monthly = df_prec_daily.resample('ME').agg( total =('prec', 'sum'), ave =('prec', 'mean'), max = ('prec','max') )
-    print(df_prec_monthly)
 
 #  週間雨時間移動平均 df_week_rain の作成
 def create_df_week_rain() :
