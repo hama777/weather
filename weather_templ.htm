@@ -1,5 +1,5 @@
 <html>
-<!-- 25/08/25 v1.10 日寒暖差ランキング追加 -->
+<!-- 25/09/25 気温タブ順序変更 -->
 
 <head>
     <title>Weather Check</title>
@@ -131,38 +131,15 @@
             <li><a href="#" data-id="hitrate" class="menu_item">的中率</a></li>
         </ul>
         <div class="content  active" id="temperature">
+            <h2>気温グラフ</h2>
             <b>時間毎気温グラフ</b>
             <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <b>日毎気温グラフ</b>
             <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <b>7日移動平均気温グラフ</b>
             <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
-
-            <b>最高最低気温</b><br>
-            <table>
-                <tr>
-                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
-                </tr>
-                %min_max_temperature%
-            </table>
-            <b>最高最低気温 過去30日</b><br>
-            <table>
-                <tr>
-                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
-                </tr>
-                %min_max_temperature_30days%
-            </table>
-            <b>月別気温データ</b>
-            <table>
-                <tr>
-                    <th>年月</th><th>平均気温</th><th>平均最高</th><th>平均最低</th><th>最高</th><th>最低</th><th>STD</th>
-                    <th>夏日</th><th>真夏日</th><th>猛暑日</th>
-                </tr>
-                %monthly_tempera%
-            </table>
-
             <br>
-            <b>日別気温データ</b>
+            <h2>日別気温データ</h2>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -181,7 +158,33 @@
                     </table>
                 </div>
             </div>
-            <b>ランキング 気温</b>
+            <br>
+            <h2>月別気温データ</h2>
+            <table>
+                <tr>
+                    <th>年月</th><th>平均気温</th><th>平均最高</th><th>平均最低</th><th>最高</th><th>最低</th><th>STD</th>
+                    <th>夏日</th><th>真夏日</th><th>猛暑日</th>
+                </tr>
+                %monthly_tempera%
+            </table>
+            <br>
+            <h2>最高最低気温</h2>
+            <b>全データ</b><br>
+            <table>
+                <tr>
+                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
+                </tr>
+                %min_max_temperature%
+            </table>
+            <b>過去30日</b><br>
+            <table>
+                <tr>
+                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
+                </tr>
+                %min_max_temperature_30days%
+            </table>
+            <br>
+            <h2>ランキング 気温</h2>
             <div class="flex">
                 <div class='frame'>
                     <table>
