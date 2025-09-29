@@ -1,5 +1,5 @@
 <html>
-<!-- 25/09/25 気温タブ順序変更 -->
+<!-- 25/09/29 雨タブ表示変更 -->
 
 <head>
     <title>Weather Check</title>
@@ -223,30 +223,30 @@
 
         </div>
         <div class="content" id="rain">
-            <b>現在の状況</b>
+            <h2>現在の状況</h2>
              : %cur_continuous%
             <br><br>
-            <b>7日移動平均1日雨時間グラフ</b> 
+            <h2>7日移動平均1日雨時間グラフ</h2> 
             <div id="week_rain_time_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div> 
             <!--  <div id="week_rain_time_graph"  style="position: static;"></div>-->
-            <b>月別雨時間</b> 
+            <br>
+            <h2>月別雨時間</h2> 
             <table>
                 <tr>
                     <th>年月</th><th>1日平均雨時間</th><th>1日最大雨時間</th><th>雨日数</th><th>降水量</th><th>日平均降水量</th>
                     <th>日最大降水量</th>
                 </tr>
                 %monthly_rain_time%
-            </table>
-            <b>日別降水量</b> 
+            </table><br>
+            <h2>日別降水量</h2> 
             <table>
                 <tr>
                     <th>日付</th><th>降水量</th>
                 </tr>
                 %daily_precipitation%
-            </table>
-
-
-            <b>連続晴・雨時間Top</b><br>
+            </table><br>
+            <h2>連続晴・雨時間</h2>
+            <h3>連続晴・雨時間Top</h3>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -265,9 +265,7 @@
                     </table>
                 </div>
             </div>
-
-
-            <b>連続晴・雨時間</b><br>
+            <h3>連続晴・雨時間</h3>
             <div class="flex">
                 <div class='frame'>
                     <table>
