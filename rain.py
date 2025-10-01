@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/09/11 v1.16 デバッグ出力を削除
-version = "1.16"
+# 25/10/01 v1.17 日別降水量を20個まで2列にした
+version = "1.17"
 
 out =  ""
 logf = ""
@@ -87,6 +87,7 @@ def week_rain_time_graph(out) :
         date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
 
+
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
     #monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
@@ -116,15 +117,17 @@ def monthly_rain_time(out) :
                   f'<td align="right">{prec_max}</td></tr>\n')
 
 #   日別降水量テーブル
-def daily_precipitation(out) :
-    for index,row in df_prec_daily.iterrows() :
-        prec = row['prec']
-        if prec == 0 :
+def daily_precipitation(out,col) :
+    df_tmp = df_prec_daily[df_prec_daily["prec"] != 0].tail(20)  # prec が0でないものの後ろ20個
+    n = 0 
+    for index,row in df_tmp.iterrows() :
+        n += 1
+        if com.multi_col2(n,col,10) :
             continue
+
+        prec = row['prec']
         date_str = index.strftime('%m/%d (%a)')
         out.write(f'<tr><td>{date_str}</td><td align="right">{prec:5.2f}</td></tr>\n')
-
-
 
 #   連続雨時間解析  df 作成
 def continuous_fine_rain() :
