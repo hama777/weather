@@ -1,5 +1,5 @@
 <html>
-<!-- 25/09/29 雨タブ表示変更 -->
+<!-- 25/10/01 v1.17 日別降水量を20個まで2列にした -->
 
 <head>
     <title>Weather Check</title>
@@ -239,12 +239,25 @@
                 %monthly_rain_time%
             </table><br>
             <h2>日別降水量</h2> 
-            <table>
-                <tr>
-                    <th>日付</th><th>降水量</th>
-                </tr>
-                %daily_precipitation%
-            </table><br>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>降水量</th>
+                        </tr>
+                        %daily_precipitation1%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>降水量</th>
+                        </tr>
+                        %daily_precipitation2%
+                    </table>
+                </div>
+            </div>
+            <br>
             <h2>連続晴・雨時間</h2>
             <h3>連続晴・雨時間Top</h3>
             <div class="flex">
