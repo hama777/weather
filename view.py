@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/08/25 v1.64 日寒暖差ランキング追加
-version = "1.64"
+# 25/10/02 v1.65 日別降水量を2列にした
+version = "1.65"
 
 out =  ""
 logf = ""
@@ -591,8 +591,11 @@ def parse_template() :
         if "%monthly_rain_time%" in line :
             rain.monthly_rain_time(out)
             continue
-        if "%daily_precipitation%" in line :
-            rain.daily_precipitation(out)
+        if "%daily_precipitation1%" in line :
+            rain.daily_precipitation(out,1)
+            continue
+        if "%daily_precipitation2%" in line :
+            rain.daily_precipitation(out,2)
             continue
         if "%continuous_rain%" in line :
             rain.continuous_rain(out)
