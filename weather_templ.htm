@@ -1,5 +1,5 @@
 <html>
-<!-- 25/10/01 v1.17 日別降水量を20個まで2列にした -->
+<!-- 25/10/03 h2 h3 のスタイル変更 -->
 
 <head>
     <title>Weather Check</title>
@@ -132,11 +132,11 @@
         </ul>
         <div class="content  active" id="temperature">
             <h2>気温グラフ</h2>
-            <b>時間毎気温グラフ</b>
+            <h3><span class="h3_color">時間毎気温グラフ</span></h3>
             <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
-            <b>日毎気温グラフ</b>
+            <h3><span class="h3_color">日毎気温グラフ</span></h3>
             <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
-            <b>7日移動平均気温グラフ</b>
+            <h3><span class="h3_color">7日移動平均気温グラフ</span></h3>
             <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <br>
             <h2>日別気温データ</h2>
@@ -169,14 +169,14 @@
             </table>
             <br>
             <h2>最高最低気温</h2>
-            <b>全データ</b><br>
+            <h3><span class="h3_color">全データ</span></h3>
             <table>
                 <tr>
                     <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
                 </tr>
                 %min_max_temperature%
             </table>
-            <b>過去30日</b><br>
+            <h3><span class="h3_color">過去30日</span></h3>
             <table>
                 <tr>
                     <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
@@ -205,7 +205,7 @@
                     </table>
                 </div>
             </div>
-            <b>寒暖差 ランキング</b>
+            <h3><span class="h3_color">寒暖差 ランキング</span></h3>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -259,7 +259,7 @@
             </div>
             <br>
             <h2>連続晴・雨時間</h2>
-            <h3>連続晴・雨時間Top</h3>
+            <h3><span class="h3_color">連続晴・雨時間Top</span></h3>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -278,7 +278,7 @@
                     </table>
                 </div>
             </div>
-            <h3>連続晴・雨時間</h3>
+            <h3><span class="h3_color">連続晴・雨時間</span></h3>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -316,7 +316,7 @@
 
         </div>
         <div class="content" id="hitrate">
-            <b>週間天気 的中率</b>
+            <h2>週間天気 的中率</h2>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -345,7 +345,7 @@
                     </table>
                 </div>
             </div>
-            <b>1時間天気 日別的中率</b>
+            <h2>1時間天気 日別的中率</h2>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -374,7 +374,7 @@
                     </table>
                 </div>
             </div>
-            <b>1時間天気 時間的中率</b>
+            <h2>1時間天気 時間的中率</h2>
             <div class="flex">
                 <div class='frame'>
                     <table>
