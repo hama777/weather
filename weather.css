@@ -1,4 +1,4 @@
-/*  25/07/03  span blue 追加    */
+/*  25/10/03 h2 h3 のスタイル変更    */
 
 table {
     /*width: auto;*/
@@ -66,11 +66,23 @@ h1{
 h2{
     margin: 0 0 0.5em;
     padding: 3px;
-    border-top: 3px double #6d2ff5;
-    border-bottom: 3px double #6d2ff5;
+    border-top: 3px double #099644af;
+    border-bottom: 3px double #099644af;
     font-size: 16px ;
     font-weight: bold;
 }
+h3{
+    margin: 0 0 0.5em;
+    padding: 3px;
+    font-size: 14px ;
+    font-weight: bold;
+}
+.h3_color{
+    color: #057535af;
+    background-color: #d4f8b7af ;
+    text-decoration: underline;
+}
+
 a { 
     text-decoration: none; 
 }
