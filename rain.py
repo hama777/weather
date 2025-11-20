@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/10/01 v1.17 日別降水量を20個まで2列にした
-version = "1.17"
+# 25/11/20 v1.18 雨時間グラフを365日にした。連続時間に年の表記を入れた
+version = "1.18"
 
 out =  ""
 logf = ""
@@ -80,7 +80,7 @@ def create_df_week_rain() :
 
 #  週間雨時間移動平均グラフ
 def week_rain_time_graph(out) :
-    for index,row in df_week_rain.iterrows() :
+    for index,row in df_week_rain.tail(365).iterrows() :
         v = row['rain']
         if pd.isna(v) :
             continue 
@@ -211,11 +211,11 @@ def top_continuous_fine(out) :
     top_continuous_com(out,df_top) 
 
 def top_continuous_com(out,df_top) :
-    for index,row in df_top.head(5).iterrows() :
+    for index,row in df_top.head(10).iterrows() :
         yymmddhh  = int(row['yymmddhh'])
         dt = com.conv_mmddhh_to_date(yymmddhh)
         hh = yymmddhh % 100
-        date_str = dt.strftime('%m/%d (%a)')
+        date_str = dt.strftime('%y/%m/%d (%a)')
         count = row['cont']
         days = count // 24
         fine_hh = count % 24
