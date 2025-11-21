@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/09/11 v1.11 日寒暖差ランキングで本日、昨日は色を変える機能追加
-version = "1.11"
+# 25/11/21 v1.12 同日気温差を表示
+version = "1.12"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -61,6 +61,8 @@ def create_temperature_info() :
     daily_info = daily_info.set_index('date')    #  date をindexにする
     diff_list = calc_differencr()
     daily_info['diff'] = diff_list
+    day_diff = calc_day_diff()
+    daily_info['day_diff'] = day_diff
 
 def ranking_diff_top(out) :
     df_diff_top = daily_info.sort_values('diff',ascending=False).head(10)
@@ -101,6 +103,15 @@ def calc_differencr() :
 
     return diff_list 
 
+#   1日の気温差を計算
+def calc_day_diff() :
+    day_diff_list = []
+    for index,row in daily_info.iterrows() :
+        diff = row['max'] - row['min']
+        day_diff_list.append(diff)
+
+    return day_diff_list 
+
 #   日別気温データ
 #   気温の日々の平均値、最高値、最低値の表示
 def temperature_info(out,col) :
@@ -119,7 +130,8 @@ def temperature_info(out,col) :
                   f"<td align='right'>{row['max']:4.1f}</td>"
                   f"<td align='right'>{row['min']:4.1f}</td>"
                   f"<td align='right'>{row['std']:4.2f}</td>"
-                  f"<td align='right'>{diff_str}</td></tr>\n")
+                  f"<td align='right'>{diff_str}</td>"
+                  f"<td align='right'>{row['day_diff']:4.1f}</td></tr>\n")
 
 
 #   日別気温データの過去最高値、最低値を表示
