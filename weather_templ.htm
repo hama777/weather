@@ -1,5 +1,5 @@
 <html>
-<!-- 25/11/21 v1.12 同日気温差を表示 -->
+<!-- 25/11/25 v1.13 週平均気温を表示するようにした -->
 
 <head>
     <title>Weather Check</title>
@@ -140,6 +140,10 @@
             <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <br>
             <h2>日別気温データ</h2>
+            7日平均気温 : 
+            %tempera_week%
+            &nbsp;&nbsp;&nbsp;1週間前との差分 :
+            %tempera_week_diff%
             <div class="flex">
                 <div class='frame'>
                     <table>
