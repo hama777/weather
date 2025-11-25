@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/11/21 v1.12 同日気温差を表示
-version = "1.12"
+# 25/11/25 v1.13 週平均気温を表示するようにした
+version = "1.13"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -215,6 +215,16 @@ def tempera_graph_week(out) :
             continue 
         date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
+
+def output_tempera_week(out) :
+    last_value = df_week_tempera.iloc[-1]['avg']
+    out.write(f"{last_value:5.2f}\n") 
+
+def output_tempera_week_diff(out) :
+    last_value = df_week_tempera.iloc[-1]['avg']
+    last_week_value = df_week_tempera.iloc[-8]['avg']
+    diff = last_value - last_week_value
+    out.write(f"{diff:5.2f}\n") 
 
 #   平均気温ランキング
 def ranking_ave_tempera(out) :
