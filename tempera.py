@@ -9,8 +9,8 @@ import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/11/25 v1.13 週平均気温を表示するようにした
-version = "1.13"
+# 25/11/26 v1.14 週平均気温テーブル追加
+version = "1.14"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -164,6 +164,24 @@ def min_max_temperature_com(out,arg_df) :
         out.write(f'<tr><td>{item_name[item]}</td>')
         out.write(f'<td align="right">{aggmax[item]:4.2f}</td><td>{aggmax_date[item]}</td>'
                   f'<td align="right">{aggmin[item]:4.2f}</td><td>{aggmin_date[item]}</td></tr>\n')
+
+def weekly_tempera_table(out) :
+    df_week_tempera['avg_1_before'] = df_week_tempera['avg'].shift(1)
+    df_week_tempera['avg_7_before'] = df_week_tempera['avg'].shift(7)
+    df_week_tempera['avg_14_before'] = df_week_tempera['avg'].shift(14)
+    for index,row in df_week_tempera.tail(14).iterrows() :
+        v = row['avg']
+        v1 = row['avg_1_before']
+        v7 = row['avg_7_before']
+        v14 = row['avg_14_before']
+
+        if pd.isna(v) :
+            continue 
+        date_str = index.strftime('%m/%d')
+        diff1 = v - v1
+        diff7 = v - v7
+        diff14 = v - v14
+        out.write(f"<tr><td>{date_str}</td><td>{v:4.2f}</td><td>{diff1:4.2f}</td><td>{diff7:4.2f}</td><td>{diff14:4.2f}</td></tr>\n")         
 
 def monthly_tempera(out) :
     # 月ごとに avg max min の 平均値、最大値、最小値、夏日日数 を求める
