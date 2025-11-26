@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/11/25 v1.66 週平均気温を表示するようにした
-version = "1.66"
+# 25/11/26 v1.67 週平均気温テーブル追加
+version = "1.67"
 
 out =  ""
 logf = ""
@@ -590,6 +590,9 @@ def parse_template() :
             continue
         if "%tempera_week_diff%" in line :
             tempera.output_tempera_week_diff(out)
+            continue
+        if "%weekly_tempera_table%" in line :
+            tempera.weekly_tempera_table(out)
             continue
         if "%week_rain_time_graph%" in line :
             rain.week_rain_time_graph(out)
