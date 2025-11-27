@@ -5,12 +5,12 @@ import locale
 import datetime
 import pandas as pd
 import com
-import rain
+#import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/11/26 v1.14 週平均気温テーブル追加
-version = "1.14"
+# 25/11/27 v1.15 週平均気温テーブルでマイナスは赤字にする
+version = "1.15"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -79,7 +79,7 @@ def ranking_diff_com(arg_df,out) :
     i = 0 
     for index,row in arg_df.iterrows() :
         i += 1
-        date_str = index.strftime('%m/%d(%a)')
+        date_str = index.strftime('%y/%m/%d(%a)')
         if index.date() == today_date :
             date_str = f'<span class=red>{date_str}</span>'
         if index.date() == yesterday :
@@ -153,11 +153,11 @@ def min_max_temperature_com(out,arg_df) :
     aggmin_date = {}
     for item in item_list :
         tdate = arg_df[item].idxmax()
-        aggmax_date[item] = tdate.strftime('%m/%d(%a)')
+        aggmax_date[item] = tdate.strftime('%y/%m/%d(%a)')
         aggmax[item] = arg_df.loc[tdate,item ]
 
         tdate = arg_df[item].idxmin()
-        aggmin_date[item] = tdate.strftime('%m/%d(%a)')
+        aggmin_date[item] = tdate.strftime('%y/%m/%d(%a)')
         aggmin[item] = arg_df.loc[tdate,item ]
 
     for item in item_list :
@@ -165,6 +165,7 @@ def min_max_temperature_com(out,arg_df) :
         out.write(f'<td align="right">{aggmax[item]:4.2f}</td><td>{aggmax_date[item]}</td>'
                   f'<td align="right">{aggmin[item]:4.2f}</td><td>{aggmin_date[item]}</td></tr>\n')
 
+#   7日移動平均テーブル
 def weekly_tempera_table(out) :
     df_week_tempera['avg_1_before'] = df_week_tempera['avg'].shift(1)
     df_week_tempera['avg_7_before'] = df_week_tempera['avg'].shift(7)
@@ -177,11 +178,20 @@ def weekly_tempera_table(out) :
 
         if pd.isna(v) :
             continue 
-        date_str = index.strftime('%m/%d')
-        diff1 = v - v1
-        diff7 = v - v7
-        diff14 = v - v14
-        out.write(f"<tr><td>{date_str}</td><td>{v:4.2f}</td><td>{diff1:4.2f}</td><td>{diff7:4.2f}</td><td>{diff14:4.2f}</td></tr>\n")         
+        date_str = index.strftime('%m/%d(%a)')
+        diff1 = float_to_color_str(v - v1)
+        diff7 = float_to_color_str(v - v7)
+        diff14 = float_to_color_str(v - v14)
+        out.write(f"<tr><td>{date_str}</td><td align='right'>{v:4.2f}</td>"
+                  f"<td align='right'>{diff1}</td><td align='right'>{diff7}</td>"
+                  f"<td align='right'>{diff14}</td></tr>\n")         
+
+def float_to_color_str(f) :
+    if f < 0 :
+        s = f'<span class=red>{f:4.2f}</span>'
+    else :
+        s = f'{f:4.2f}'
+    return s
 
 def monthly_tempera(out) :
     # 月ごとに avg max min の 平均値、最大値、最小値、夏日日数 を求める
@@ -263,7 +273,7 @@ def ranking_tempera_com(df,col,out) :
     yesterday = today_date - timedelta(days=1)
     for index,row in df.iterrows() :
         i += 1
-        date_str = index.strftime('%m/%d (%a)')
+        date_str = index.strftime('%y/%m/%d (%a)')
         #print(index,today_date)
         if index.date() == today_date :
             date_str = f'<span class=red>{date_str}</span>'
