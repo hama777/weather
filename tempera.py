@@ -9,8 +9,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/11/27 v1.15 週平均気温テーブルでマイナスは赤字にする
-version = "1.15"
+# 25/11/28 v1.16 週平均気温テーブルを15日間とした
+version = "1.16"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -170,7 +170,7 @@ def weekly_tempera_table(out) :
     df_week_tempera['avg_1_before'] = df_week_tempera['avg'].shift(1)
     df_week_tempera['avg_7_before'] = df_week_tempera['avg'].shift(7)
     df_week_tempera['avg_14_before'] = df_week_tempera['avg'].shift(14)
-    for index,row in df_week_tempera.tail(14).iterrows() :
+    for index,row in df_week_tempera.tail(15).iterrows() :
         v = row['avg']
         v1 = row['avg_1_before']
         v7 = row['avg_7_before']
