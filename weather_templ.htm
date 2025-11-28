@@ -1,5 +1,5 @@
 <html>
-<!-- 25/11/26 v1.14 週平均気温テーブル追加 -->
+<!-- 25/11/27 週平均気温テーブルとグラフを横に並べた -->
 
 <head>
     <title>Weather Check</title>
@@ -136,8 +136,6 @@
             <div id="tempera_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <h3><span class="h3_color">日毎気温グラフ</span></h3>
             <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
-            <h3><span class="h3_color">7日移動平均気温グラフ</span></h3>
-            <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <br>
             <h2>日別気温データ</h2>
             7日平均気温 : 
@@ -164,12 +162,21 @@
             </div>
             <br>
             <h2>週平均気温データ</h2>
-            <table>
-                <tr>
-                    <th>日付</th><th>週平均気温</th><th>前日差</th><th>7日前差</th><th>14日前差</th>
-                </tr>
-                %weekly_tempera_table%
-            </table>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                        <tr>
+                            <th>日付</th><th>週平均気温</th><th>前日差</th><th>7日前差</th><th>14日前差</th>
+                        </tr>
+                        %weekly_tempera_table%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:10px ; margin-left:10px; "></div>
+                </div>
+            </div>
+
+
             <h2>月別気温データ</h2>
             <table>
                 <tr>
