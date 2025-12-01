@@ -1,5 +1,5 @@
 <html>
-<!-- 25/11/27 週平均気温テーブルとグラフを横に並べた -->
+<!-- 25/12/01 v1.17 低温ランキング追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -203,6 +203,7 @@
             </table>
             <br>
             <h2>ランキング 気温</h2>
+            <h3><span class="h3_color">高温ランキング</span></h3>
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -220,6 +221,27 @@
                     <table>
                     <tr><th>順位</th><th>日付</th><th>最低気温</th></tr>
                     %ranking_min_tempera%
+                    </table>
+                </div>
+            </div>
+            <h3><span class="h3_color">低温ランキング</span></h3>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>平均気温</th></tr>
+                    %ranking_ave_tempera_low%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>最高気温</th></tr>
+                    %ranking_max_tempera_low%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>最低気温</th></tr>
+                    %ranking_min_tempera_low%
                     </table>
                 </div>
             </div>
