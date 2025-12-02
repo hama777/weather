@@ -9,8 +9,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/01 v1.17 低温ランキング追加
-version = "1.17"
+# 25/12/02 v1.18 1日寒暖差ランキング追加
+version = "1.18"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -20,7 +20,7 @@ temperafile = appdir + "/temperature.txt"    #  実績気温データ
 #   気温のdf  
 df_tempera = ""
 
-#  日々の気温データ df カラム date avg(日平均) max min  diff(前日差) 
+#  日々の気温データ df カラム date avg(日平均) max min  diff(前日差)  day_diff(1日寒暖差)
 daily_info = ""
 
 def read_temperature_data() :
@@ -278,6 +278,10 @@ def ranking_max_tempera_low(out) :
 def ranking_min_tempera_low(out) :
     df_min = daily_info.sort_values('min',ascending=True)
     ranking_tempera_com(df_min.head(10),'min',out)
+
+def ranking_daily_diff(out) :
+    df_top = daily_info.sort_values('day_diff',ascending=False)
+    ranking_tempera_com(df_top.head(10),'day_diff',out)
 
 def ranking_tempera_com(df,col,out) :
     i = 0 
