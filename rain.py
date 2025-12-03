@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/11/20 v1.18 雨時間グラフを365日にした。連続時間に年の表記を入れた
-version = "1.18"
+# 25/12/03 v1.19 1時間最大降水量の情報追加
+version = "1.19"
 
 out =  ""
 logf = ""
@@ -24,7 +24,12 @@ dailyfile = appdir + "/dailyinfo.txt"
 act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
 precfile = appdir + "/precipitation.txt"     #  降水量データ
 
-df_week_rain = ""
+df_week_rain = ""     # 週間雨時間移動平均
+
+# 日毎降水量情報    pdate dateime型 index  prec float型 日の降水量  max_hour_prec float型 1時間最大降水量
+df_prec_daily = ""   
+# 月ごとの降水量情報  pdate dateime型  total 月の合計降水量 ave 1日平均降水量 max  1日最大降水量 hour_max 1時間最大降水量
+df_prec_monthly = ""  
 
 def preprocess() :
     create_df_week_rain()
@@ -48,10 +53,22 @@ def create_df_prec() :
 
     df_prec = pd.DataFrame(list(zip(date_list,prec_list)), columns = ['pdate','prec'])
     df_prec = df_prec.set_index('pdate')  
-    df_prec_daily = df_prec.resample('D').sum()
-    df_prec_monthly = df_prec_daily.resample('ME').agg( total =('prec', 'sum'), ave =('prec', 'mean'), max = ('prec','max') )
+    #df_prec_daily = df_prec.resample('D').sum()
+    df_prec_daily = (
+        df_prec
+        .resample('D')
+        .agg(
+            prec=('prec', 'sum'),        # 日ごとの合計
+            max_hour_prec=('prec', 'max')     # 日ごとの1時間最大
+        )
+    )
+    df_prec_monthly = df_prec_daily.resample('ME').agg( 
+        total =('prec', 'sum'), ave =('prec', 'mean'), max = ('prec','max') , hour_max =  ('max_hour_prec','max')
+    )
+    #print(df_prec_monthly)
 
-#  週間雨時間移動平均 df_week_rain の作成
+#  週間雨時間移動平均 df_week_rain df_daily_rain の作成
+#   df_daily_rain  日の雨情報  date 日付 datetime rain 雨時間
 def create_df_week_rain() :
     global df_week_rain,df_daily_rain
 
