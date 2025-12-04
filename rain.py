@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/03 v1.19 1時間最大降水量の情報追加
-version = "1.19"
+# 25/12/04 v1.20 1時間最大降水量のカラム追加
+version = "1.20"
 
 out =  ""
 logf = ""
@@ -123,15 +123,17 @@ def monthly_rain_time(out) :
             prec_total = "-"
             prec_ave = "-"
             prec_max = "-"
+            prec_hour_max = "-"
         else :
             prec_total = total
             prec_ave = f'{row["ave"]:4.2f}'
             prec_max = f'{row["max"]:4.2f}'
+            prec_hour_max = f'{row["hour_max"]:4.2f}'
         date_str = index.strftime('%y/%m')
         out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td>'
                   f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td>'
                   f'<td align="right">{prec_total}</td><td align="right">{prec_ave}</td>'
-                  f'<td align="right">{prec_max}</td></tr>\n')
+                  f'<td align="right">{prec_max}</td><td align="right">{prec_hour_max}</td></tr>\n')
 
 #   日別降水量テーブル
 def daily_precipitation(out,col) :
