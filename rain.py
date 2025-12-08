@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/04 v1.20 1時間最大降水量のカラム追加
-version = "1.20"
+# 25/12/08 v1.21 1時間,1日降水量ランキングメソッド追加
+version = "1.21"
 
 out =  ""
 logf = ""
@@ -30,6 +30,8 @@ df_week_rain = ""     # 週間雨時間移動平均
 df_prec_daily = ""   
 # 月ごとの降水量情報  pdate dateime型  total 月の合計降水量 ave 1日平均降水量 max  1日最大降水量 hour_max 1時間最大降水量
 df_prec_monthly = ""  
+# 1時間ごろの降水量情報   pdate datetime  prec float
+df_prec = ""
 
 def preprocess() :
     create_df_week_rain()
@@ -39,7 +41,7 @@ def preprocess() :
 #   降水量のdfを作成
 #         df_prec    date prec
 def create_df_prec() :
-    global df_prec_daily,df_prec_monthly
+    global df_prec_daily,df_prec_monthly,df_prec
     date_list = [] 
     prec_list = []
     with open(precfile , encoding='utf-8') as f:
@@ -65,7 +67,13 @@ def create_df_prec() :
     df_prec_monthly = df_prec_daily.resample('ME').agg( 
         total =('prec', 'sum'), ave =('prec', 'mean'), max = ('prec','max') , hour_max =  ('max_hour_prec','max')
     )
-    #print(df_prec_monthly)
+
+#   1時間降水量ランキング
+def ranking_hour_prec() :
+    df_top = df_prec.sort_values('prec',ascending=False)
+
+def ranking_daily_prec() :
+    df_top = df_prec_daily.sort_values('prec',ascending=False)
 
 #  週間雨時間移動平均 df_week_rain df_daily_rain の作成
 #   df_daily_rain  日の雨情報  date 日付 datetime rain 雨時間
