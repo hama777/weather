@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/08 v1.21 1時間,1日降水量ランキングメソッド追加
-version = "1.21"
+# 25/12/10 v1.22 1日降水量ランキングテーブル追加
+version = "1.22"
 
 out =  ""
 logf = ""
@@ -67,13 +67,6 @@ def create_df_prec() :
     df_prec_monthly = df_prec_daily.resample('ME').agg( 
         total =('prec', 'sum'), ave =('prec', 'mean'), max = ('prec','max') , hour_max =  ('max_hour_prec','max')
     )
-
-#   1時間降水量ランキング
-def ranking_hour_prec() :
-    df_top = df_prec.sort_values('prec',ascending=False)
-
-def ranking_daily_prec() :
-    df_top = df_prec_daily.sort_values('prec',ascending=False)
 
 #  週間雨時間移動平均 df_week_rain df_daily_rain の作成
 #   df_daily_rain  日の雨情報  date 日付 datetime rain 雨時間
@@ -259,3 +252,17 @@ def cur_continuous(out) :
     hh = yymmddhh % 100
     date_str = dt.strftime('%m/%d (%a)')
     out.write(f"{s} {cur_continuous_data['count']} 時間 {date_str} {hh}時 現在\n")
+
+#   1日降水量ランキング
+def ranking_prec_daily(out) :
+    df_top = df_prec_daily.sort_values('prec',ascending=False)
+    for index,row in df_top.head(10).iterrows() :
+        prec = row['prec']
+        date_str = index.strftime('%m/%d (%a)')
+        out.write(f'<tr><td>{date_str}</td><td align="right">{prec:5.2f}</td></tr>\n')
+
+#   1時間降水量ランキング
+def ranking_hour_prec() :
+    df_top = df_prec.sort_values('prec',ascending=False)
+
+
