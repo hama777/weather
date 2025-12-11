@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/10 v1.70 1日降水量ランキングテーブル追加
-version = "1.70"
+# 25/12/11 v1.71 降水量ランキング追加
+version = "1.71"
 
 out =  ""
 logf = ""
@@ -635,6 +635,9 @@ def parse_template() :
             continue
         if "%ranking_prec_daily%" in line :
             rain.ranking_prec_daily(out)
+            continue
+        if "%ranking_prec_hour%" in line :
+            rain.ranking_prec_hour(out)
             continue
         # if "%week_tempera%" in line :
         #     week_tempera()
