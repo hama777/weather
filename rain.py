@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/10 v1.22 1日降水量ランキングテーブル追加
-version = "1.22"
+# 25/12/11 v1.23 降水量ランキング追加
+version = "1.23"
 
 out =  ""
 logf = ""
@@ -262,7 +262,9 @@ def ranking_prec_daily(out) :
         out.write(f'<tr><td>{date_str}</td><td align="right">{prec:5.2f}</td></tr>\n')
 
 #   1時間降水量ランキング
-def ranking_hour_prec() :
+def ranking_prec_hour(out) :
     df_top = df_prec.sort_values('prec',ascending=False)
-
-
+    for index,row in df_top.head(10).iterrows() :
+        prec = row['prec']
+        date_str = index.strftime('%m/%d (%a) %H時')
+        out.write(f'<tr><td>{date_str}</td><td align="right">{prec:5.2f}</td></tr>\n')
