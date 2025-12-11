@@ -1,5 +1,5 @@
 <html>
-<!-- 25/12/10 v1.22 1日降水量ランキングテーブル追加 -->
+<!-- 25/12/11 v1.23 降水量ランキング追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -342,16 +342,28 @@
                     </table>
                 </div>
             </div>
-
+            <h2>降水量ランキング</h2>
+            <div class="flex">
+                <div class='frame'>
+                    1日降水量
+                    <table>
+                        <tr>
+                            <th>日付</th><th>降水量</th>
+                        </tr>
+                        %ranking_prec_daily%
+                    </table>
+                </div>
+                <div class='frame'>
+                    1時間降水量
+                    <table>
+                        <tr>
+                            <th>日付</th><th>降水量</th>
+                        </tr>
+                        %ranking_prec_hour%
+                    </table>
+                </div>
+            </div>
         </div>
-        <h2>降水量ランキング</h2>
-        <h3><span class="h3_color">1日降水量</span></h3>
-        <table>
-            <tr>
-                <th>日付</th><th>降水量</th>
-            </tr>
-            %ranking_prec_daily%
-        </table>
 
         <div class="content" id="forecast">
             <div class="table-container">
