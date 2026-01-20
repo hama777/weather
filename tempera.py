@@ -9,8 +9,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/02 v1.18 1日寒暖差ランキング追加
-version = "1.18"
+# 26/01/20 v1.19 月別気温データで1年前の気温との差分を表示
+version = "1.19"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -208,9 +208,21 @@ def monthly_tempera(out) :
         count_summerday.name = ('avg', col_name)  # MultiIndexの列名に合わせる
         monthly_summary[('avg', col_name)] = count_summerday
 
+    # 1年前の平均気温との差分を取る
+    monthly_summary['year_diff'] = (
+        monthly_summary[('avg','mean')]
+        - monthly_summary[('avg','mean')].shift(12)
+    )
     for index,row in monthly_summary.iterrows() :
         date_str = index.strftime('%y/%m')
+        year_diff = row[("year_diff","")]   # muliindex なので 全部 flat化したほうがよいかも
+        if pd.isna(year_diff) :
+            year_diff_str = ""
+        else :
+            year_diff_str = f'{year_diff:4.2f}'
+
         out.write(f'<tr><td>{date_str}</td><td align="right">{row["avg"]["mean"]:4.2f}</td>'
+                  f'<td align="right">{year_diff_str}</td>'
                   f'<td align="right">{row["avg"]["max"]:4.2f}</td>'
                   f'<td align="right">{row["avg"]["min"]:4.2f}</td>'
                   f'<td align="right">{row["max"]["max"]}</td>'
