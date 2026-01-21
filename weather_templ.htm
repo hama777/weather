@@ -1,5 +1,5 @@
 <html>
-<!-- 26/01/20 v1.19 月別気温データで1年前の気温との差分を表示 -->
+<!-- 26/01/21 v1.20 前週気温差表示廃止 -->
 
 <head>
     <title>Weather Check</title>
@@ -138,17 +138,13 @@
             <div id="tempera_graph_daily" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
             <br>
             <h2>日別気温データ</h2>
-            7日平均気温 : 
-            %tempera_week%
-            &nbsp;&nbsp;&nbsp;1週間前との差分 :
-            %tempera_week_diff%
             <div class="flex">
                 <div class='frame'>
                     <table>
                         <tr>
                             <th>日付</th><th>平均気温</th><th>最高</th><th>最低</th><th>標準偏差</th><th>前日差</th><th>同日差</th>
                         </tr>
-                        %daily_tempera1%
+                        %daily_tempera%
                     </table>
                 </div>
                 <div class='frame'>
@@ -156,7 +152,7 @@
                         <tr>
                             <th>日付</th><th>平均気温</th><th>最高</th><th>最低</th><th>標準偏差</th><th>前日差</th><th>同日差</th>
                         </tr>
-                        %daily_tempera2%
+                        %daily_tempera%
                     </table>
                 </div>
             </div>
