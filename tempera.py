@@ -9,8 +9,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/01/20 v1.19 月別気温データで1年前の気温との差分を表示
-version = "1.19"
+# 26/01/21 v1.20 前週気温差表示廃止
+version = "1.20"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -22,6 +22,8 @@ df_tempera = ""
 
 #  日々の気温データ df カラム date avg(日平均) max min  diff(前日差)  day_diff(1日寒暖差)
 daily_info = ""
+
+temperature_info_col = 0
 
 def read_temperature_data() :
     global df_tempera
@@ -114,11 +116,13 @@ def calc_day_diff() :
 
 #   日別気温データ
 #   気温の日々の平均値、最高値、最低値の表示
-def temperature_info(out,col) :
+def temperature_info(out) :
+    global temperature_info_col
+    temperature_info_col += 1 
     n = 0 
     for index,row in daily_info.tail(40).iterrows() :
         n += 1
-        if com.multi_col(n,col) :
+        if com.multi_col(n,temperature_info_col) :
             continue 
         date_str = index.strftime('%m/%d(%a)')
         diff = row['diff']
@@ -256,15 +260,15 @@ def tempera_graph_week(out) :
         date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
 
-def output_tempera_week(out) :
-    last_value = df_week_tempera.iloc[-1]['avg']
-    out.write(f"{last_value:5.2f}\n") 
+# def output_tempera_week(out) :
+#     last_value = df_week_tempera.iloc[-1]['avg']
+#     out.write(f"{last_value:5.2f}\n") 
 
-def output_tempera_week_diff(out) :
-    last_value = df_week_tempera.iloc[-1]['avg']
-    last_week_value = df_week_tempera.iloc[-8]['avg']
-    diff = last_value - last_week_value
-    out.write(f"{diff:5.2f}\n") 
+# def output_tempera_week_diff(out) :
+#     last_value = df_week_tempera.iloc[-1]['avg']
+#     last_week_value = df_week_tempera.iloc[-8]['avg']
+#     diff = last_value - last_week_value
+#     out.write(f"{diff:5.2f}\n") 
 
 #   平均気温ランキング
 def ranking_ave_tempera(out) :
