@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/11 v1.71 降水量ランキング追加
-version = "1.71"
+# 26/01/21 v1.72 前週気温差表示廃止
+version = "1.72"
 
 out =  ""
 logf = ""
@@ -555,12 +555,12 @@ def parse_template() :
         if "%tempera_graph_week%" in line :
             tempera.tempera_graph_week(out)
             continue
-        if "%daily_tempera1%" in line :
-            tempera.temperature_info(out,1)
+        if "%daily_tempera%" in line :
+            tempera.temperature_info(out)
             continue
-        if "%daily_tempera2%" in line :
-            tempera.temperature_info(out,2)
-            continue
+        # if "%daily_tempera2%" in line :
+        #     tempera.temperature_info(out,2)
+        #     continue
         if "%min_max_temperature%" in line :
             tempera.min_max_temperature(out)
             continue
@@ -594,12 +594,12 @@ def parse_template() :
         if "%ranking_diff_low%" in line :
             tempera.ranking_diff_low(out)
             continue
-        if "%tempera_week%" in line :
-            tempera.output_tempera_week(out)
-            continue
-        if "%tempera_week_diff%" in line :
-            tempera.output_tempera_week_diff(out)
-            continue
+        # if "%tempera_week%" in line :
+        #     tempera.output_tempera_week(out)
+        #     continue
+        # if "%tempera_week_diff%" in line :
+        #     tempera.output_tempera_week_diff(out)
+        #     continue
         if "%weekly_tempera_table%" in line :
             tempera.weekly_tempera_table(out)
             continue
