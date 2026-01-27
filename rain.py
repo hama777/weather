@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 25/12/11 v1.23 降水量ランキング追加
-version = "1.23"
+# 26/01/27 v1.24 日別降水量カラム処理変更
+version = "1.24"
 
 out =  ""
 logf = ""
@@ -23,6 +23,8 @@ templatefile = appdir + "/weather_templ.htm"
 dailyfile = appdir + "/dailyinfo.txt"
 act_weather_file = appdir + "/actweather.txt"   #  実績天気データ  1時間ごと
 precfile = appdir + "/precipitation.txt"     #  降水量データ
+
+daily_precipitation_col = 0  # 日別降水量カラム制御
 
 df_week_rain = ""     # 週間雨時間移動平均
 
@@ -137,12 +139,14 @@ def monthly_rain_time(out) :
                   f'<td align="right">{prec_max}</td><td align="right">{prec_hour_max}</td></tr>\n')
 
 #   日別降水量テーブル
-def daily_precipitation(out,col) :
+def daily_precipitation(out) :
+    global daily_precipitation_col 
+    daily_precipitation_col += 1
     df_tmp = df_prec_daily[df_prec_daily["prec"] != 0].tail(20)  # prec が0でないものの後ろ20個
     n = 0 
     for index,row in df_tmp.iterrows() :
         n += 1
-        if com.multi_col2(n,col,10) :
+        if com.multi_col2(n,daily_precipitation_col,10) :
             continue
 
         prec = row['prec']
