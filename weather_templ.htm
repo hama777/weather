@@ -1,5 +1,5 @@
 <html>
-<!-- 26/01/27 v1.24 日別降水量カラム処理変更 -->
+<!-- 26/01/28 気温カラム処理変更 -->
 
 <head>
     <title>Weather Check</title>
@@ -171,8 +171,7 @@
                     <div id="tempera_graph_week" style="width:900px; height:400px;  margin-top:10px ; margin-left:10px; "></div>
                 </div>
             </div>
-
-
+            <br>
             <h2>月別気温データ</h2>
             <table>
                 <tr>
@@ -183,22 +182,29 @@
             </table>
             <br>
             <h2>最高最低気温</h2>
-            <h3><span class="h3_color">全データ</span></h3>
-            <table>
-                <tr>
-                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
-                </tr>
-                %min_max_temperature%
-            </table>
-            <h3><span class="h3_color">過去30日</span></h3>
-            <table>
-                <tr>
-                    <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
-                </tr>
-                %min_max_temperature_30days%
-            </table>
+            <div class="flex">
+                <div class='frame'>
+                    <h3><span class="h3_color">全データ</span></h3>
+                    <table>
+                        <tr>
+                            <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
+                        </tr>
+                        %min_max_temperature%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <h3><span class="h3_color">過去30日</span></h3>
+                    <table>
+                        <tr>
+                            <th>項目</th><th>最高</th><th>日付</th><th>最低</th><th>日付</th>
+                        </tr>
+                        %min_max_temperature_30days%
+                    </table>
+                </div>
+            </div>
+
             <br>
-            <h2>ランキング 気温</h2>
+            <h2>最高・最低ランキング</h2>
             <h3><span class="h3_color">高温ランキング</span></h3>
             <div class="flex">
                 <div class='frame'>
@@ -241,26 +247,31 @@
                     </table>
                 </div>
             </div>
-            <h3><span class="h3_color">寒暖差 ランキング</span></h3>
+            <br>
+            <h2>寒暖差ランキング</h2>
             <div class="flex">
                 <div class='frame'>
+                    <h3><span class="h3_color">前日差上昇 ランキング</span></h3>
                     <table>
                     <tr><th>順位</th><th>日付</th><th>前日差</th></tr>
                     %ranking_diff_top%
                     </table>
                 </div>
                 <div class='frame'>
+                    <h3><span class="h3_color">前日差下降 ランキング</span></h3>
                     <table>
                     <tr><th>順位</th><th>日付</th><th>前日差</th></tr>
                     %ranking_diff_low%
                     </table>
                 </div>
+                <div class='frame'>
+                    <h3><span class="h3_color">1日寒暖差 ランキング</span></h3>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>1日寒暖差</th></tr>
+                        %ranking_daily_diff%
+                    </table>
+                </div>
             </div>
-            <h3><span class="h3_color">1日寒暖差 ランキング</span></h3>
-            <table>
-            <tr><th>順位</th><th>日付</th><th>1日寒暖差</th></tr>
-                %ranking_daily_diff%
-            </table>
 
         </div>
         <div class="content" id="rain">
