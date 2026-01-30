@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/01/27 v1.73 日別降水量カラム処理変更
-version = "1.73"
+# 26/01/29 v1.74 予測率カラム処理変更
+version = "1.74"
 
 out =  ""
 logf = ""
@@ -28,6 +28,9 @@ dailyfile = appdir + "/dailyinfo.txt"
 res = ""
 week_data_interval = 6   #  週間天気で何時間起きにデータを採取するか
 rain_threshold = 4       #  1日で何時間雨の場合、 雨 と判定するか
+output_week_hit_rate_col = 0
+daily_hit_rate_col = 0 
+output_hit_rate_col = 0 
 
 #    we_data  データ形式
 #    we_data = {
@@ -186,8 +189,6 @@ def read_data_week(fname) :
             timeline_dic[pub_date] = we
             week_data[k] = timeline_dic
         cur_date +=  datetime.timedelta(days=1)
-    #print(week_data)
-
 
 #   時間天気予報の表示
 def hour_forecast() :
@@ -196,7 +197,6 @@ def hour_forecast() :
     display_start_hh = 0    #  表示を開始する時刻   1日前の0時から表示する
     out.write('<thead><tr><th>予報日時</th>\n')
     cur_date = today_date - datetime.timedelta(days=display_start_day)    # 予報は今日のdisplay_start_day日前から
-    #cur_hh = start_hh        
     cur_hh = display_start_hh        
     #  テーブルヘッダ出力
     while True :
@@ -219,7 +219,6 @@ def hour_forecast() :
         out.write(f'<tr><td>{forecast_str}</td>\n')
         timeline_dic = we_data[forecast_date]
         cur_date = today_date - datetime.timedelta(days=display_start_day)    # 予報は今日のdisplay_start_day日前から
-        #cur_hh = start_hh
         cur_hh = display_start_hh
         while True :
             k = com.conv_date_int(cur_date) + cur_hh    # k 発表日時
@@ -354,7 +353,9 @@ def add_daily_data(cnt,hit,dd,act) :
     daily_rate[int(dd/100)] = daily_hitdata
 
 #   時間的中率の表示
-def output_hit_rate(col) :
+def output_hit_rate() :
+    global output_hit_rate_col 
+    output_hit_rate_col += 1
     n = 0 
     for forecast_date,hitdata in  hit_rate.items() :   
         cur_date = com.conv_mmddhh_to_date(forecast_date)  # date型
@@ -363,7 +364,7 @@ def output_hit_rate(col) :
             continue 
 
         n += 1
-        if com.multi_col2(n,col,56) :
+        if com.multi_col2(n,output_hit_rate_col,56) :
             continue
         date_str = com.conv_mmddhh_to_str(forecast_date)
         act = hitdata['act']
@@ -376,14 +377,16 @@ def output_hit_rate(col) :
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
 
 #   日的中率の表示
-def daily_hit_rate(col) :
+def daily_hit_rate() :
+    global daily_hit_rate_col
+    daily_hit_rate_col += 1
     n = 0 
     for forecast_date,hitdata in  daily_rate.items() :   
         cur_date = com.conv_mmddhh_to_date(forecast_date*100)  # forecast_date は yymmdd のため *100 して yymmddhh 形式にする
         if cur_date < today_date - datetime.timedelta(days=39) : 
             continue 
         n += 1
-        if com.multi_col(n,col) :
+        if com.multi_col(n,daily_hit_rate_col) :
             continue
                 
         date_str = com.conv_mmdd_to_datestr(forecast_date)
@@ -466,12 +469,14 @@ def calc_hit_rate_week() :
         week_rate[yymmdd] = hitdata
 
 #  週間天気予報 的中率の表示
-def output_week_hit_rate(col) :
+def output_week_hit_rate() :
+    global output_week_hit_rate_col
+    output_week_hit_rate_col += 1
     n = 0 
     week_rate_last = dict(list(week_rate.items())[-40:])  #  上限00件
     for yymmdd, hitdata in week_rate_last.items() :
         n += 1
-        if com.multi_col(n,col) :
+        if com.multi_col(n,output_week_hit_rate_col) :
             continue
 
         date_str = com.conv_mmdd_to_datestr(yymmdd)
@@ -508,7 +513,6 @@ def date_settings():
     today_hh = today_datetime.hour
     today_yymmddhh = today_yy * 1000000 +  today_mm * 10000 + today_dd * 100 + today_hh 
 
-
 def output_current_date(line) :
     date_str = today_datetime.strftime("%m/%d(%a) %H:%M:%S ")
     s = line.replace("%today%",date_str)
@@ -525,26 +529,14 @@ def parse_template() :
         if "%week_forecast%" in line :
             week_forecast()
             continue
-        if "%week_hit_rate1%" in line :
-            output_week_hit_rate(1)
+        if "%week_hit_rate%" in line :
+            output_week_hit_rate()
             continue
-        if "%week_hit_rate2%" in line :
-            output_week_hit_rate(2)
+        if "%output_hit_rate%" in line :
+            output_hit_rate()
             continue
-        if "%output_hit_rate1%" in line :
-            output_hit_rate(1)
-            continue
-        if "%output_hit_rate2%" in line :
-            output_hit_rate(2)
-            continue
-        if "%output_hit_rate3%" in line :
-            output_hit_rate(3)
-            continue
-        if "%daily_hit_rate1%" in line :
-            daily_hit_rate(1)
-            continue
-        if "%daily_hit_rate2%" in line :
-            daily_hit_rate(2)
+        if "%daily_hit_rate%" in line :
+            daily_hit_rate()
             continue
         if "%tempera_graph%" in line :
             tempera.tempera_graph(out)
@@ -558,9 +550,6 @@ def parse_template() :
         if "%daily_tempera%" in line :
             tempera.temperature_info(out)
             continue
-        # if "%daily_tempera2%" in line :
-        #     tempera.temperature_info(out,2)
-        #     continue
         if "%min_max_temperature%" in line :
             tempera.min_max_temperature(out)
             continue
@@ -594,12 +583,6 @@ def parse_template() :
         if "%ranking_diff_low%" in line :
             tempera.ranking_diff_low(out)
             continue
-        # if "%tempera_week%" in line :
-        #     tempera.output_tempera_week(out)
-        #     continue
-        # if "%tempera_week_diff%" in line :
-        #     tempera.output_tempera_week_diff(out)
-        #     continue
         if "%weekly_tempera_table%" in line :
             tempera.weekly_tempera_table(out)
             continue
@@ -615,9 +598,6 @@ def parse_template() :
         if "%daily_precipitation%" in line :
             rain.daily_precipitation(out)
             continue
-        # if "%daily_precipitation2%" in line :
-        #     rain.daily_precipitation(out,2)
-        #     continue
         if "%continuous_rain%" in line :
             rain.continuous_rain(out)
             continue
@@ -639,9 +619,6 @@ def parse_template() :
         if "%ranking_prec_hour%" in line :
             rain.ranking_prec_hour(out)
             continue
-        # if "%week_tempera%" in line :
-        #     week_tempera()
-        #     continue
         if "%version%" in line :
             s = line.replace("%version%",version)
             out.write(s)
