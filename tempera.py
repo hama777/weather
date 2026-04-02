@@ -9,8 +9,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/01/21 v1.20 前週気温差表示廃止
-version = "1.20"
+# 26/04/02 v1.21 週平均気温の表に前年差を追加
+version = "1.21"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -174,11 +174,13 @@ def weekly_tempera_table(out) :
     df_week_tempera['avg_1_before'] = df_week_tempera['avg'].shift(1)
     df_week_tempera['avg_7_before'] = df_week_tempera['avg'].shift(7)
     df_week_tempera['avg_14_before'] = df_week_tempera['avg'].shift(14)
+    df_week_tempera['avg_365_before'] = df_week_tempera['avg'].shift(365)
     for index,row in df_week_tempera.tail(15).iterrows() :
         v = row['avg']
         v1 = row['avg_1_before']
         v7 = row['avg_7_before']
         v14 = row['avg_14_before']
+        v365 = row['avg_365_before']
 
         if pd.isna(v) :
             continue 
@@ -186,9 +188,10 @@ def weekly_tempera_table(out) :
         diff1 = float_to_color_str(v - v1)
         diff7 = float_to_color_str(v - v7)
         diff14 = float_to_color_str(v - v14)
+        diff365 = float_to_color_str(v - v365)
         out.write(f"<tr><td>{date_str}</td><td align='right'>{v:4.2f}</td>"
                   f"<td align='right'>{diff1}</td><td align='right'>{diff7}</td>"
-                  f"<td align='right'>{diff14}</td></tr>\n")         
+                  f"<td align='right'>{diff14}</td><td align='right'>{diff365}</td></tr>\n")         
 
 def float_to_color_str(f) :
     if f < 0 :
