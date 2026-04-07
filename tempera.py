@@ -9,8 +9,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/04/02 v1.21 週平均気温の表に前年差を追加
-version = "1.21"
+# 26/04/07 v1.22 最高気温ランキングに今年のみを追加
+version = "1.22"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -301,6 +301,21 @@ def ranking_min_tempera_low(out) :
 def ranking_daily_diff(out) :
     df_top = daily_info.sort_values('day_diff',ascending=False)
     ranking_tempera_com(df_top.head(10),'day_diff',out)
+
+def ranking_ave_tempera_year(out) :
+    df_cur_year = daily_info[daily_info.index.year == 2026]
+    df_top = df_cur_year.sort_values('avg',ascending=False)
+    ranking_tempera_com(df_top.head(10),'avg',out)
+
+def ranking_max_tempera_year(out) :
+    df_cur_year = daily_info[daily_info.index.year == 2026]
+    df_top = df_cur_year.sort_values('max',ascending=False)
+    ranking_tempera_com(df_top.head(10),'max',out)
+
+def ranking_min_tempera_year(out) :
+    df_cur_year = daily_info[daily_info.index.year == 2026]
+    df_top = df_cur_year.sort_values('min',ascending=False)
+    ranking_tempera_com(df_top.head(10),'min',out)
 
 def ranking_tempera_com(df,col,out) :
     i = 0 
