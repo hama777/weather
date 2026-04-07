@@ -1,5 +1,5 @@
 <html>
-<!-- 26/04/02 v1.21 週平均気温の表に前年差を追加 -->
+<!-- 26/04/07 v1.22 最高気温ランキングに今年のみを追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -223,6 +223,27 @@
                     <table>
                     <tr><th>順位</th><th>日付</th><th>最低気温</th></tr>
                     %ranking_min_tempera%
+                    </table>
+                </div>
+            </div>
+            <h3><span class="h3_color">今年高温ランキング</span></h3>
+            <div class="flex">
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>平均気温</th></tr>
+                    %ranking_ave_tempera_year%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>最高気温</th></tr>
+                    %ranking_max_tempera_year%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>最低気温</th></tr>
+                    %ranking_min_tempera_year%
                     </table>
                 </div>
             </div>
