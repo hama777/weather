@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/01/29 v1.74 予測率カラム処理変更
-version = "1.74"
+# 26/04/07 v1.75 最高気温ランキングに今年のみを追加
+version = "1.75"
 
 out =  ""
 logf = ""
@@ -567,6 +567,15 @@ def parse_template() :
             continue
         if "%ranking_min_tempera%" in line :
             tempera.ranking_min_tempera(out)
+            continue
+        if "%ranking_ave_tempera_year%" in line :
+            tempera.ranking_ave_tempera_year(out)
+            continue
+        if "%ranking_max_tempera_year%" in line :
+            tempera.ranking_max_tempera_year(out)
+            continue
+        if "%ranking_min_tempera_year%" in line :
+            tempera.ranking_min_tempera_year(out)
             continue
         if "%ranking_ave_tempera_low%" in line :
             tempera.ranking_ave_tempera_low(out)
