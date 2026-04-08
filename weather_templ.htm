@@ -1,5 +1,5 @@
 <html>
-<!-- 26/04/07 v1.22 最高気温ランキングに今年のみを追加 -->
+<!-- 26/04/08 グラフの範囲を表示 -->
 
 <head>
     <title>Weather Check</title>
@@ -19,7 +19,7 @@
                 ]);
 
             var options = {
-                title: '気温グラフ',
+                title: '気温グラフ(2週間)',
                 colors: ['#32a852'],
                 hAxis: { title: '日時' },
                 chartArea: { backgroundColor: '#b7ebc5', left: 50, right: 30 },
@@ -46,7 +46,7 @@
                 ]);
 
             var options = {
-                title: '日毎気温グラフ',
+                title: '日毎気温グラフ(180日)',
                 colors: ['#32a852'],
                 hAxis: { title: '日時' },
                 chartArea: { backgroundColor: '#b7ebc5', left: 50, right: 30 },
@@ -73,7 +73,7 @@
                 ]);
 
             var options = {
-                title: '日毎気温グラフ',
+                title: '週平均気温グラフ(25年1月～)',
                 colors: ['#32a852'],
                 hAxis: { title: '日時' },
                 chartArea: { backgroundColor: '#b7ebc5', left: 50, right: 30 },
@@ -370,7 +370,7 @@
                     </table>
                 </div>
             </div>
-            <h2>降水量ランキング</h2>
+            <h2>降水量ランキング(25年8月～)</h2>
             <div class="flex">
                 <div class='frame'>
                     1日降水量
