@@ -5,12 +5,11 @@ import locale
 import datetime
 import pandas as pd
 import com
-#import rain
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/04/07 v1.22 最高気温ランキングに今年のみを追加
-version = "1.22"
+# 26/05/07 v1.23 週平均気温グラフを過去400日にした
+version = "1.23"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -254,9 +253,9 @@ def tempera_graph_daily(out) :
         v = row['avg']
         out.write(f"['{date_str}',{v}],") 
 
-#   気温グラフ   7日移動平均
+#   気温グラフ   7日移動平均   過去400日
 def tempera_graph_week(out) :
-    for index,row in df_week_tempera.iterrows() :
+    for index,row in df_week_tempera.tail(400).iterrows() :
         v = row['avg']
         if pd.isna(v) :
             continue 
