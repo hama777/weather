@@ -1,5 +1,5 @@
 <html>
-<!-- 26/05/07 v1.23 週平均気温グラフを過去400日にした -->
+<!-- 26/05/26 v1.24 週平均気温の14日前差分ランキング追加 -->
 
 <head>
     <title>Weather Check</title>
@@ -293,8 +293,18 @@
                     </table>
                 </div>
             </div>
-
+            <h2>週平均ランキング</h2>
+            <div class="flex">
+                <div class='frame'>
+                    <h3><span class="h3_color">14日前差分ランキング</span></h3>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>差分</th></tr>
+                    %ranking_week_diff14_top%
+                    </table>
+                </div>
+            </div>
         </div>
+
         <div class="content" id="rain">
             <h2>現在の状況</h2>
              : %cur_continuous%
