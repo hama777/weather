@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/04/07 v1.75 最高気温ランキングに今年のみを追加
-version = "1.75"
+# 26/05/26 v1.76 週平均気温の14日前差分ランキング追加
+version = "1.76"
 
 out =  ""
 logf = ""
@@ -597,6 +597,9 @@ def parse_template() :
             continue
         if "%ranking_daily_diff%" in line :
             tempera.ranking_daily_diff(out)
+            continue
+        if "%ranking_week_diff14_top%" in line :
+            tempera.ranking_week_diff(out)
             continue
         if "%week_rain_time_graph%" in line :
             rain.week_rain_time_graph(out)
