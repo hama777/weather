@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/05/26 v1.76 週平均気温の14日前差分ランキング追加
-version = "1.76"
+# 26/06/17 v1.77 的中率の計算で最後の時間は計算に入れない
+version = "1.77"
 
 out =  ""
 logf = ""
@@ -294,7 +294,7 @@ def calc_hit_rate() :
     for forecast_date in  we_data.keys() :     # 予報日時
         if forecast_date > cur_mmddhh :
             break                              # 現在日時を超えたら終了
-        date_str = com.conv_mmddhh_to_str(forecast_date)
+        #date_str = com.conv_mmddhh_to_str(forecast_date)
         dd = com.get_dd_part(forecast_date)         # 日付部分
         timeline_dic = we_data[forecast_date]
         if forecast_date in timeline_dic :
@@ -312,9 +312,13 @@ def calc_hit_rate() :
 
             #  24時間以内の的中率
             befor24h  = com.calc_befor24h(forecast_date)
-            for dt,we in timeline_dic.items() :
+            #for dt,we in timeline_dic.items() :
+            for i, (dt, we) in enumerate(timeline_dic.items()):
                 if dt < befor24h :
                     continue 
+                # 最後の項目は処理しない
+                if i == len(timeline_dic) - 1:
+                    continue
                 cnt24 += 1
                 if com.is_rain(we) == com.is_rain(act) :
                     hit24 += 1 
