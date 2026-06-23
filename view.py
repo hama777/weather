@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/06/17 v1.77 的中率の計算で最後の時間は計算に入れない
-version = "1.77"
+# 26/06/23 v1.78 的中率の計算で最後の時間は計算に入れない
+version = "1.78"
 
 out =  ""
 logf = ""
@@ -283,15 +283,20 @@ def week_forecast() :
 #   的中率の計算
 #      hit_rate  辞書   キー  予報日時  値  hitdata
 #      hitdata   辞書   キー  act 実際の天気(天気コード)  cnt 予報回数  hit 的中回数  hit24  24時間用  cnt24  24時間用
+#      evaldata  辞書   キー  予報日時  値   eval_array 辞書
 def calc_hit_rate() : 
-    global  hit_rate,daily_rate
+    global  hit_rate,daily_rate,evaldata
 
+    evaldata = {}
     cur_mmddhh = today_yymmddhh   #  現在の 日時  yymmddhh 形式
     cur_dd = 0 
     daily_cnt = 0     # 1日ごとの集計に使う
     daily_hit = 0
     daily_rain = 0 
+    
     for forecast_date in  we_data.keys() :     # 予報日時
+        eval_array = {}
+        eval_array["rain_rain"] = eval_array["rain_fine"] = eval_array["fine_rain"] = eval_array["fine_fine"] = 0 
         if forecast_date > cur_mmddhh :
             break                              # 現在日時を超えたら終了
         #date_str = com.conv_mmddhh_to_str(forecast_date)
@@ -309,6 +314,17 @@ def calc_hit_rate() :
                 cnt += 1
                 if com.is_rain(we) == com.is_rain(act) :
                     hit += 1 
+                if com.is_rain(act) :   #  実際が雨で
+                    if com.is_rain(we) :  
+                        eval_array["rain_rain"] += 1    #  雨と予報  正解
+                    else :
+                        eval_array["rain_fine"] += 1    #  晴と予報  不正解
+                else :
+                    if com.is_rain(we) :  #  実際が晴で
+                        eval_array["fine_rain"] += 1    #  雨と予報  不正解
+                    else :
+                        eval_array["fine_fine"] += 1    #  晴と予報  正解
+
 
             #  24時間以内の的中率
             befor24h  = com.calc_befor24h(forecast_date)
@@ -342,9 +358,13 @@ def calc_hit_rate() :
 
         daily_cnt += cnt
         daily_hit += hit
+        evaldata[forecast_date] = eval_array
+#        print(evaldata)
+#        eval_array["rain_rain"] = eval_array["rain_fine"] = eval_array["fine_rain"] = eval_array["fine_fine"] = 0 
 
     #  最後に当日分のデータを追加する
     add_daily_data(daily_cnt,daily_hit,forecast_date,daily_rain)
+    
 
 #   1日データの追加
 def add_daily_data(cnt,hit,dd,act) :
@@ -379,6 +399,20 @@ def output_hit_rate() :
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
+
+def output_confusion_matrix() :
+    for forecast_date,eval_array in  evaldata.items() :   
+        cur_date = com.conv_mmddhh_to_date(forecast_date)  # date型
+        #  7日以前は表示しない
+        if cur_date < today_date - datetime.timedelta(days=6) : 
+            continue 
+        date_str = com.conv_mmddhh_to_str(forecast_date)
+        out.write(f'<tr><td>{date_str}</td>'
+                  f'<td align="right">{eval_array["rain_rain"]}</td>'
+                  f'<td align="right">{eval_array["rain_fine"]}</td>'
+                  f'<td align="right">{eval_array["fine_rain"]}</td>'
+                  f'<td align="right">{eval_array["fine_fine"]}</td></tr>')
+
 
 #   日的中率の表示
 def daily_hit_rate() :
@@ -541,6 +575,9 @@ def parse_template() :
             continue
         if "%daily_hit_rate%" in line :
             daily_hit_rate()
+            continue
+        if "%output_confusion_matrix%" in line :
+            output_confusion_matrix()
             continue
         if "%tempera_graph%" in line :
             tempera.tempera_graph(out)
