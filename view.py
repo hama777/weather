@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/06/23 v1.78 的中率の計算で最後の時間は計算に入れない
-version = "1.78"
+# 26/07/01 v1.79 混同行列の表示廃止
+version = "1.79"
 
 out =  ""
 logf = ""
@@ -396,22 +396,23 @@ def output_hit_rate() :
         hit = hitdata['hit']
         cnt24 = hitdata['cnt24']
         hit24 = hitdata['hit24']
+
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
                   f'<td align="right">{hit/cnt*100:5.2f}</td>'
                   f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
 
-def output_confusion_matrix() :
-    for forecast_date,eval_array in  evaldata.items() :   
-        cur_date = com.conv_mmddhh_to_date(forecast_date)  # date型
-        #  7日以前は表示しない
-        if cur_date < today_date - datetime.timedelta(days=6) : 
-            continue 
-        date_str = com.conv_mmddhh_to_str(forecast_date)
-        out.write(f'<tr><td>{date_str}</td>'
-                  f'<td align="right">{eval_array["rain_rain"]}</td>'
-                  f'<td align="right">{eval_array["rain_fine"]}</td>'
-                  f'<td align="right">{eval_array["fine_rain"]}</td>'
-                  f'<td align="right">{eval_array["fine_fine"]}</td></tr>')
+# def output_confusion_matrix() :
+#     for forecast_date,eval_array in  evaldata.items() :   
+#         cur_date = com.conv_mmddhh_to_date(forecast_date)  # date型
+#         #  7日以前は表示しない
+#         if cur_date < today_date - datetime.timedelta(days=6) : 
+#             continue 
+#         date_str = com.conv_mmddhh_to_str(forecast_date)
+#         out.write(f'<tr><td>{date_str}</td>'
+#                   f'<td align="right">{eval_array["rain_rain"]}</td>'
+#                   f'<td align="right">{eval_array["rain_fine"]}</td>'
+#                   f'<td align="right">{eval_array["fine_rain"]}</td>'
+#                   f'<td align="right">{eval_array["fine_fine"]}</td></tr>')
 
 
 #   日的中率の表示
@@ -576,9 +577,9 @@ def parse_template() :
         if "%daily_hit_rate%" in line :
             daily_hit_rate()
             continue
-        if "%output_confusion_matrix%" in line :
-            output_confusion_matrix()
-            continue
+        # if "%output_confusion_matrix%" in line :
+        #     output_confusion_matrix()
+        #     continue
         if "%tempera_graph%" in line :
             tempera.tempera_graph(out)
             continue
