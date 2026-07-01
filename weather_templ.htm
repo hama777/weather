@@ -1,5 +1,5 @@
 <html>
-<!-- 26/06/23 v1.78 的中率の計算で混同行列を追加 -->
+<!-- 26/07/01 v1.79 混同行列の表示廃止 -->
 
 <head>
     <title>Weather Check</title>
@@ -453,7 +453,7 @@
             <div class="flex">
                 <div class='frame'>
                     <table>
-                        <tr><th>日時</th><th>天気</th><th>Rate</th><th>Rate(24h)</th></tr>
+                        <tr><th>日時</th><th>天気</th><th>Rate</th><th>Rate(24h)</th>></tr>
                         %output_hit_rate%
                     </table>
                 </div>
@@ -470,11 +470,6 @@
                     </table>
                 </div>
             </div>
-            <h2>1時間天気 混同行列</h2>
-                    <table>
-                        <tr><th>日時</th><th>雨/雨</th><th>雨/晴</th><th>晴/雨</th><th>晴/晴</th></tr>
-                        %output_confusion_matrix%
-                    </table>
 
         </div>
     </div>
