@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/05/26 v1.24 週平均気温の14日前差分ランキング追加
-version = "1.24"
+# 26/07/01 v1.25 月別気温データで前年マイナスの場合は赤字にする
+version = "1.25"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -258,7 +258,10 @@ def monthly_tempera(out) :
         if pd.isna(year_diff) :
             year_diff_str = ""
         else :
-            year_diff_str = f'{year_diff:4.2f}'
+            if year_diff < 0 :
+                year_diff_str = f'<span class=red>{year_diff:4.2f}</span>'
+            else :
+                year_diff_str = f'{year_diff:4.2f}'
 
         out.write(f'<tr><td>{date_str}</td><td align="right">{row["avg"]["mean"]:4.2f}</td>'
                   f'<td align="right">{year_diff_str}</td>'
