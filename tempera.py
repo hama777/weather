@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/01 v1.25 月別気温データで前年マイナスの場合は赤字にする
-version = "1.25"
+# 26/07/03 v1.27 週平均ランキング  下降ランキング追加
+version = "1.27"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -71,6 +71,7 @@ def create_temperature_info() :
     daily_info['day_diff'] = day_diff
     create_df_week_diff()
 
+#   df_week_diff の作成   df_week_diff は週平均気温 の差分情報
 def create_df_week_diff() :
     global df_week_diff     # index datetime カラム  diff14    14日前の週平均気温    ランキングに使用
     rows = []
@@ -78,24 +79,48 @@ def create_df_week_diff() :
         v = row['avg']
         v14 = row['avg_14_before']
         diff14 = v - v14
-        rows.append([index, diff14])
-    df_week_diff = pd.DataFrame(rows, columns=['date', 'diff14'])
+        v365 = row['avg_365_before']
+        diff365 = v - v365
+        rows.append([index, diff14,diff365])
+    df_week_diff = pd.DataFrame(rows, columns=['date', 'diff14','diff365'])
     df_week_diff = df_week_diff.set_index('date')
     #print(df_week_diff)
 
+#   週平均気温  14日前差分 ランキング
 def ranking_week_diff(out) :
-    df_diff_top = df_week_diff.sort_values('diff14',ascending=False).head(10)
+    df_diff = df_week_diff.sort_values('diff14',ascending=False).head(10)
+    ranking_week_com(out,df_diff,"week2")
+
+def ranking_week_diff_low(out) :
+    df_diff = df_week_diff.sort_values('diff14',ascending=True).head(10)
+    ranking_week_com(out,df_diff,"week2")
+
+#   週平均気温  1年前差分 ランキング
+def ranking_week_diff_year(out) :
+    df_diff = df_week_diff.sort_values('diff365',ascending=False).head(10)
+    ranking_week_com(out,df_diff,"year")
+
+def ranking_week_diff_year_low(out) :
+    df_diff = df_week_diff.sort_values('diff365',ascending=True).head(10)
+    print(df_diff)
+    ranking_week_com(out,df_diff,"year")
+
+def ranking_week_com(out,df_diff,type) :
     i = 0 
     today_date = datetime.date.today()  
     yesterday = today_date - timedelta(days=1)
-    for index,row in df_diff_top.iterrows() :
+    for index,row in df_diff.iterrows() :
         i += 1
         date_str = index.strftime('%y/%m/%d(%a)')
         if index == today_date :
             date_str = f'<span class=red>{date_str}</span>'
         if index == yesterday :
             date_str = f'<span class=blue>{date_str}</span>'
-        out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{row["diff14"]:4.2f}</td></tr>\n')
+        if type == "week2" :
+            val = row["diff14"]
+        else :
+            val = row["diff365"]
+        out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{val:4.2f}</td></tr>\n')
 
 def ranking_diff_top(out) :
     df_diff_top = daily_info.sort_values('diff',ascending=False).head(10)
