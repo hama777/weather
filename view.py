@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/01 v1.79 混同行列の表示廃止
-version = "1.79"
+# 26/07/03 v1.81 週平均ランキング  下降ランキング追加
+version = "1.81"
 
 out =  ""
 logf = ""
@@ -642,6 +642,15 @@ def parse_template() :
             continue
         if "%ranking_week_diff14_top%" in line :
             tempera.ranking_week_diff(out)
+            continue
+        if "%ranking_week_diff365_top%" in line :
+            tempera.ranking_week_diff_year(out)
+            continue
+        if "%ranking_week_diff14_low%" in line :
+            tempera.ranking_week_diff_low(out)
+            continue
+        if "%ranking_week_diff365_low%" in line :
+            tempera.ranking_week_diff_year_low(out)
             continue
         if "%week_rain_time_graph%" in line :
             rain.week_rain_time_graph(out)
