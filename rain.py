@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/06/26 v1.26 ランキングで当日、前日分の色を変える
-version = "1.26"
+# 26/07/09 v1.27 週平均1日雨時間グラフを400日間とした
+version = "1.27"
 
 out =  ""
 logf = ""
@@ -100,7 +100,7 @@ def create_df_week_rain() :
 
 #  週間雨時間移動平均グラフ
 def week_rain_time_graph(out) :
-    for index,row in df_week_rain.tail(365).iterrows() :
+    for index,row in df_week_rain.tail(400).iterrows() :
         v = row['rain']
         if pd.isna(v) :
             continue 
