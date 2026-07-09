@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/03 v1.27 週平均ランキング  下降ランキング追加
-version = "1.27"
+# 26/07/09 v1.28 デバッグ用出力を削除
+version = "1.28"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -102,7 +102,7 @@ def ranking_week_diff_year(out) :
 
 def ranking_week_diff_year_low(out) :
     df_diff = df_week_diff.sort_values('diff365',ascending=True).head(10)
-    print(df_diff)
+    #print(df_diff)
     ranking_week_com(out,df_diff,"year")
 
 def ranking_week_com(out,df_diff,type) :
