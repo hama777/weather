@@ -1,5 +1,5 @@
 <html>
-<!-- 26/07/09 v1.27 週平均1日雨時間グラフを400日間とした -->
+<!-- 26/07/10  降水量ランキングの位置変更  -->
 
 <head>
     <title>Weather Check</title>
@@ -342,7 +342,7 @@
                 </tr>
                 %monthly_rain_time%
             </table><br>
-            <h2>日別降水量</h2> 
+            <h2>日別降水量(25年8月～)</h2> 
             <div class="flex">
                 <div class='frame'>
                     <table>
@@ -358,6 +358,24 @@
                             <th>日付</th><th>降水量</th>
                         </tr>
                         %daily_precipitation%
+                    </table>
+                </div>
+                <div class='frame'>
+                    1日降水量ランキング
+                    <table>
+                        <tr>
+                            <th>日付</th><th>降水量</th>
+                        </tr>
+                        %ranking_prec_daily%
+                    </table>
+                </div>
+                <div class='frame'>
+                    1時間降水量ランキング
+                    <table>
+                        <tr>
+                            <th>日付</th><th>降水量</th>
+                        </tr>
+                        %ranking_prec_hour%
                     </table>
                 </div>
             </div>
@@ -398,27 +416,6 @@
                             <th>日付</th><th>連続晴時間</th>
                         </tr>
                         %continuous_fine%
-                    </table>
-                </div>
-            </div>
-            <h2>降水量ランキング(25年8月～)</h2>
-            <div class="flex">
-                <div class='frame'>
-                    1日降水量
-                    <table>
-                        <tr>
-                            <th>日付</th><th>降水量</th>
-                        </tr>
-                        %ranking_prec_daily%
-                    </table>
-                </div>
-                <div class='frame'>
-                    1時間降水量
-                    <table>
-                        <tr>
-                            <th>日付</th><th>降水量</th>
-                        </tr>
-                        %ranking_prec_hour%
                     </table>
                 </div>
             </div>
