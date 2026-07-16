@@ -1,5 +1,5 @@
 <html>
-<!-- 26/07/10  降水量ランキングの位置変更  -->
+<!-- 26/07/16 v1.29 連続上昇日数ランキング追加  -->
 
 <head>
     <title>Weather Check</title>
@@ -321,6 +321,16 @@
                     <table>
                     <tr><th>順位</th><th>日付</th><th>差分</th></tr>
                     %ranking_week_diff365_low%
+                    </table>
+                </div>
+            </div>
+            <h2>日毎連続上昇下降ランキング</h2>
+            <div class="flex">
+                <div class='frame'>
+                    <h3><span class="h3_color">連続上昇ランキング</span></h3>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>日数</th></tr>
+                    %ranking_consecutive_up%
                     </table>
                 </div>
             </div>
