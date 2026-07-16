@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/09 v1.28 デバッグ用出力を削除
-version = "1.28"
+# 26/07/16 v1.29 連続上昇日数ランキング追加
+version = "1.29"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -193,7 +193,6 @@ def temperature_info(out) :
                   f"<td align='right'>{diff_str}</td>"
                   f"<td align='right'>{row['day_diff']:4.1f}</td></tr>\n")
 
-
 #   日別気温データの過去最高値、最低値を表示
 def min_max_temperature(out) :
     min_max_temperature_com(out,daily_info)
@@ -224,6 +223,57 @@ def min_max_temperature_com(out,arg_df) :
         out.write(f'<tr><td>{item_name[item]}</td>')
         out.write(f'<td align="right">{aggmax[item]:4.2f}</td><td>{aggmax_date[item]}</td>'
                   f'<td align="right">{aggmin[item]:4.2f}</td><td>{aggmin_date[item]}</td></tr>\n')
+
+#   日毎、連続上昇日数ランキング
+def ranking_consecutive_up(out) : 
+    rank = rank_consecutive(True)
+    i = 0
+    for index,row in rank.head(5).iterrows() :
+        i += 1
+        sdate = row['start_date'].strftime('%y/%m/%d(%a)')
+        edate = row['end_date'].strftime('%y/%m/%d(%a)')
+        out.write(f'<tr><td>{i}</td><td>{sdate} - {edate}</td><td>{row["consecutive_days"]}</td></tr>\n')
+
+def rank_consecutive(flg) :
+
+    # 元の daily_info は変更しない
+    sorted_daily_info = daily_info.sort_index()
+
+    # 上昇または下降を判定
+    if flg:
+        target = sorted_daily_info["diff"] > 0
+    else:
+        target = sorted_daily_info["diff"] < 0
+
+    # True/Falseが切り替わるごとにグループ番号を付与
+    group = target.ne(target.shift()).cumsum()
+
+    # 連続増加区間ごとに集計
+    ranking = (
+        sorted_daily_info[target]
+        .groupby(group[target])
+        .agg(
+            start_date=("diff", lambda x: x.index[0]),
+            end_date=("diff", lambda x: x.index[-1]),
+            consecutive_days=("diff", "size"),
+        )
+        .sort_values(
+            ["consecutive_days", "end_date"],
+            ascending=[False, True]
+        )
+    )
+    # 同率順位（10,8,8,7 → 1,2,2,4）
+    ranking["rank"] = (
+        ranking["consecutive_days"]
+        .rank(method="min", ascending=False)
+        .astype(int)
+    )
+
+    # 5位まで（5位タイを含む）
+    #print(ranking)    
+    #ranking = ranking[ranking["rank"] <= 5].reset_index(drop=True)
+    return(ranking)
+
 
 #   7日移動平均テーブル
 def weekly_tempera_table(out) :
@@ -322,16 +372,6 @@ def tempera_graph_week(out) :
             continue 
         date_str = index.strftime('%m/%d')
         out.write(f"['{date_str}',{v}],") 
-
-# def output_tempera_week(out) :
-#     last_value = df_week_tempera.iloc[-1]['avg']
-#     out.write(f"{last_value:5.2f}\n") 
-
-# def output_tempera_week_diff(out) :
-#     last_value = df_week_tempera.iloc[-1]['avg']
-#     last_week_value = df_week_tempera.iloc[-8]['avg']
-#     diff = last_value - last_week_value
-#     out.write(f"{diff:5.2f}\n") 
 
 #   平均気温ランキング
 def ranking_ave_tempera(out) :
