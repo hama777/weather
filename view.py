@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/16 v1.82 連続上昇日数ランキング追加
-version = "1.82"
+# 26/07/17 v1.83 7日前差分ランキング追加
+version = "1.83"
 
 out =  ""
 logf = ""
@@ -640,14 +640,20 @@ def parse_template() :
         if "%ranking_daily_diff%" in line :
             tempera.ranking_daily_diff(out)
             continue
+        if "%ranking_week_diff7_top%" in line :
+            tempera.ranking_week_diff(out,7)
+            continue
         if "%ranking_week_diff14_top%" in line :
-            tempera.ranking_week_diff(out)
+            tempera.ranking_week_diff(out,14)
             continue
         if "%ranking_week_diff365_top%" in line :
             tempera.ranking_week_diff_year(out)
             continue
+        if "%ranking_week_diff7_low%" in line :
+            tempera.ranking_week_diff_low(out,7)
+            continue
         if "%ranking_week_diff14_low%" in line :
-            tempera.ranking_week_diff_low(out)
+            tempera.ranking_week_diff_low(out,14)
             continue
         if "%ranking_week_diff365_low%" in line :
             tempera.ranking_week_diff_year_low(out)
