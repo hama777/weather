@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/16 v1.29 連続上昇日数ランキング追加
-version = "1.29"
+# 26/07/17 v1.30 7日前差分ランキング追加
+version = "1.30"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -77,23 +77,31 @@ def create_df_week_diff() :
     rows = []
     for index,row in df_week_tempera.iterrows() :
         v = row['avg']
+        v7 = row['avg_7_before']
         v14 = row['avg_14_before']
+        diff7 = v - v7
         diff14 = v - v14
         v365 = row['avg_365_before']
         diff365 = v - v365
-        rows.append([index, diff14,diff365])
-    df_week_diff = pd.DataFrame(rows, columns=['date', 'diff14','diff365'])
+        rows.append([index, diff7,diff14,diff365])
+    df_week_diff = pd.DataFrame(rows, columns=['date','diff7', 'diff14','diff365'])
     df_week_diff = df_week_diff.set_index('date')
     #print(df_week_diff)
 
 #   週平均気温  14日前差分 ランキング
-def ranking_week_diff(out) :
-    df_diff = df_week_diff.sort_values('diff14',ascending=False).head(10)
-    ranking_week_com(out,df_diff,"week2")
+def ranking_week_diff(out,days) :
+    item = 'diff14'
+    if days == 7 :
+        item = 'diff7'
+    df_diff = df_week_diff.sort_values(item,ascending=False).head(10)
+    ranking_week_com(out,df_diff,item)
 
-def ranking_week_diff_low(out) :
-    df_diff = df_week_diff.sort_values('diff14',ascending=True).head(10)
-    ranking_week_com(out,df_diff,"week2")
+def ranking_week_diff_low(out,days) :
+    item = 'diff14'
+    if days == 7 :
+        item = 'diff7'
+    df_diff = df_week_diff.sort_values(item,ascending=True).head(10)
+    ranking_week_com(out,df_diff,item)
 
 #   週平均気温  1年前差分 ランキング
 def ranking_week_diff_year(out) :
@@ -116,7 +124,9 @@ def ranking_week_com(out,df_diff,type) :
             date_str = f'<span class=red>{date_str}</span>'
         if index == yesterday :
             date_str = f'<span class=blue>{date_str}</span>'
-        if type == "week2" :
+        if type == "diff7" :
+            val = row["diff7"]
+        elif type == "diff14" :
             val = row["diff14"]
         else :
             val = row["diff365"]
