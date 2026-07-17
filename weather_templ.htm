@@ -1,5 +1,5 @@
 <html>
-<!-- 26/07/16 v1.29 連続上昇日数ランキング追加  -->
+<!-- 26/07/17 v1.30 7日前差分ランキング追加  -->
 
 <head>
     <title>Weather Check</title>
@@ -296,6 +296,13 @@
             <h2>週平均ランキング</h2>
             <div class="flex">
                 <div class='frame'>
+                    <h3><span class="h3_color">7日前差分ランキング</span></h3>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>差分</th></tr>
+                    %ranking_week_diff7_top%
+                    </table>
+                </div>
+                <div class='frame'>
                     <h3><span class="h3_color">14日前差分ランキング</span></h3>
                     <table>
                     <tr><th>順位</th><th>日付</th><th>差分</th></tr>
@@ -307,6 +314,13 @@
                     <table>
                     <tr><th>順位</th><th>日付</th><th>差分</th></tr>
                     %ranking_week_diff365_top%
+                    </table>
+                </div>
+                <div class='frame'>
+                    <h3><span class="h3_color">7日前差(下降)</span></h3>
+                    <table>
+                    <tr><th>順位</th><th>日付</th><th>差分</th></tr>
+                    %ranking_week_diff7_low%
                     </table>
                 </div>
                 <div class='frame'>
