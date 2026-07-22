@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/17 v1.30 7日前差分ランキング追加
-version = "1.30"
+# 26/07/22 v1.31 日毎平均気温連続下降ランキング追加
+version = "1.31"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -244,6 +244,17 @@ def ranking_consecutive_up(out) :
         edate = row['end_date'].strftime('%y/%m/%d(%a)')
         out.write(f'<tr><td>{i}</td><td>{sdate} - {edate}</td><td>{row["consecutive_days"]}</td></tr>\n')
 
+def ranking_consecutive_down(out) : 
+    rank = rank_consecutive(False)
+    i = 0
+    for index,row in rank.head(5).iterrows() :
+        i += 1
+        sdate = row['start_date'].strftime('%y/%m/%d(%a)')
+        edate = row['end_date'].strftime('%y/%m/%d(%a)')
+        out.write(f'<tr><td>{i}</td><td>{sdate} - {edate}</td><td>{row["consecutive_days"]}</td></tr>\n')
+
+#   日毎平均気温の連続上昇、下降のランキングを集計する
+#      flg  True 上昇    False 下降
 def rank_consecutive(flg) :
 
     # 元の daily_info は変更しない
