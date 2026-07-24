@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/22 v1.31 日毎平均気温連続下降ランキング追加
-version = "1.31"
+# 26/07/24 v1.32 日毎気温グラフを400日にする
+version = "1.32"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -380,7 +380,7 @@ def tempera_graph(out) :
 
 #   気温グラフ   日ごと
 def tempera_graph_daily(out) :
-    for index,row in daily_info.tail(180).iterrows() :
+    for index,row in daily_info.tail(400).iterrows() :
         date_str = index.strftime('%m/%d')
         v = row['avg']
         out.write(f"['{date_str}',{v}],") 
