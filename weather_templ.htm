@@ -1,5 +1,5 @@
 <html>
-<!-- 26/07/24 v1.32 日毎気温グラフを400日にする  -->
+<!-- 26/07/28 v1.33 週平均高温ランキング追加  -->
 
 <head>
     <title>Weather Check</title>
@@ -338,6 +338,13 @@
                     </table>
                 </div>
             </div>
+
+            <h3><span class="h3_color">週平均気温ランキング(高温)</span></h3>
+            <table>
+                <tr><th>順位</th><th>日付</th><th>週平均気温</th></tr>
+                %ranking_week_tempra_top%
+            </table>
+
             <h2>日毎連続上昇下降ランキング</h2>
             <div class="flex">
                 <div class='frame'>
