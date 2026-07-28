@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/24 v1.32 日毎気温グラフを400日にする
-version = "1.32"
+# 26/07/28 v1.33 週平均高温ランキング追加
+version = "1.33"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -41,6 +41,8 @@ def read_temperature_data() :
 
 #   気温の日々の平均値、最高値、最低値、標準偏差を求める
 #   気温の7日移動平均  df_week_tempera  作成
+#        df_week_tempera 週平均気温
+#          カラム  index (date)  ave avg_1_before avg_7_before avg_14_before avg_365_before すべてfloat
 def create_temperature_info() :
     global daily_info,df_week_tempera
     seri_tmp  = df_tempera.groupby(df_tempera['date'].dt.date)['val'].mean()
@@ -69,7 +71,9 @@ def create_temperature_info() :
     daily_info['diff'] = diff_list
     day_diff = calc_day_diff()
     daily_info['day_diff'] = day_diff
+
     create_df_week_diff()
+
 
 #   df_week_diff の作成   df_week_diff は週平均気温 の差分情報
 def create_df_week_diff() :
@@ -87,6 +91,22 @@ def create_df_week_diff() :
     df_week_diff = pd.DataFrame(rows, columns=['date','diff7', 'diff14','diff365'])
     df_week_diff = df_week_diff.set_index('date')
     #print(df_week_diff)
+
+#   週平均気温  ランキング
+def ranking_week_tempra_top(out) :
+    df_week_tempera_sorted = df_week_tempera.sort_values(by="avg", ascending=False)
+    today_date = datetime.date.today()  
+    yesterday = today_date - timedelta(days=1)
+    i = 0
+    df_tmp =  df_week_tempera_sorted.head(10)
+    for index,row in df_tmp.iterrows() :
+        i += 1
+        date_str = index.strftime('%y/%m/%d(%a)')
+        if index == today_date :
+            date_str = f'<span class=red>{date_str}</span>'
+        if index == yesterday :
+            date_str = f'<span class=blue>{date_str}</span>'
+        out.write(f'<tr><td align=right>{i}</td><td>{date_str}</td><td align=right>{row["avg"]:4.2f}</td></tr>\n')
 
 #   週平均気温  14日前差分 ランキング
 def ranking_week_diff(out,days) :
@@ -298,10 +318,6 @@ def rank_consecutive(flg) :
 
 #   7日移動平均テーブル
 def weekly_tempera_table(out) :
-#    df_week_tempera['avg_1_before'] = df_week_tempera['avg'].shift(1)
-#    df_week_tempera['avg_7_before'] = df_week_tempera['avg'].shift(7)
-#    df_week_tempera['avg_14_before'] = df_week_tempera['avg'].shift(14)
-#    df_week_tempera['avg_365_before'] = df_week_tempera['avg'].shift(365)
     for index,row in df_week_tempera.tail(15).iterrows() :
         v = row['avg']
         v1 = row['avg_1_before']
