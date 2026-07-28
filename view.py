@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/22 v1.84 日毎平均気温連続下降ランキング追加
-version = "1.84"
+# 26/07/28 v1.85 # 26/07/28 v1.33 週平均高温ランキング追加
+version = "1.85"
 
 out =  ""
 logf = ""
@@ -637,6 +637,10 @@ def parse_template() :
         if "%weekly_tempera_table%" in line :
             tempera.weekly_tempera_table(out)
             continue
+        if "%ranking_week_tempra_top%" in line :
+            tempera.ranking_week_tempra_top(out)
+            continue
+
         if "%ranking_daily_diff%" in line :
             tempera.ranking_daily_diff(out)
             continue
