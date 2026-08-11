@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/28 v1.33 週平均高温ランキング追加
-version = "1.33"
+# 26/08/10 v1.34 年平均気温計算処理
+version = "1.34"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -385,6 +385,32 @@ def monthly_tempera(out) :
                   f'<td align="right">{row["avg"]["summerday_25"]:3.0f}</td>'
                   f'<td align="right">{row["avg"]["summerday_30"]:3.0f}</td>'
                   f'<td align="right">{row["avg"]["summerday_35"]:3.0f}</td></tr>\n')
+
+    yearly_tempera()
+
+def yearly_tempera() :
+    today_date = datetime.date.today()  
+
+    # 1. 通年（1/1〜12/31）の集計グループ
+    full_year_group = daily_info.groupby(daily_info.index.year)['avg']
+
+    # 2. 年初から今日と同月日（1/1〜today）までの集計グループ
+    filtered_df = daily_info[daily_info.index.strftime('%m%d') <= today_date.strftime('%m%d')]
+    ytd_group = filtered_df.groupby(filtered_df.index.year)['avg']
+
+    # 3. 平均値と標準偏差をまとめてデータフレームを作成
+    result_df = pd.DataFrame({
+        'full_year_avg': full_year_group.mean(),
+        'full_year_std': full_year_group.std(),
+        'ytd_avg': ytd_group.mean(),
+        'ytd_std': ytd_group.std()
+    })
+
+    # インデックス名を設定
+    result_df.index.name = 'year'
+
+    print(result_df)
+    return
 
 #   気温グラフ   時間ごと
 def tempera_graph(out) :
