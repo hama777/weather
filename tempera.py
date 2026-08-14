@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/08/12 v1.35 年平均気温表示
-version = "1.35"
+# 26/08/14 v1.36 処理共通化
+version = "1.36"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -130,7 +130,6 @@ def ranking_week_diff_year(out) :
 
 def ranking_week_diff_year_low(out) :
     df_diff = df_week_diff.sort_values('diff365',ascending=True).head(10)
-    #print(df_diff)
     ranking_week_com(out,df_diff,"year")
 
 def ranking_week_com(out,df_diff,type) :
@@ -179,7 +178,7 @@ def calc_differencr() :
     i = 0 
     prev = 99
     diff_list = []
-    for index,row in daily_info.iterrows() :
+    for _,row in daily_info.iterrows() :
         i += 1 
         if i == 1 : 
             prev = row['avg']
@@ -194,7 +193,7 @@ def calc_differencr() :
 #   1日の気温差を計算
 def calc_day_diff() :
     day_diff_list = []
-    for index,row in daily_info.iterrows() :
+    for _,row in daily_info.iterrows() :
         diff = row['max'] - row['min']
         day_diff_list.append(diff)
 
@@ -257,17 +256,15 @@ def min_max_temperature_com(out,arg_df) :
 #   日毎、連続上昇日数ランキング
 def ranking_consecutive_up(out) : 
     rank = rank_consecutive(True)
-    i = 0
-    for index,row in rank.head(5).iterrows() :
-        i += 1
-        sdate = row['start_date'].strftime('%y/%m/%d(%a)')
-        edate = row['end_date'].strftime('%y/%m/%d(%a)')
-        out.write(f'<tr><td>{i}</td><td>{sdate} - {edate}</td><td>{row["consecutive_days"]}</td></tr>\n')
+    ranking_consecutive_com(out,rank)
 
 def ranking_consecutive_down(out) : 
     rank = rank_consecutive(False)
+    ranking_consecutive_com(out,rank)
+
+def ranking_consecutive_com(out,rank) : 
     i = 0
-    for index,row in rank.head(5).iterrows() :
+    for _,row in rank.head(5).iterrows() :
         i += 1
         sdate = row['start_date'].strftime('%y/%m/%d(%a)')
         edate = row['end_date'].strftime('%y/%m/%d(%a)')
@@ -335,7 +332,6 @@ def weekly_tempera_table(out) :
         out.write(f"<tr><td>{date_str}</td><td align='right'>{v:4.2f}</td>"
                   f"<td align='right'>{diff1}</td><td align='right'>{diff7}</td>"
                   f"<td align='right'>{diff14}</td><td align='right'>{diff365}</td></tr>\n")         
-
 
 def float_to_color_str(f) :
     if f < 0 :
@@ -494,7 +490,6 @@ def ranking_tempera_com(df,col,out) :
     for index,row in df.iterrows() :
         i += 1
         date_str = index.strftime('%y/%m/%d (%a)')
-        #print(index,today_date)
         if index.date() == today_date :
             date_str = f'<span class=red>{date_str}</span>'
         if index.date() == yesterday :
