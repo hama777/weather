@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/08/12 v1.86 年平均気温表示
-version = "1.86"
+# 26/08/16 v1.87 未取得データが多くある時、ヒット率で0割が発生するのを修正
+version = "1.87"
 
 out =  ""
 logf = ""
@@ -396,10 +396,17 @@ def output_hit_rate() :
         hit = hitdata['hit']
         cnt24 = hitdata['cnt24']
         hit24 = hitdata['hit24']
-
+        if cnt == 0 :
+            hitstr = "-"
+        else :
+            hitstr = f'{hit/cnt*100:5.2f}'
+        if cnt24 == 0 :
+            hitstr24 = "-"
+        else :
+            hitstr24 = f'{hit24/cnt24*100:5.2f}'
         out.write(f'<tr><td>{date_str}</td><td><img src="{icon_url}{act}.png" width="20" height="15"></td>'
-                  f'<td align="right">{hit/cnt*100:5.2f}</td>'
-                  f'<td align="right">{hit24/cnt24*100:5.2f}</td></tr>')
+                  f'<td align="right">{hitstr}</td>'
+                  f'<td align="right">{hitstr24}</td></tr>')
 
 # def output_confusion_matrix() :
 #     for forecast_date,eval_array in  evaldata.items() :   
