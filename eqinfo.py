@@ -3,20 +3,25 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/08/26 v0.00 地震情報
-version = "0.00"
+# 26/08/28 v0.01 過去データをファイルに保存
+version = "0.01"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
+eqdatafile = appdir + "/eqdata.txt"
 
 URL = "https://typhoon.yahoo.co.jp/weather/jp/earthquake/list/"
 
 headers = {
     "User-Agent": "Mozilla/5.0"
 }
+new_earthquakes = []
 
 def main_proc() :
+    global new_earthquakes
+
     read_config()
+    read_eqdata()
     if not proxy == "noproxy" :
         os.environ['https_proxy'] = proxy
 
@@ -31,8 +36,7 @@ def main_proc() :
     # 表の行を取得
     rows = table.find_all("tr")
 
-    earthquakes = []
-
+    new_list = []
     for row in rows:
         cells = row.find_all(["th", "td"])
 
@@ -49,20 +53,55 @@ def main_proc() :
         date_str = data[0].replace("ごろ", "")
         occurred_at = datetime.strptime(date_str, "%Y年%m月%d日 %H時%M分")
 
-        earthquakes.append({
-            "eqtime": occurred_at,
-            "place": data[1],
-            "magnitude": data[2],
-            "scale": data[3],
-        })
+        entry = {}
+        entry["eqtime"] = occurred_at
+        entry["place"] = data[1]
+        entry["magnitude"] = data[2]
+        entry["scale"] = data[3]
+
+        # --------------------------------------------------
+        # 既存データと同じ地震か確認
+        # 発生時刻・震源地・マグニチュードの3項目で判定
+        # --------------------------------------------------
+        is_duplicate = any(
+            eq["eqtime"] == entry["eqtime"]
+            and eq["place"] == entry["place"]
+            and eq["magnitude"] == entry["magnitude"]
+            for eq in eq_list
+        )
+
+        if is_duplicate:
+            # 既存データに到達したので取得終了
+            print("break!")
+            break
+
+        # 新しい地震
+        new_list.append(entry)
+
 
     # 表示
-    for earthquake in earthquakes:
+    for earthquake in new_list:
+        print("new list")
+        print(earthquake)
         etimte = earthquake["eqtime"]
         place = earthquake["place"]
         magnitude = earthquake["magnitude"]
         scale = earthquake["scale"]
-        print(f'{etimte} | {place} \t|{magnitude}|{scale}')
+        #print(f'{etimte} | {place} \t|{magnitude}|{scale}')
+
+    eq_list.extend(new_list)
+    # --------------------------------------------------
+    # eqdata.txt を新しく書き出す
+    # --------------------------------------------------
+    with open(eqdatafile, "w", encoding="utf-8") as f:
+        for eq in eq_list:
+            f.write(
+                f"{eq['eqtime'].isoformat()}\t"
+                f"{eq['place']}\t"
+                f"{eq['magnitude']}\t"
+                f"{eq['scale']}\n"
+            )
+
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
@@ -74,6 +113,34 @@ def read_config() :
     proxy  = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
+
+# --------------------------------------------------
+# eqdata.txt を読み込む
+# --------------------------------------------------
+def read_eqdata() :
+    global eq_list
+    eq_list = []
+
+    if os.path.exists(eqdatafile):
+        with open(eqdatafile, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.rstrip("\n")
+
+                if not line:
+                    continue
+
+                data = line.split("\t")
+
+                if len(data) != 4:
+                    continue
+
+                eq_list.append({
+                    "eqtime": datetime.fromisoformat(data[0]),
+                    "place": data[1],
+                    "magnitude": data[2],
+                    "scale": data[3],
+                })
+
 
 #-----------------------------------
 main_proc()
