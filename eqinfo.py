@@ -3,12 +3,14 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/08/28 v0.01 過去データをファイルに保存
-version = "0.01"
+# 26/08/31 v0.02 過去データの日付形式を変更
+version = "0.02"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
 eqdatafile = appdir + "/eqdata.txt"
+templatefile = appdir + "./eq_templ.htm"
+resultfile = appdir + "./eqinfo.htm"
 
 URL = "https://typhoon.yahoo.co.jp/weather/jp/earthquake/list/"
 
@@ -72,17 +74,15 @@ def main_proc() :
 
         if is_duplicate:
             # 既存データに到達したので取得終了
-            print("break!")
             break
 
         # 新しい地震
         new_list.append(entry)
 
+    parse_template()
 
     # 表示
     for earthquake in new_list:
-        print("new list")
-        print(earthquake)
         etimte = earthquake["eqtime"]
         place = earthquake["place"]
         magnitude = earthquake["magnitude"]
@@ -96,7 +96,7 @@ def main_proc() :
     with open(eqdatafile, "w", encoding="utf-8") as f:
         for eq in eq_list:
             f.write(
-                f"{eq['eqtime'].isoformat()}\t"
+                f"{eq['eqtime'].strftime('%y/%m/%d %H:%M')}\t"
                 f"{eq['place']}\t"
                 f"{eq['magnitude']}\t"
                 f"{eq['scale']}\n"
@@ -113,6 +113,20 @@ def read_config() :
     proxy  = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
+
+def parse_template() :
+    global out 
+    f = open(templatefile , 'r', encoding='utf-8')
+    out = open(resultfile,'w' ,  encoding='utf-8')
+    for line in f :
+        if "%month_table%" in line :
+            month_table()
+            continue
+
+        out.write(line)
+
+    f.close()
+    out.close()
 
 # --------------------------------------------------
 # eqdata.txt を読み込む
@@ -135,7 +149,7 @@ def read_eqdata() :
                     continue
 
                 eq_list.append({
-                    "eqtime": datetime.fromisoformat(data[0]),
+                    "eqtime": datetime.strptime(data[0], "%y/%m/%d %H:%M"),
                     "place": data[1],
                     "magnitude": data[2],
                     "scale": data[3],
