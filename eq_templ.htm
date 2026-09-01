@@ -1,0 +1,47 @@
+<html><head><title>Earthquake info</title>
+    <!-- 26/09/01 v0.03 テンプレートでhtml形式で出力  -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Style-Type" content="text/css">
+    <link rel="stylesheet" href="weather.css">
+    <script src="https://kit.fontawesome.com/2eea21dfe2.js" crossorigin="anonymous"></script>
+    </head>
+    
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+        google.load("visualization", "1", {packages:["corechart"]});
+        google.setOnLoadCallback(
+            function() {
+                var data = google.visualization.arrayToDataTable([
+        [       '', '冊数'],
+                ]);
+        
+                var options = {
+                    title: '月別冊数',
+                    colors: ['#73e65a'] ,
+                    chartArea:{left:100},
+                    hAxis: {title: '日'}
+                };
+        
+                var chart = new google.visualization.ColumnChart(document.getElementById('monthly_graph'));
+                chart.draw(data, options);
+            }
+        );
+    </script>
+    
+
+    <h1>地震情報</h1>
+    <span style="font-size:12px;">Ver : %version%</span>
+    <span style="font-size:12px;">実行日時   : %today%</span>
+    <span style="font-size:12px;">最終データ : %lastdate%</span>
+    
+    <br>
+    <h2>最近の地震</h2>
+    <table>
+        <tr>
+            <th>日時</th><th>場所</th><th>マグニチュード</th><th>震度</th>
+        </tr>
+        %recent_list%
+    </table>
+    </body>
+    </html>
+    
