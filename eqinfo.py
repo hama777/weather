@@ -3,8 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/08/31 v0.02 過去データの日付形式を変更
-version = "0.02"
+# 26/09/01 v0.03 テンプレートでhtml形式で出力
+version = "0.03"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -60,6 +60,7 @@ def main_proc() :
         entry["place"] = data[1]
         entry["magnitude"] = data[2]
         entry["scale"] = data[3]
+        print(occurred_at)
 
         # --------------------------------------------------
         # 既存データと同じ地震か確認
@@ -79,7 +80,6 @@ def main_proc() :
         # 新しい地震
         new_list.append(entry)
 
-    parse_template()
 
     # 表示
     for earthquake in new_list:
@@ -90,6 +90,12 @@ def main_proc() :
         #print(f'{etimte} | {place} \t|{magnitude}|{scale}')
 
     eq_list.extend(new_list)
+
+    eq_list.sort(
+        key=lambda eq: eq["eqtime"],
+        reverse=True
+    )
+    
     # --------------------------------------------------
     # eqdata.txt を新しく書き出す
     # --------------------------------------------------
@@ -101,6 +107,16 @@ def main_proc() :
                 f"{eq['magnitude']}\t"
                 f"{eq['scale']}\n"
             )
+
+    parse_template()
+
+def recent_list() :
+    for eq in eq_list:
+        etimte = eq["eqtime"]
+        place = eq["place"]
+        magnitude = eq["magnitude"]
+        scale = eq["scale"]
+        out.write(f'<tr><td>{etimte}</td><td>{place}</td><td align="right">{magnitude}</td><td align="right">{scale}</td></tr>')
 
 
 def read_config() : 
@@ -119,8 +135,8 @@ def parse_template() :
     f = open(templatefile , 'r', encoding='utf-8')
     out = open(resultfile,'w' ,  encoding='utf-8')
     for line in f :
-        if "%month_table%" in line :
-            month_table()
+        if "%recent_list%" in line :
+            recent_list()
             continue
 
         out.write(line)
