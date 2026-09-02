@@ -1,10 +1,11 @@
 import os
 import requests
+import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/09/01 v0.03 テンプレートでhtml形式で出力
-version = "0.03"
+# 26/09/02 v0.04 データをデータフレームの形式にした
+version = "0.04"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -18,9 +19,9 @@ headers = {
     "User-Agent": "Mozilla/5.0"
 }
 new_earthquakes = []
-
+df_eq = ""
 def main_proc() :
-    global new_earthquakes
+    global new_earthquakes,df_eq
 
     read_config()
     read_eqdata()
@@ -60,7 +61,6 @@ def main_proc() :
         entry["place"] = data[1]
         entry["magnitude"] = data[2]
         entry["scale"] = data[3]
-        print(occurred_at)
 
         # --------------------------------------------------
         # 既存データと同じ地震か確認
@@ -93,9 +93,19 @@ def main_proc() :
 
     eq_list.sort(
         key=lambda eq: eq["eqtime"],
-        reverse=True
+        reverse=False
     )
-    
+
+    df_eq = pd.DataFrame(eq_list)
+
+    df_eq["eqtime"] = pd.to_datetime(df_eq["eqtime"])
+    df_eq["magnitude"] = pd.to_numeric(df_eq["magnitude"], errors="coerce")
+
+    df_eq = df_eq.astype({
+        "place": "str",
+        "scale": "str",
+    })
+
     # --------------------------------------------------
     # eqdata.txt を新しく書き出す
     # --------------------------------------------------
@@ -111,13 +121,12 @@ def main_proc() :
     parse_template()
 
 def recent_list() :
-    for eq in eq_list:
-        etimte = eq["eqtime"]
-        place = eq["place"]
-        magnitude = eq["magnitude"]
-        scale = eq["scale"]
+    for index, row in df_eq.tail(10).iloc[::-1].iterrows():
+        etimte = row["eqtime"]
+        place = row["place"]
+        magnitude = row["magnitude"]
+        scale = row["scale"]
         out.write(f'<tr><td>{etimte}</td><td>{place}</td><td align="right">{magnitude}</td><td align="right">{scale}</td></tr>')
-
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
