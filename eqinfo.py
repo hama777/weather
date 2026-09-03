@@ -4,8 +4,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/09/02 v0.04 データをデータフレームの形式にした
-version = "0.04"
+# 26/09/03 v0.05 構造変更
+version = "0.05"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -80,22 +80,17 @@ def main_proc() :
         # 新しい地震
         new_list.append(entry)
 
-
-    # 表示
-    for earthquake in new_list:
-        etimte = earthquake["eqtime"]
-        place = earthquake["place"]
-        magnitude = earthquake["magnitude"]
-        scale = earthquake["scale"]
-        #print(f'{etimte} | {place} \t|{magnitude}|{scale}')
-
     eq_list.extend(new_list)
-
     eq_list.sort(
         key=lambda eq: eq["eqtime"],
         reverse=False
     )
+    create_dataframe() 
+    output_eqdata()
+    parse_template()
 
+def create_dataframe() :
+    global df_eq
     df_eq = pd.DataFrame(eq_list)
 
     df_eq["eqtime"] = pd.to_datetime(df_eq["eqtime"])
@@ -106,9 +101,7 @@ def main_proc() :
         "scale": "str",
     })
 
-    # --------------------------------------------------
-    # eqdata.txt を新しく書き出す
-    # --------------------------------------------------
+def output_eqdata() :
     with open(eqdatafile, "w", encoding="utf-8") as f:
         for eq in eq_list:
             f.write(
@@ -117,8 +110,6 @@ def main_proc() :
                 f"{eq['magnitude']}\t"
                 f"{eq['scale']}\n"
             )
-
-    parse_template()
 
 def recent_list() :
     for index, row in df_eq.tail(10).iloc[::-1].iterrows():
@@ -160,25 +151,26 @@ def read_eqdata() :
     global eq_list
     eq_list = []
 
-    if os.path.exists(eqdatafile):
-        with open(eqdatafile, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.rstrip("\n")
+    if not os.path.exists(eqdatafile):
+        return
+    with open(eqdatafile, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.rstrip("\n")
 
-                if not line:
-                    continue
+            if not line:
+                continue
 
-                data = line.split("\t")
+            data = line.split("\t")
 
-                if len(data) != 4:
-                    continue
+            if len(data) != 4:
+                continue
 
-                eq_list.append({
-                    "eqtime": datetime.strptime(data[0], "%y/%m/%d %H:%M"),
-                    "place": data[1],
-                    "magnitude": data[2],
-                    "scale": data[3],
-                })
+            eq_list.append({
+                "eqtime": datetime.strptime(data[0], "%y/%m/%d %H:%M"),
+                "place": data[1],
+                "magnitude": data[2],
+                "scale": data[3],
+            })
 
 
 #-----------------------------------
