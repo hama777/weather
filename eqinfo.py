@@ -4,8 +4,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/09/03 v0.05 構造変更
-version = "0.05"
+# 26/09/07 v0.06 不要箇所削除
+version = "0.06"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -80,44 +80,21 @@ def main_proc() :
         # 新しい地震
         new_list.append(entry)
 
-    eq_list.extend(new_list)
-    eq_list.sort(
+    new_list.sort(
         key=lambda eq: eq["eqtime"],
         reverse=False
     )
-    create_dataframe() 
-    output_eqdata()
-    parse_template()
+    output_eqdata(new_list)
 
-def create_dataframe() :
-    global df_eq
-    df_eq = pd.DataFrame(eq_list)
-
-    df_eq["eqtime"] = pd.to_datetime(df_eq["eqtime"])
-    df_eq["magnitude"] = pd.to_numeric(df_eq["magnitude"], errors="coerce")
-
-    df_eq = df_eq.astype({
-        "place": "str",
-        "scale": "str",
-    })
-
-def output_eqdata() :
-    with open(eqdatafile, "w", encoding="utf-8") as f:
-        for eq in eq_list:
+def output_eqdata(data_list) :
+    with open(eqdatafile, "a", encoding="utf-8") as f:
+        for eq in data_list:
             f.write(
                 f"{eq['eqtime'].strftime('%y/%m/%d %H:%M')}\t"
                 f"{eq['place']}\t"
                 f"{eq['magnitude']}\t"
                 f"{eq['scale']}\n"
             )
-
-def recent_list() :
-    for index, row in df_eq.tail(10).iloc[::-1].iterrows():
-        etimte = row["eqtime"]
-        place = row["place"]
-        magnitude = row["magnitude"]
-        scale = row["scale"]
-        out.write(f'<tr><td>{etimte}</td><td>{place}</td><td align="right">{magnitude}</td><td align="right">{scale}</td></tr>')
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
@@ -129,20 +106,6 @@ def read_config() :
     proxy  = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
-
-def parse_template() :
-    global out 
-    f = open(templatefile , 'r', encoding='utf-8')
-    out = open(resultfile,'w' ,  encoding='utf-8')
-    for line in f :
-        if "%recent_list%" in line :
-            recent_list()
-            continue
-
-        out.write(line)
-
-    f.close()
-    out.close()
 
 # --------------------------------------------------
 # eqdata.txt を読み込む
@@ -171,7 +134,6 @@ def read_eqdata() :
                 "magnitude": data[2],
                 "scale": data[3],
             })
-
 
 #-----------------------------------
 main_proc()
