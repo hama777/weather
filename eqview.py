@@ -3,9 +3,10 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
+from ftplib import FTP_TLS
 
-# 26/09/08 v0.01 不要箇所削除
-version = "0.01"
+# 26/09/09 v0.02 ftp機能追加
+version = "0.02"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -28,6 +29,7 @@ def main_proc() :
     create_dataframe() 
     #output_eqdata()
     parse_template()
+    ftp_upload()
 
 def create_dataframe() :
     global df_eq
@@ -67,6 +69,10 @@ def read_config() :
 
     conf = open(conffile,'r', encoding='utf-8')
     proxy  = conf.readline().strip()
+    ftp_host = conf.readline().strip()
+    ftp_user = conf.readline().strip()
+    ftp_pass = conf.readline().strip()
+    ftp_url = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
 
@@ -111,6 +117,12 @@ def read_eqdata() :
                 "magnitude": data[2],
                 "scale": data[3],
             })
+
+def ftp_upload() : 
+    if debug == 1 :
+        return 
+    with FTP_TLS(host=ftp_host, user=ftp_user, passwd=ftp_pass) as ftp:
+        ftp.storbinary('STOR {}'.format(ftp_url), open(resultfile, 'rb'))
 
 
 #-----------------------------------
