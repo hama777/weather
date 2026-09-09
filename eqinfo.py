@@ -4,8 +4,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/09/07 v0.06 不要箇所削除
-version = "0.06"
+# 26/09/09 v0.07 configフォーマット変更
+version = "0.07"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -104,6 +104,10 @@ def read_config() :
 
     conf = open(conffile,'r', encoding='utf-8')
     proxy  = conf.readline().strip()
+    ftp_host = conf.readline().strip()
+    ftp_user = conf.readline().strip()
+    ftp_pass = conf.readline().strip()
+    ftp_url = conf.readline().strip()
     debug = int(conf.readline().strip())
     conf.close()
 
