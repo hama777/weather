@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from ftplib import FTP_TLS
 
-# 26/09/09 v0.02 ftp機能追加
-version = "0.02"
+# 26/09/17 v0.03 日ごと集計処理追加
+version = "0.03"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -42,6 +42,27 @@ def create_dataframe() :
         "place": "str",
         "scale": "str",
     })
+    create_eq_daily()    #  仮
+
+def create_eq_daily() :
+    # eqtime を日付に変換
+    s = df_eq["eqtime"].dt.normalize()
+
+    # 最小日～最大日まで、すべての日付を作成
+    all_dates = pd.date_range(s.min(), s.max(), freq="D")
+
+    # 日付ごとの件数を集計し、存在しない日は 0
+    df_eq_daily = (
+        s.value_counts()
+        .reindex(all_dates, fill_value=0)
+        .sort_index()
+        .rename_axis("eqdate")
+        .reset_index(name="count")
+    )
+
+    # 型を確認
+    df_eq_daily["count"] = df_eq_daily["count"].astype(int)
+    print(df_eq_daily)
 
 # def output_eqdata() :
 #     with open(eqdatafile, "w", encoding="utf-8") as f:
