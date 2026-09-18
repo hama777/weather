@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from ftplib import FTP_TLS
 
-# 26/09/17 v0.03 日ごと集計処理追加
-version = "0.03"
+# 26/09/18 v0.04 日別回数グラフ追加
+version = "0.04"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -45,6 +45,7 @@ def create_dataframe() :
     create_eq_daily()    #  仮
 
 def create_eq_daily() :
+    global df_eq_daily
     # eqtime を日付に変換
     s = df_eq["eqtime"].dt.normalize()
 
@@ -63,6 +64,13 @@ def create_eq_daily() :
     # 型を確認
     df_eq_daily["count"] = df_eq_daily["count"].astype(int)
     print(df_eq_daily)
+
+def daily_graph() :
+    for index, row in df_eq_daily.iterrows():
+        date_str = row['eqdate'].strftime('%m/%d')
+        count = row['count']
+        out.write(f"['{date_str}',{count}],") 
+
 
 # def output_eqdata() :
 #     with open(eqdatafile, "w", encoding="utf-8") as f:
@@ -104,6 +112,9 @@ def parse_template() :
     for line in f :
         if "%recent_list%" in line :
             recent_list()
+            continue
+        if "%daily_graph%" in line :
+            daily_graph()
             continue
 
         out.write(line)
