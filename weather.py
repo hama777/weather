@@ -8,8 +8,8 @@ from datetime import date,timedelta
 
 from bs4 import BeautifulSoup
 
-# 25/08/07 v1.14 降水量を取得ができなかったのを修正
-version = "1.14"  
+# 26/09/24 v1.15 降水量のhtml形式が変わったので修正
+version = "1.15"  
 
 out =  ""
 logf = ""
@@ -181,12 +181,21 @@ def get_current_temperature() :
 
 #   降水量を取得する
 #       実況天気・観測値 から取得   先頭業は必ずしもその時刻でない可能性があるがとりあえず最新時のものを取得
-def get_current_precipitation() :
+def get_current_precipitation_old() :
     top = BeautifulSoup(res.text, 'html.parser')
     dataTable = top.find('table', class_ ='dataTable')   
     row = dataTable.find_all('tr') 
     col = row[1].find_all('td')     # 最新時は2行目 row[1] にある
     return float(col[4].text)         # 降水量は5カラム目 col[4] にある
+
+#   降水量を取得する
+#       実況天気・観測値 から取得   data-table__cell の最終行が 最新のものになるのでそれを取得
+def get_current_precipitation() :
+    top = BeautifulSoup(res.text, 'html.parser')
+    cells = top.find_all('div', attrs={'class': 'data-table__cell',
+                                    'data-content': 'prec'})
+    prec = cells[-1].find('p').get_text(strip=True)
+    return float(prec)
 
 def analize_week() :
     global week_start_dd , week_list 
