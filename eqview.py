@@ -2,11 +2,12 @@ import os
 import requests
 import pandas as pd
 from bs4 import BeautifulSoup
-from datetime import datetime
+#from datetime import date,timedelta
+from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/09/18 v0.04 日別回数グラフ追加
-version = "0.04"
+# 26/09/25 v0.05 日付、バージョンを表示するようにした
+version = "0.05"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -24,6 +25,7 @@ df_eq = ""
 def main_proc() :
     global df_eq
 
+    date_settings()
     read_config()
     read_eqdata()
     create_dataframe() 
@@ -105,6 +107,17 @@ def read_config() :
     debug = int(conf.readline().strip())
     conf.close()
 
+def date_settings():
+    global  today_date,today_mm,today_dd,today_yy,today_datetime,today_hh,today_yymmddhh
+
+    today_datetime = datetime.today()   # datetime 型
+    today_date = date.today()           # date 型
+
+def output_current_date(line) :
+    date_str = today_datetime.strftime("%m/%d(%a) %H:%M:%S ")
+    s = line.replace("%today%",date_str)
+    out.write(s)
+
 def parse_template() :
     global out 
     f = open(templatefile , 'r', encoding='utf-8')
@@ -115,6 +128,13 @@ def parse_template() :
             continue
         if "%daily_graph%" in line :
             daily_graph()
+            continue
+        if "%version%" in line :
+            s = line.replace("%version%",version)
+            out.write(s)
+            continue
+        if "%today%" in line :
+            output_current_date(line)
             continue
 
         out.write(line)
