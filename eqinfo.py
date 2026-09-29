@@ -4,8 +4,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-# 26/09/09 v0.07 configフォーマット変更
-version = "0.07"
+# 26/09/29 v0.08 震度が表示されていない地震は除く
+version = "0.08"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -55,6 +55,9 @@ def main_proc() :
 
         date_str = data[0].replace("ごろ", "")
         occurred_at = datetime.strptime(date_str, "%Y年%m月%d日 %H時%M分")
+
+        if data[3] == "---" :    # 震度が --- のときは国外の地震なので除く
+            continue 
 
         entry = {}
         entry["eqtime"] = occurred_at
