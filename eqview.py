@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/09/25 v0.05 日付、バージョンを表示するようにした
-version = "0.05"
+# 26/09/29 v0.06 震度の件数カウント処理追加
+version = "0.06"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -30,6 +30,7 @@ def main_proc() :
     read_eqdata()
     create_dataframe() 
     #output_eqdata()
+    count_by_scale()
     parse_template()
     ftp_upload()
 
@@ -65,24 +66,12 @@ def create_eq_daily() :
 
     # 型を確認
     df_eq_daily["count"] = df_eq_daily["count"].astype(int)
-    print(df_eq_daily)
 
 def daily_graph() :
     for index, row in df_eq_daily.iterrows():
         date_str = row['eqdate'].strftime('%m/%d')
         count = row['count']
         out.write(f"['{date_str}',{count}],") 
-
-
-# def output_eqdata() :
-#     with open(eqdatafile, "w", encoding="utf-8") as f:
-#         for eq in eq_list:
-#             f.write(
-#                 f"{eq['eqtime'].strftime('%y/%m/%d %H:%M')}\t"
-#                 f"{eq['place']}\t"
-#                 f"{eq['magnitude']}\t"
-#                 f"{eq['scale']}\n"
-#             )
 
 def recent_list() :
     for index, row in df_eq.tail(10).iloc[::-1].iterrows():
@@ -91,6 +80,10 @@ def recent_list() :
         magnitude = row["magnitude"]
         scale = row["scale"]
         out.write(f'<tr><td>{etimte}</td><td>{place}</td><td align="right">{magnitude}</td><td align="right">{scale}</td></tr>')
+
+def count_by_scale():
+    scale_count =  df_eq["scale"].value_counts().sort_index().to_dict()
+    print(scale_count)
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
