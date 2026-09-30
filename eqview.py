@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/09/29 v0.06 震度の件数カウント処理追加
-version = "0.06"
+# 26/09/30 v0.07 震度の件数カウント表追加
+version = "0.07"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -82,8 +82,14 @@ def recent_list() :
         out.write(f'<tr><td>{etimte}</td><td>{place}</td><td align="right">{magnitude}</td><td align="right">{scale}</td></tr>')
 
 def count_by_scale():
+    global scale_count
     scale_count =  df_eq["scale"].value_counts().sort_index().to_dict()
-    print(scale_count)
+
+def scale_list() :
+    n = len(df_eq)
+    for k,v in scale_count.items() :
+        p = int(v) / n * 100
+        out.write(f'<tr><td align="right">{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
@@ -121,6 +127,9 @@ def parse_template() :
             continue
         if "%daily_graph%" in line :
             daily_graph()
+            continue
+        if "%scale_list%" in line :
+            scale_list()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
