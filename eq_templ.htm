@@ -1,5 +1,5 @@
 <html><head><title>Earthquake info</title>
-    <!-- 26/09/18 v0.04 日別回数グラフ追加  -->
+    <!-- 26/09/30 v0.07 震度の件数カウント表追加  -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Style-Type" content="text/css">
     <link rel="stylesheet" href="weather.css">
@@ -46,6 +46,13 @@
     <h2>日別発生回数</h2>
     <div id="daily_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
+    <h2>震度別発生回数</h2>
+    <table>
+        <tr>
+            <th>震度</th><th>発生回数</th><th>割合</th>
+        </tr>
+        %scale_list%
+    </table>
     </body>
     </html>
     
