@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/09/30 v0.07 震度の件数カウント表追加
-version = "0.07"
+# 26/10/01 v0.08 場所別件数カウント表追加
+version = "0.08"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -31,6 +31,7 @@ def main_proc() :
     create_dataframe() 
     #output_eqdata()
     count_by_scale()
+    count_by_place()
     parse_template()
     ftp_upload()
 
@@ -85,11 +86,27 @@ def count_by_scale():
     global scale_count
     scale_count =  df_eq["scale"].value_counts().sort_index().to_dict()
 
+def count_by_place():
+    global place_count
+    place_count =  df_eq["place"].value_counts().to_dict()
+    print(place_count)
+
+
 def scale_list() :
     n = len(df_eq)
     for k,v in scale_count.items() :
         p = int(v) / n * 100
         out.write(f'<tr><td align="right">{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
+
+def place_list() :
+    n = len(df_eq)
+    i =0 
+    for k,v in place_count.items() :
+        i += 1
+        p = int(v) / n * 100
+        out.write(f'<tr><td align="right">{i}</td><td>{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
+        if i >= 10 :
+            break
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
@@ -130,6 +147,9 @@ def parse_template() :
             continue
         if "%scale_list%" in line :
             scale_list()
+            continue
+        if "%place_list%" in line :
+            place_list()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
