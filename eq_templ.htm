@@ -1,5 +1,5 @@
 <html><head><title>Earthquake info</title>
-    <!-- 26/09/30 v0.07 震度の件数カウント表追加  -->
+    <!-- 26/10/01 v0.08 場所別件数カウント表追加  -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Style-Type" content="text/css">
     <link rel="stylesheet" href="weather.css">
@@ -52,6 +52,13 @@
             <th>震度</th><th>発生回数</th><th>割合</th>
         </tr>
         %scale_list%
+    </table>
+    <h2>場所別発生回数</h2>
+    <table>
+        <tr>
+            <th>順位</th><th>場所</th><th>発生回数</th><th>割合</th>
+        </tr>
+        %place_list%
     </table>
     </body>
     </html>
