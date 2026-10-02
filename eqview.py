@@ -6,14 +6,22 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/10/01 v0.08 場所別件数カウント表追加
-version = "0.08"
+# 26/10/02 v0.09 月別集計の処理追加
+version = "0.09"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
 eqdatafile = appdir + "/eqdata.txt"
 templatefile = appdir + "./eq_templ.htm"
 resultfile = appdir + "./eqinfo.htm"
+
+
+# df_eq    個々の地震データ
+#   eqtime  datetime  発生日時
+#   magnitude   float  マグニチュード
+#   scape    str   震度
+#   place    str   場所
+
 
 #URL = "https://typhoon.yahoo.co.jp/weather/jp/earthquake/list/"
 
@@ -32,6 +40,7 @@ def main_proc() :
     #output_eqdata()
     count_by_scale()
     count_by_place()
+    create_eq_monthly()
     parse_template()
     ftp_upload()
 
@@ -68,6 +77,26 @@ def create_eq_daily() :
     # 型を確認
     df_eq_daily["count"] = df_eq_daily["count"].astype(int)
 
+def create_eq_monthly() :
+    eq_monthly = {}
+
+    # 月ごとに処理
+    for month, df_month in df_eq.groupby(df_eq["eqtime"].dt.strftime("%y%m")):
+
+        # 月の発生回数
+        count = len(df_month)
+
+        # 震度ごとの回数
+        scale_count = df_month["scale"].value_counts().astype(int).to_dict()
+
+        # キーを数値にする
+        month_key = int(month)
+
+        # [発生回数, 震度ごとの回数辞書]
+        eq_monthly[month_key] = [count, scale_count]
+
+    print(eq_monthly)
+
 def daily_graph() :
     for index, row in df_eq_daily.iterrows():
         date_str = row['eqdate'].strftime('%m/%d')
@@ -89,8 +118,6 @@ def count_by_scale():
 def count_by_place():
     global place_count
     place_count =  df_eq["place"].value_counts().to_dict()
-    print(place_count)
-
 
 def scale_list() :
     n = len(df_eq)
