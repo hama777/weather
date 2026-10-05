@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/10/02 v0.09 月別集計の処理追加
-version = "0.09"
+# 26/10/05 v0.10 月別発生回数リスト追加
+version = "0.10"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -78,6 +78,7 @@ def create_eq_daily() :
     df_eq_daily["count"] = df_eq_daily["count"].astype(int)
 
 def create_eq_monthly() :
+    global eq_monthly
     eq_monthly = {}
 
     # 月ごとに処理
@@ -135,6 +136,11 @@ def place_list() :
         if i >= 10 :
             break
 
+def monthly_list() :
+    for yymm,v  in eq_monthly.items() :
+        count = v[0]
+        out.write(f'<tr><td >{yymm}</td><td align="right">{count}</td></tr>')
+
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
     if not os.path.isfile(conffile) :
@@ -177,6 +183,9 @@ def parse_template() :
             continue
         if "%place_list%" in line :
             place_list()
+            continue
+        if "%monthly_list%" in line :
+            monthly_list()
             continue
         if "%version%" in line :
             s = line.replace("%version%",version)
