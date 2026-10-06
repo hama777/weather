@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/10/05 v0.10 月別発生回数リスト追加
-version = "0.10"
+# 26/10/06 v0.11 月別発生回数に1日あたりの回数追加
+version = "0.11"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -138,8 +138,10 @@ def place_list() :
 
 def monthly_list() :
     for yymm,v  in eq_monthly.items() :
+        n = get_month_days(yymm)
         count = v[0]
-        out.write(f'<tr><td >{yymm}</td><td align="right">{count}</td></tr>')
+        cotun_day = count  / n
+        out.write(f'<tr><td >{yymm}</td><td align="right">{count}</td><td align="right">{cotun_day:5.2f}</td></tr>')
 
 def read_config() : 
     global target_url,proxy,debug,ftp_host,ftp_user,ftp_pass,ftp_url
@@ -166,6 +168,32 @@ def output_current_date(line) :
     date_str = today_datetime.strftime("%m/%d(%a) %H:%M:%S ")
     s = line.replace("%today%",date_str)
     out.write(s)
+
+def get_month_days(yymm):
+    """指定年月の日数を返す。
+
+    今月の場合は今日までの日数、
+    それ以外の場合はその月の総日数を返す。
+    """
+    year = yymm // 100 + 2000
+    month = yymm % 100
+
+    # 2026年8月19日からのデータなのでこの月は 13 日
+    if year == 2026 and month == 8:
+        return 13
+
+    # 今月なら今日の日付（日数）を返す
+    if year == today_date.year and month == today_date.month:
+        return today_date.day
+
+    # 指定月の月末日を求める
+    if month == 12:
+        next_month = date(year + 1, 1, 1)
+    else:
+        next_month = date(year, month + 1, 1)
+
+    last_day = next_month - timedelta(days=1)
+    return last_day.day
 
 def parse_template() :
     global out 
