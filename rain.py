@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/07/09 v1.27 週平均1日雨時間グラフを400日間とした
-version = "1.27"
+# 26/10/08 v1.28 1日平均雨時間の前年比を追加
+version = "1.28"
 
 out =  ""
 logf = ""
@@ -133,10 +133,21 @@ def monthly_rain_time(out) :
             prec_max = f'{row["max"]:4.2f}'
             prec_hour_max = f'{row["hour_max"]:4.2f}'
         date_str = index.strftime('%y/%m')
+        # 12ヶ月前の年月
+        prev_index = index - pd.DateOffset(months=12)
+
+        # 12ヶ月前のデータが存在するか確認
+        if prev_index in monthly_stats.index:
+            rain_diff = row['rain_ave'] - monthly_stats.loc[prev_index, 'rain_ave']
+            str_rain_diff = f'{rain_diff:5.2f}'
+        else:
+            str_rain_diff = "-"
+        
         out.write(f'<tr><td>{date_str}</td><td align="right">{ave:5.2f}</td>'
                   f'<td align="right">{max}</td><td align="right">{days_rain:4.0f}</td>'
                   f'<td align="right">{prec_total}</td><td align="right">{prec_ave}</td>'
-                  f'<td align="right">{prec_max}</td><td align="right">{prec_hour_max}</td></tr>\n')
+                  f'<td align="right">{prec_max}</td><td align="right">{prec_hour_max}</td>'
+                  f'<td align="right">{str_rain_diff}</td></tr>\n')
 
 #   日別降水量テーブル
 def daily_precipitation(out) :
