@@ -1,5 +1,5 @@
 <html><head><title>Earthquake info</title>
-    <!-- 26/10/06 v0.11 月別発生回数に1日あたりの回数追加  -->
+    <!-- 26/10/13 日別グラフ修正  -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Style-Type" content="text/css">
     <link rel="stylesheet" href="weather.css">
@@ -19,8 +19,9 @@
                 var options = {
                     title: '日別発生回数',
                     colors: ['#73e65a'] ,
-                    chartArea:{left:100},
-                    hAxis: {title: '日'}
+                    chartArea:{left:60},
+                    hAxis: {title: '日'},
+                    vAxis: { format: '0',  gridlines: {count: -1}                   }
                 };
         
                 var chart = new google.visualization.ColumnChart(document.getElementById('daily_graph'));
@@ -44,7 +45,7 @@
         %recent_list%
     </table>
     <h2>日別発生回数</h2>
-    <div id="daily_graph" style="width:900px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
+    <div id="daily_graph" style="width:1200px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
     <h2>震度別発生回数</h2>
     <table>
