@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/08/14 v1.36 処理共通化
-version = "1.36"
+# 26/10/20 v1.37 年集計処理修正
+version = "1.37"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -384,7 +384,51 @@ def monthly_tempera(out) :
 
     yearly_tempera()
 
-def yearly_tempera() :
+def yearly_tempera():
+    global year_ave_df
+    today_date = datetime.date.today()
+
+    # 1. 通年（1/1〜12/31）の集計グループ
+    full_year_group = daily_info.groupby(daily_info.index.year)
+
+    # 2. 年初から今日と同月日（1/1〜today）までの集計グループ
+    filtered_df = daily_info[
+        daily_info.index.strftime('%m%d') <= today_date.strftime('%m%d')
+    ]
+    ytd_group = filtered_df.groupby(filtered_df.index.year)
+
+    # 3. 年ごとの集計結果をデータフレームにまとめる
+    year_ave_df = pd.DataFrame({
+        'full_year_avg': full_year_group['avg'].mean(),
+        'full_year_std': full_year_group['avg'].std(),
+        'ytd_avg': ytd_group['avg'].mean(),
+        'ytd_std': ytd_group['avg'].std(),
+
+        # 最高気温・最低気温
+        'max': full_year_group['max'].max(),
+        'min': full_year_group['min'].min(),
+
+        # 日ごとの最高気温・最低気温の平均
+        'max_ave': full_year_group['max'].mean(),
+        'min_ave': full_year_group['min'].mean(),
+
+        # 夏日・真夏日・猛暑日の日数
+        'summerday_25': full_year_group['max'].apply(
+            lambda s: (s >= 25).sum()
+        ),
+        'summerday_30': full_year_group['max'].apply(
+            lambda s: (s >= 30).sum()
+        ),
+        'summerday_35': full_year_group['max'].apply(
+            lambda s: (s >= 35).sum()
+        )
+    })
+
+    # インデックス名を設定
+    year_ave_df.index.name = 'year'
+    return
+
+def yearly_tempera_old() :
     global year_ave_df
     today_date = datetime.date.today()  
 
