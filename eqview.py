@@ -6,8 +6,8 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/10/07 v0.12 日付の形式変更
-version = "0.12"
+# 26/10/22 v0.13 日別発生回数グラフを直近60日とした
+version = "0.13"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -85,7 +85,7 @@ def create_eq_monthly() :
         eq_monthly[month_key] = [count, scale_count]
 
 def daily_graph() :
-    for index, row in df_eq_daily.iterrows():
+    for index, row in df_eq_daily.tail(60).iterrows():
         date_str = row['eqdate'].strftime('%m/%d')
         count = row['count']
         out.write(f"['{date_str}',{count}],") 
