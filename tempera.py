@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/10/20 v1.37 年集計処理修正
-version = "1.37"
+# 26/10/21 v1.38 年気温情報に情報追加
+version = "1.38"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -456,7 +456,15 @@ def year_avarage(out) :
     for yy,row in year_ave_df.iterrows() :
         out.write(f"<tr><td>{yy}</td><td align='right'>{row['full_year_avg']:5.2f}</td>"
                   f"<td align='right'>{row['ytd_avg']:5.2f}</td>"
-                  f"<td align='right'>{row['ytd_std']:5.2f}</td></tr>\n")
+                  f"<td align='right'>{row['ytd_std']:5.2f}</td>"
+                  f"<td align='right'>{row['max']:5.2f}</td>"
+                  f"<td align='right'>{row['min']:5.2f}</td>"
+                  f"<td align='right'>{row['max_ave']:5.2f}</td>"
+                  f"<td align='right'>{row['max_ave']:5.2f}</td>"
+                  f"<td align='right'>{row['summerday_25']:5.0f}</td>"
+                  f"<td align='right'>{row['summerday_30']:5.0f}</td>"
+                  f"<td align='right'>{row['summerday_35']:5.0f}</td>"
+                  f"</tr>\n")
 
 
 #   気温グラフ   時間ごと
