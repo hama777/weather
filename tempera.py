@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/10/21 v1.38 年気温情報に情報追加
-version = "1.38"
+# 26/10/23 v1.39 四半期情報を取得する関数追加
+version = "1.39"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -383,6 +383,7 @@ def monthly_tempera(out) :
                   f'<td align="right">{row["avg"]["summerday_35"]:3.0f}</td></tr>\n')
 
     yearly_tempera()
+    quarter_tempera()
 
 def yearly_tempera():
     global year_ave_df
@@ -427,6 +428,29 @@ def yearly_tempera():
     # インデックス名を設定
     year_ave_df.index.name = 'year'
     return
+
+def quarter_tempera() :
+    global quarter_info
+    quarter_info = (
+        daily_info
+        .groupby(daily_info.index.to_period('Q'))
+        .agg(
+            avg=('avg', 'mean'),
+            std=('avg', 'std'),
+            avg_max=('max', 'mean'),
+            avg_min=('min', 'mean')
+        )
+    )
+
+    # 四半期の開始日を datetime 型のインデックスに変換
+    quarter_info.index = quarter_info.index.to_timestamp()
+
+    # インデックス名を date に設定
+    quarter_info.index.name = 'date'
+
+    # インデックスをカラムに変換
+    quarter_info = quarter_info.reset_index()
+    #print(quarter_info)
 
 def yearly_tempera_old() :
     global year_ave_df
