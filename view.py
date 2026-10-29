@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/08/16 v1.87 未取得データが多くある時、ヒット率で0割が発生するのを修正
-version = "1.87"
+# 26/10/27 v1.88 四半期情報出力
+version = "1.88"
 
 out =  ""
 logf = ""
@@ -675,8 +675,11 @@ def parse_template() :
         if "%ranking_consecutive_down%" in line :
             tempera.ranking_consecutive_down(out)
             continue
-        if "%year_avarage%" in line :
-            tempera.year_avarage(out)
+        if "%year_average%" in line :
+            tempera.year_average(out)
+            continue
+        if "%quarter_average%" in line :
+            tempera.quarter_average(out)
             continue
 
         if "%week_rain_time_graph%" in line :
