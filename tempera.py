@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/10/23 v1.39 四半期情報を取得する関数追加
-version = "1.39"
+# 26/10/28 v1.40 四半期情報出力
+version = "1.40"
 
 # TODO: today_date  yesterday を共通化する
 
@@ -452,31 +452,8 @@ def quarter_tempera() :
     quarter_info = quarter_info.reset_index()
     #print(quarter_info)
 
-def yearly_tempera_old() :
-    global year_ave_df
-    today_date = datetime.date.today()  
-
-    # 1. 通年（1/1〜12/31）の集計グループ
-    full_year_group = daily_info.groupby(daily_info.index.year)['avg']
-
-    # 2. 年初から今日と同月日（1/1〜today）までの集計グループ
-    filtered_df = daily_info[daily_info.index.strftime('%m%d') <= today_date.strftime('%m%d')]
-    ytd_group = filtered_df.groupby(filtered_df.index.year)['avg']
-
-    # 3. 平均値と標準偏差をまとめてデータフレームを作成
-    year_ave_df = pd.DataFrame({
-        'full_year_avg': full_year_group.mean(),
-        'full_year_std': full_year_group.std(),
-        'ytd_avg': ytd_group.mean(),
-        'ytd_std': ytd_group.std()
-    })
-
-    # インデックス名を設定
-    year_ave_df.index.name = 'year'
-    return
-
 #   年平均気温
-def year_avarage(out) :
+def year_average(out) :
     for yy,row in year_ave_df.iterrows() :
         out.write(f"<tr><td>{yy}</td><td align='right'>{row['full_year_avg']:5.2f}</td>"
                   f"<td align='right'>{row['ytd_avg']:5.2f}</td>"
@@ -490,6 +467,15 @@ def year_avarage(out) :
                   f"<td align='right'>{row['summerday_35']:5.0f}</td>"
                   f"</tr>\n")
 
+def quarter_average(out) : 
+    for _,row in quarter_info.iterrows() :
+        qq = row["date"]
+        qq = qq.strftime('%y/%m')
+        out.write(f"<tr><td>{qq}</td><td align='right'>{row['avg']:5.2f}</td>"
+                  f"<td align='right'>{row['std']:5.2f}</td>"
+                  f"<td align='right'>{row['avg_max']:5.2f}</td>"
+                  f"<td align='right'>{row['avg_min']:5.2f}</td>"
+                  f"</tr>\n")
 
 #   気温グラフ   時間ごと
 def tempera_graph(out) :
