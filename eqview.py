@@ -6,8 +6,8 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/10/22 v0.13 日別発生回数グラフを直近60日とした
-version = "0.13"
+# 26/11/10 v0.14 場所別発生回数に過去30日のリストを追加
+version = "0.14"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -103,8 +103,10 @@ def count_by_scale():
     scale_count =  df_eq["scale"].value_counts().sort_index().to_dict()
 
 def count_by_place():
-    global place_count
+    global place_count,place_count_30
     place_count =  df_eq["place"].value_counts().to_dict()
+    start_date = datetime.now() - timedelta(days=30)
+    place_count_30 = df_eq[df_eq["eqtime"] >= start_date]["place"].value_counts().to_dict()
 
 def scale_list() :
     n = len(df_eq)
@@ -116,6 +118,16 @@ def place_list() :
     n = len(df_eq)
     i =0 
     for k,v in place_count.items() :
+        i += 1
+        p = int(v) / n * 100
+        out.write(f'<tr><td align="right">{i}</td><td>{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
+        if i >= 10 :
+            break
+
+def place_list_30() :
+    n = len(place_count_30)
+    i =0 
+    for k,v in place_count_30.items() :
         i += 1
         p = int(v) / n * 100
         out.write(f'<tr><td align="right">{i}</td><td>{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
@@ -197,6 +209,9 @@ def parse_template() :
             continue
         if "%place_list%" in line :
             place_list()
+            continue
+        if "%place_list_30%" in line :
+            place_list_30()
             continue
         if "%monthly_list%" in line :
             monthly_list()
