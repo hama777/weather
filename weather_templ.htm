@@ -1,5 +1,5 @@
 <html>
-<!-- 26/10/28 v1.40 四半期情報出力  -->
+<!-- 26/11/12 v1.29 年雨情報テーブル追加  -->
 
 <head>
     <title>Weather Check</title>
@@ -390,10 +390,17 @@
             <h2>月別雨時間</h2> 
             <table>
                 <tr>
-                    <th>年月</th><th>1日平均雨時間</th><th>1日最大雨時間</th><th>雨日数</th><th>降水量</th><th>日平均降水量</th>
+                    <th>年月</th><th>日雨時間</th><th>日最大雨時間</th><th>雨日数</th><th>降水量</th><th>日平均降水量</th>
                     <th>日最大降水量</th><th>1時間最大降水量</th><th>前年比平均雨時間</th>
                 </tr>
                 %monthly_rain_time%
+            </table><br>
+            <h2>年別雨時間</h2> 
+            <table>
+                <tr>
+                    <th>年</th><th>日雨時間</th><th>月平均雨日数</th><th>月平均降水量</th>
+                </tr>
+                %year_rain_info%
             </table><br>
             <h2>日別降水量(25年8月～)</h2> 
             <div class="flex">
