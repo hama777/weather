@@ -10,8 +10,8 @@ import tempera
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/10/27 v1.88 四半期情報出力
-version = "1.88"
+# 26/11/12 v1.89 年雨情報テーブル追加
+version = "1.89"
 
 out =  ""
 logf = ""
@@ -687,6 +687,9 @@ def parse_template() :
             continue
         if "%monthly_rain_time%" in line :
             rain.monthly_rain_time(out)
+            continue
+        if "%year_rain_info%" in line :
+            rain.year_rain_info(out)
             continue
         if "%daily_precipitation%" in line :
             rain.daily_precipitation(out)
