@@ -8,8 +8,8 @@ import com
 from datetime import date,timedelta
 from ftplib import FTP_TLS
 
-# 26/10/08 v1.28 1日平均雨時間の前年比を追加
-version = "1.28"
+# 26/11/12 v1.29 年雨情報テーブル追加
+version = "1.29"
 
 out =  ""
 logf = ""
@@ -110,7 +110,12 @@ def week_rain_time_graph(out) :
 
 #   月別 1日平均雨時間テーブル
 def monthly_rain_time(out) :
-    #monthly_stats = df_daily_rain.resample('ME').agg({'rain': ['mean', 'max'],'is_rain' : 'sum'})
+    global  monthly_stats
+    #  monthly_stats  月ごとのデータを持つ
+    #    index  datetime  
+    #    'rain_ave' : 1日平均雨時間    'rain_max' : 1日最大雨時間   'is_rain_count' : 雨日数
+    #    'total' : 降水量   'ave' : 日平均降水量  'max' : 日最大降水量  'hour_max' : 1時間最大降水量	
+
     monthly_stats = df_daily_rain.resample('ME').agg(
         rain_ave=('rain', 'mean'),
         rain_max=('rain', 'max'),
@@ -148,6 +153,26 @@ def monthly_rain_time(out) :
                   f'<td align="right">{prec_total}</td><td align="right">{prec_ave}</td>'
                   f'<td align="right">{prec_max}</td><td align="right">{prec_hour_max}</td>'
                   f'<td align="right">{str_rain_diff}</td></tr>\n')
+
+def year_rain_info(out) :
+    create_year_rain_info()
+    for index,row in df_year_rain.iterrows() :
+        out.write(f'<tr><td>{index}</td><td align="right">{row["rain_ave"]:5.2f}</td>'
+                  f'<td align="right">{row["is_rain_count"]:5.2f}</td>'
+                  f'<td align="right">{row["total"]:5.1f}</td>'
+                  f'</tr>\n')
+
+
+def create_year_rain_info() :
+    global df_year_rain
+    df_year_rain = monthly_stats.groupby(monthly_stats.index.year).agg({
+        "rain_ave": "mean",
+        "is_rain_count": "mean",
+        "total": "mean"
+    })
+
+    # index名を year にする
+    df_year_rain.index.name = "year"
 
 #   日別降水量テーブル
 def daily_precipitation(out) :
