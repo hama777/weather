@@ -1,0 +1,196 @@
+/*  26/11/17 weather.css から分離    */
+
+table {
+    /*width: auto;*/
+    /* min-width: 600px;   */
+    border-collapse: collapse;
+    margin-left: 50px;
+}
+
+/* 固定する1行目（ヘッダー行） */
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #abf88d;
+    z-index: 2;
+}
+
+/* 固定する1列目 */
+tbody td:first-child {
+    position: sticky;
+    left: 0;
+    background-color: #f2dea0;
+    z-index: 1;
+}
+
+/* 1行1列目の固定 */
+thead th:first-child {
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 3;  /* 他のセルより高い z-index */
+    background-color: #829cf1;
+}
+
+/* ホバー効果の設定 */
+tbody tr:hover {
+    background-color: #e0f7fa;
+}
+
+tbody tr:hover td:first-child {
+    background-color: #e0f7fa;
+}
+
+td { 
+    font-family: "Meiryo UI" ; 
+    font-size: 14px; 
+    border: 1px #f18d09 solid;  
+    border-collapse: collapse; 
+    padding: 3px; 
+    margin-left: 0px;
+}
+
+table.rank {
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+
+}
+h1{
+    text-align: center;
+    margin: 0 0 0.5em;
+    padding: 3px;
+    font-size: 20px ;
+    font-weight: bold;
+}
+h2{
+    margin: 0 0 0.5em;
+    padding: 3px;
+    border-top: 3px double #eb842a;
+    border-bottom: 3px double #eb842a;
+    font-size: 16px ;
+    font-weight: bold;
+}
+h3{
+    margin: 0 0 0.5em;
+    padding: 3px;
+    font-size: 14px ;
+    font-weight: bold;
+}
+.h3_color{
+    color: #eb842a;
+    background-color: #d4f8b7af ;
+    text-decoration: underline;
+}
+
+a { 
+    text-decoration: none; 
+}
+/*
+th { 
+    background-color :#fcfb8b;
+}
+*/
+tr { 
+    background-color : #ffffff;
+}
+td.all { 
+    background-color : #daf5d5;
+}
+tr:nth-child(2n+1) { 
+    background-color : #f7e8da;
+}
+
+td.red  { 
+    color : #ff0000 ; 
+    font-weight : bold ;
+}
+td.right{ 
+    text-align: right;
+}
+.flex {
+    display: flex;
+}
+.frame { 
+    background:linear-gradient(#c4eaf5, #d2b5f7) ; 
+    margin-left: 3px; margin-top: 4px; margin-right: 3px; border: solid 1px #0000ff; 
+    border-radius: 10px; 
+}
+
+.heading-040 {
+    padding: .1em .7em;
+    border-top: 2px solid #5ba9f7;
+    border-bottom: 2px solid #5ba9f7;
+    background-image: linear-gradient(45deg, #5ba9f712 25%, transparent 25%, transparent 50%, #5ba9f712 50%, #5ba9f712 75%, transparent 75%, transparent), linear-gradient(-45deg, #5ba9f712 25%, transparent 25%, transparent 50%, #5ba9f712 50%, #5ba9f712 75%, transparent 75%, transparent);
+    background-color: #5ba9f70d;
+    background-size: 20px 20px;
+    color: #5ba9f7;
+}
+span.red {
+    color : red;
+}
+span.blue {
+    color : blue;
+}
+
+  .container {
+    padding: 0;
+    background: #ffffff;
+    margin-left: 30px ;
+  }
+
+  ul.menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0;
+  }
+  ul.menu li {
+    display: inline-block;
+  }
+  ul.menu li a {
+    font-size: 14px;
+    display: inline-block;
+    width: 80px;
+    height: 20px;
+    line-height: 20px;
+    text-align: center;
+    text-decoration: none;
+    padding: 7px;
+    color: #333;
+
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-style: solid; border-color: #1cdd21;
+    border-width: 1px;
+    
+  }
+  ul.menu li a.active {
+    background: #1cdd21;  
+    color: #000;
+  }
+  ul.menu li a:not(.active):hover {
+    opacity: 0.5;
+    transition: .8s;
+    background:  #dadfdf;  
+  }
+  .content {
+    font-size: 14px;
+    padding: 7px 10px;
+    line-height: 1.4;
+    min-height: 150px;
+    background: #fff;
+    color: #000;
+    display: none;
+    
+  }
+  .content.active {
+    font-size: 14px;
+    padding: 7px 10px;
+    line-height: 1.4;
+    min-height: 150px;
+    background: #fff;
+    color: #000;
+    display: block;  
+  }
