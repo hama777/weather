@@ -1,13 +1,11 @@
 import os
 import locale
-#import requests
 import pandas as pd
-#from bs4 import BeautifulSoup
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/11/10 v0.14 場所別発生回数に過去30日のリストを追加
-version = "0.14"
+# 26/11/20 v0.15 場所別発生回数の割合が間違っていたのを修正
+version = "0.15"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -125,7 +123,7 @@ def place_list() :
             break
 
 def place_list_30() :
-    n = len(place_count_30)
+    n = sum(place_count_30.values())
     i =0 
     for k,v in place_count_30.items() :
         i += 1
