@@ -1,5 +1,5 @@
 <html><head><title>Earthquake info</title>
-    <!-- 26/11/19 場所別発生回数を横並びにした  -->
+    <!-- 26/11/27 v0.16 過去30日間の震度別発生回数追加  -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="Content-Style-Type" content="text/css">
     <link rel="stylesheet" href="eqinfo.css">
@@ -48,12 +48,27 @@
     <div id="daily_graph" style="width:1200px; height:400px;  margin-top:20px ; margin-left:  50px; "></div>
 
     <h2>震度別発生回数</h2>
-    <table>
-        <tr>
-            <th>震度</th><th>発生回数</th><th>割合</th>
-        </tr>
-        %scale_list%
-    </table>
+    <div class="flex">
+        <div class='frame'>
+            <h3><span class="h3_color">全データ</span></h3>
+            <table>
+                <tr>
+                    <th>震度</th><th>発生回数</th><th>割合</th>
+                </tr>
+                %scale_list%
+            </table>
+        </div>
+        <div class='frame'>
+            <h3><span class="h3_color">過去30日</span></h3>
+            <table>
+                <tr>
+                    <th>震度</th><th>発生回数</th><th>割合</th>
+                </tr>
+                %scale_list_30%
+            </table>
+        </div>
+    </div>
+
     <h2>場所別発生回数</h2>
     <div class="flex">
         <div class='frame'>
