@@ -4,8 +4,8 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from ftplib import FTP_TLS
 
-# 26/11/20 v0.15 場所別発生回数の割合が間違っていたのを修正
-version = "0.15"
+# 26/11/27 v0.16 過去30日間の震度別発生回数追加
+version = "0.16"
 
 appdir = os.path.dirname(os.path.abspath(__file__))
 conffile = appdir + "/eqinfo.conf"
@@ -97,8 +97,10 @@ def recent_list() :
         out.write(f'<tr><td>{etimte}</td><td>{place}</td><td align="right">{magnitude}</td><td align="right">{scale}</td></tr>')
 
 def count_by_scale():
-    global scale_count
+    global scale_count,scale_count_30
     scale_count =  df_eq["scale"].value_counts().sort_index().to_dict()
+    start_date = datetime.now() - timedelta(days=30)
+    scale_count_30 = df_eq[df_eq["eqtime"] >= start_date]["scale"].value_counts().to_dict()
 
 def count_by_place():
     global place_count,place_count_30
@@ -109,6 +111,17 @@ def count_by_place():
 def scale_list() :
     n = len(df_eq)
     for k,v in scale_count.items() :
+        p = int(v) / n * 100
+        out.write(f'<tr><td align="right">{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
+
+def scale_list_30() :
+    scale_name = ("1","2","3","4","5弱","5強","6弱","6強")
+    n = sum(scale_count_30.values())
+    i =0 
+    for k in scale_name :
+        if k not in scale_count_30 :
+            continue
+        v = scale_count_30[k]
         p = int(v) / n * 100
         out.write(f'<tr><td align="right">{k}</td><td align="right">{v}</td><td align="right">{p:5.2f}</td></tr>')
 
@@ -204,6 +217,9 @@ def parse_template() :
             continue
         if "%scale_list%" in line :
             scale_list()
+            continue
+        if "%scale_list_30%" in line :
+            scale_list_30()
             continue
         if "%place_list%" in line :
             place_list()
